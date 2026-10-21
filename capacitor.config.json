@@ -1,0 +1,6 @@
+{
+  "appId": "com.tableaupro.app",
+  "appName": "TableauPro",
+  "webDir": "dist",
+  "android": { "allowMixedContent": false }
+}

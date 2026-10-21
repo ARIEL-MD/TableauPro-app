@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">TableauPro</string>
+    <string name="title_activity_main">TableauPro</string>
+    <string name="package_name">com.tableaupro.app</string>
+    <string name="custom_url_scheme">com.tableaupro.app</string>
+</resources>

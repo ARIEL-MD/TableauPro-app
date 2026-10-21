@@ -1,0 +1,6 @@
+{
+  "name": "TableauPro - Electrical Panel Designer",
+  "description": "Application professionnelle de conception, schématisation et calcul de tableaux électriques avec espace de travail virtuel interactif, aimantation rail DIN, nomenclature BOM et repérage NF C 15-100.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

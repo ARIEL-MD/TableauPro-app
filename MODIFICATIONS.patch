@@ -1,0 +1,584 @@
+diff --git a/src/App.tsx b/src/App.tsx
+index abefef3..c44e80f 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -20,12 +20,45 @@ import { BOMModal } from './components/BOMModal';
+ import { ArchitectureModal } from './components/ArchitectureModal';
+ import { NfcComplianceModal } from './components/NfcComplianceModal';
+ import { UnifilarSchemaView } from './components/UnifilarSchemaView';
++import { ProjectManagerModal } from './components/ProjectManagerModal';
+ import { FileText } from 'lucide-react';
+ 
+ const STORAGE_KEY = 'tableaupro_current_project';
++const PROJECTS_STORAGE_KEY = 'tableaupro_projects';
++
++const createEmptyProject = (title = 'Project 1'): ElectricalPanelProject => {
++  const now = new Date().toISOString();
++  return {
++    id: 'proj-' + Date.now(),
++    version: '1.3.0',
++    title,
++    clientName: '',
++    location: '',
++    dateCreated: now,
++    dateUpdated: now,
++    standard: 'NF C 15-100',
++    enclosure: {
++      name: 'Coffret modulaire',
++      rows: 0,
++      modulesPerRow: 18,
++      brand: '',
++      hasDoor: false,
++      ipRating: '',
++      ikRating: '',
++    },
++    rails: [],
++    devices: [],
++    busbars: [],
++    distributionBlocks: [],
++    terminalBars: [],
++    annotations: [],
++  };
++};
+ 
+ export default function App() {
+-  // Initial project state loaded from localStorage or default preset (logement_t3_t4)
++  // Initial project state: restore the current project, otherwise open a blank electrical board.
++  // Les captures de référence montrent un canevas vide au premier lancement : aucun rail,
++  // aucun appareil et aucune borne ne sont pré-remplis.
+   const [project, setProject] = useState<ElectricalPanelProject>(() => {
+     const saved = localStorage.getItem(STORAGE_KEY);
+     if (saved) {
+@@ -35,26 +68,23 @@ export default function App() {
+         console.error('Failed to parse saved project', e);
+       }
+     }
+-    const preset = PRESET_TEMPLATES.logement_t3_t4;
+-    return {
+-      id: 'proj-' + Date.now(),
+-      version: '1.3.0',
+-      title: preset.title || 'Projet Tableau Électrique',
+-      clientName: 'Client Résidentiel',
+-      location: 'Logement Principal',
+-      dateCreated: new Date().toISOString(),
+-      dateUpdated: new Date().toISOString(),
+-      standard: 'NF C 15-100',
+-      enclosure: preset.enclosure!,
+-      rails: (preset.rails as DinRail[]) || [],
+-      devices: (preset.devices as ElectricalDevice[]) || [],
+-      busbars: (preset.busbars as BusbarComb[]) || [],
+-      distributionBlocks: (preset.distributionBlocks as DistributionBlock[]) || [],
+-      terminalBars: (preset.terminalBars as TerminalBar[]) || [],
+-      annotations: [],
+-    };
++    return createEmptyProject();
+   });
+ 
++  // Multi-project library used by the "Projets" sheet shown in the reference captures.
++  const [projects, setProjects] = useState<ElectricalPanelProject[]>(() => {
++    const saved = localStorage.getItem(PROJECTS_STORAGE_KEY);
++    if (!saved) return [];
++    try {
++      const parsed = JSON.parse(saved);
++      return Array.isArray(parsed) ? parsed : [];
++    } catch (e) {
++      console.error('Failed to parse project library', e);
++      return [];
++    }
++  });
++  const [isProjectManagerOpen, setIsProjectManagerOpen] = useState(false);
++
+   // Undo / Redo history
+   const [history, setHistory] = useState<ElectricalPanelProject[]>([]);
+   const [redoStack, setRedoStack] = useState<ElectricalPanelProject[]>([]);
+@@ -86,17 +116,36 @@ export default function App() {
+     }, 3200);
+   };
+ 
+-  // Auto-save to LocalStorage
++  // Auto-save current project to LocalStorage
+   useEffect(() => {
+     localStorage.setItem(STORAGE_KEY, JSON.stringify(project));
+   }, [project]);
+ 
++  // Keep the local multi-project library synchronized with the project currently edited.
++  useEffect(() => {
++    setProjects((previousProjects) => {
++      const existingIndex = previousProjects.findIndex((p) => p.id === project.id);
++      if (existingIndex >= 0) {
++        const next = [...previousProjects];
++        next[existingIndex] = project;
++        return next;
++      }
++      return [...previousProjects, project];
++    });
++  }, [project]);
++
++  useEffect(() => {
++    localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(projects));
++  }, [projects]);
++
+   // Update project with undo history recording
+   const updateProjectWithHistory = (updater: (prev: ElectricalPanelProject) => ElectricalPanelProject) => {
+     setProject((prev) => {
++      const next = updater(prev);
++      if (next === prev) return prev;
+       setHistory((h) => [...h.slice(-20), prev]);
+       setRedoStack([]);
+-      return updater(prev);
++      return { ...next, dateUpdated: new Date().toISOString() };
+     });
+   };
+ 
+@@ -554,6 +603,11 @@ export default function App() {
+ 
+       return {
+         ...prev,
++        enclosure: {
++          ...prev.enclosure,
++          rows: Math.max(prev.enclosure.rows, rails.length),
++          modulesPerRow: Math.max(prev.enclosure.modulesPerRow, ...rails.map((r) => r.capacityModules)),
++        },
+         rails,
+         devices: [...prev.devices, newDevice],
+       };
+@@ -793,7 +847,7 @@ export default function App() {
+       busbars: prev.busbars.filter((b) => b.railId !== railId),
+       enclosure: {
+         ...prev.enclosure,
+-        rows: Math.max(1, prev.rails.length - 1),
++        rows: Math.max(0, prev.rails.length - 1),
+       },
+     }));
+     if (selectedRailId === railId) setSelectedRailId(null);
+@@ -878,31 +932,63 @@ export default function App() {
+     reader.readAsText(file);
+   };
+ 
+-  // Reset to empty board
++  // Reset to a genuinely empty board: the user builds the electrical project from scratch.
+   const handleResetProject = () => {
+-    updateProjectWithHistory((prev) => ({
+-      ...prev,
+-      title: 'Nouveau Tableau Électrique',
+-      rails: [
+-        { id: 'rail-1', order: 1, label: 'Rangée 1', capacityModules: 18, lengthMm: 300, x: 60, y: 120 },
+-      ],
+-      devices: [],
+-      busbars: [],
+-      distributionBlocks: [],
+-      annotations: [],
+-      terminalBars: [
+-        { id: 'term-earth-init', type: 'earth', holesCount: 11, x: 60, y: 40 },
+-        { id: 'term-neutral-init', type: 'neutral', holesCount: 8, x: 260, y: 40 },
+-      ],
+-      enclosure: {
+-        ...prev.enclosure,
+-        rows: 1,
+-        modulesPerRow: 18,
+-      },
+-    }));
++    updateProjectWithHistory(() => createEmptyProject('Nouveau projet'));
+     setSelectedDeviceId(null);
+     setSelectedRailId(null);
+-    showToast('Nouveau tableau réinitialisé');
++    showToast('Nouveau projet vide prêt');
++  };
++
++  const clearWorkspaceSelectionAndHistory = () => {
++    setSelectedDeviceId(null);
++    setSelectedRailId(null);
++    setHistory([]);
++    setRedoStack([]);
++  };
++
++  const handleOpenSavedProject = (projectId: string) => {
++    const target = projects.find((p) => p.id === projectId);
++    if (!target) return;
++    setProject(target);
++    clearWorkspaceSelectionAndHistory();
++    setIsProjectManagerOpen(false);
++    showToast(`Projet "${target.title}" ouvert`);
++  };
++
++  const handleCreateSavedProject = () => {
++    const nextProject = createEmptyProject(`Project ${projects.length + 1}`);
++    setProject(nextProject);
++    clearWorkspaceSelectionAndHistory();
++    setIsProjectManagerOpen(false);
++    showToast('Nouveau projet vide créé');
++  };
++
++  const handleDuplicateSavedProject = (projectId: string) => {
++    const source = projects.find((p) => p.id === projectId);
++    if (!source) return;
++    const now = new Date().toISOString();
++    const duplicate: ElectricalPanelProject = {
++      ...source,
++      id: `proj-${Date.now()}-copy`,
++      title: `${source.title} copie`,
++      dateCreated: now,
++      dateUpdated: now,
++    };
++    setProjects((prev) => [...prev, duplicate]);
++    showToast(`Projet "${source.title}" dupliqué`);
++  };
++
++  const handleDeleteSavedProject = (projectId: string) => {
++    const remainingProjects = projects.filter((p) => p.id !== projectId);
++    setProjects(remainingProjects);
++
++    if (project.id === projectId) {
++      const nextProject = remainingProjects[0] ?? createEmptyProject('Project 1');
++      setProject(nextProject);
++      clearWorkspaceSelectionAndHistory();
++    }
++    showToast('Projet supprimé');
+   };
+ 
+   // Full-page unifilar dossier view (schema, wiring plan, calculations, labels)
+@@ -1009,10 +1095,25 @@ export default function App() {
+         onCreateNewTemplate={handleCreateNewTemplate}
+       />
+ 
++      {/* Project library modal */}
++      {isProjectManagerOpen && (
++        <ProjectManagerModal
++          projects={projects}
++          currentProjectId={project.id}
++          onClose={() => setIsProjectManagerOpen(false)}
++          onOpenProject={handleOpenSavedProject}
++          onCreateProject={handleCreateSavedProject}
++          onDuplicateProject={handleDuplicateSavedProject}
++          onDeleteProject={handleDeleteSavedProject}
++          onScanQr={() => showToast('Le scan QR sera connecté dans une prochaine itération')}
++        />
++      )}
++
+       {/* Hamburger Options Menu Drawer */}
+       <AppMenuDrawer
+         isOpen={isMenuOpen}
+         onClose={() => setIsMenuOpen(false)}
++        onOpenProjects={() => setIsProjectManagerOpen(true)}
+         onNewProject={handleResetProject}
+         onSaveJSON={handleExportJSON}
+         onImportJSON={handleImportJSON}
+diff --git a/src/components/AppMenuDrawer.tsx b/src/components/AppMenuDrawer.tsx
+index d156038..d1312db 100644
+--- a/src/components/AppMenuDrawer.tsx
++++ b/src/components/AppMenuDrawer.tsx
+@@ -21,6 +21,7 @@ import {
+ interface AppMenuDrawerProps {
+   isOpen: boolean;
+   onClose: () => void;
++  onOpenProjects: () => void;
+   onNewProject: () => void;
+   onSaveJSON: () => void;
+   onImportJSON: (file: File) => void;
+@@ -42,6 +43,7 @@ interface AppMenuDrawerProps {
+ export const AppMenuDrawer: React.FC<AppMenuDrawerProps> = ({
+   isOpen,
+   onClose,
++  onOpenProjects,
+   onNewProject,
+   onSaveJSON,
+   onImportJSON,
+@@ -129,6 +131,17 @@ export const AppMenuDrawer: React.FC<AppMenuDrawerProps> = ({
+               Fichier & Sauvegarde
+             </span>
+             <div className="mt-1 space-y-1">
++              <button
++                onClick={() => {
++                  onOpenProjects();
++                  onClose();
++                }}
++                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-700 font-medium transition-colors cursor-pointer"
++              >
++                <FolderOpen className="w-4 h-4 text-[#007aff]" />
++                <span>Projets enregistrés</span>
++              </button>
++
+               <button
+                 onClick={() => {
+                   onNewProject();
+diff --git a/src/components/CanvasWorkspace.tsx b/src/components/CanvasWorkspace.tsx
+index fdaeaf3..bfa57e3 100644
+--- a/src/components/CanvasWorkspace.tsx
++++ b/src/components/CanvasWorkspace.tsx
+@@ -13,7 +13,7 @@ import { DinRailSvg } from './DinRailSvg';
+ import { TerminalBarSvg } from './TerminalBarSvg';
+ import { DistributionBlockSvg } from './DistributionBlockSvg';
+ import { AnnotationObject } from './AnnotationObject';
+-import { ImagePlus, Menu, Plus, Minus, Maximize2, Zap } from 'lucide-react';
++import { Menu, Plus, Minus, Maximize2, Zap } from 'lucide-react';
+ 
+ interface CanvasWorkspaceProps {
+   project: ElectricalPanelProject;
+@@ -71,6 +71,17 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
+   const [selectedAnnotationId, setSelectedAnnotationId] = useState<string | null>(null);
+   const annotationCount = (project.annotations ?? []).length;
+   const previousAnnotationCount = useRef(annotationCount);
++  const hasPhysicalItems =
++    project.rails.length > 0 ||
++    project.devices.length > 0 ||
++    project.terminalBars.length > 0 ||
++    project.distributionBlocks.length > 0;
++  const isCompletelyEmpty = !hasPhysicalItems && annotationCount === 0;
++  const usedModules = project.devices.reduce((acc, d) => acc + d.moduleWidth, 0);
++  const totalEnclosureModules = project.enclosure.rows * project.enclosure.modulesPerRow;
++  const reservePercentage = totalEnclosureModules > 0
++    ? Math.max(0, Math.round(((totalEnclosureModules - usedModules) / totalEnclosureModules) * 100))
++    : 0;
+ 
+   // Un objet qu'on vient d'ajouter est sélectionné d'office (barre d'outils visible)
+   useEffect(() => {
+@@ -162,18 +173,15 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
+       )}
+ 
+       {/* ========================================================
+-          TOP-LEFT FLOATING CARD: [ 🖼️+ Projet ] & Vue Switcher
++          TOP PROJECT NAME CARD — style mobile des captures
+          ======================================================== */}
+-      <div className="absolute top-3 left-4 z-30 flex items-center gap-2.5 no-print">
+-        <div className="flex items-center gap-2.5 px-3 py-2 bg-white/95 backdrop-blur-md rounded-xl border border-slate-200/90 shadow-sm hover:shadow transition-all">
+-          <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#007aff] flex items-center justify-center border border-blue-100">
+-            <ImagePlus className="w-4 h-4 stroke-[2.2]" />
+-          </div>
++      <div className="absolute top-3 left-3 right-[76px] z-30 no-print">
++        <div className="h-12 px-4 bg-white/95 backdrop-blur-md rounded-xl border border-slate-200/90 shadow-md flex items-center">
+           <input
+             type="text"
+             value={project.title}
+             onChange={(e) => onUpdateTitle(e.target.value)}
+-            className="text-sm font-semibold text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1.5 py-0.5 min-w-[120px] max-w-[200px]"
++            className="w-full border-b border-slate-200 text-base font-medium text-slate-900 placeholder-slate-400 bg-transparent focus:outline-none focus:border-[#007aff] pb-1"
+             placeholder="Nom du projet"
+             title="Cliquez pour renommer le projet"
+           />
+@@ -232,8 +240,9 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
+           transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+         }}
+       >
+-        {/* Physical Enclosure Cabinet Frame */}
+-        <div className="printable-panel rounded-2xl border-2 border-slate-300 bg-white/95 p-6 shadow-xl inline-block min-w-[760px] backdrop-blur-xs relative">
++        {/* Physical panel area: hidden while the project is still empty */}
++        {hasPhysicalItems ? (
++          <div className="printable-panel rounded-2xl border-2 border-slate-300 bg-white/95 p-6 shadow-xl inline-block min-w-[760px] backdrop-blur-xs relative">
+           {/* Cabinet Header Bezel */}
+           <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200">
+             <div>
+@@ -248,24 +257,13 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
+                 </span>
+               </div>
+               <p className="text-[11px] text-slate-500 mt-0.5">
+-                {project.title} — {project.rails.length} rail{project.rails.length > 1 ? 's' : ''} DIN · Réserve{' '}
+-                {Math.max(
+-                  0,
+-                  Math.round(
+-                    ((project.enclosure.rows * project.enclosure.modulesPerRow -
+-                      project.devices.reduce((acc, d) => acc + d.moduleWidth, 0)) /
+-                      (project.enclosure.rows * project.enclosure.modulesPerRow)) *
+-                      100
+-                  )
+-                )}
+-                %
++                {project.title} — {project.rails.length} rail{project.rails.length > 1 ? 's' : ''} DIN · Réserve {reservePercentage}%
+               </p>
+             </div>
+ 
+             <div className="text-right">
+               <span className="text-xs font-mono font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg">
+-                {project.devices.reduce((acc, d) => acc + d.moduleWidth, 0)} /{' '}
+-                {project.enclosure.rows * project.enclosure.modulesPerRow} Modules
++                {usedModules} / {totalEnclosureModules} Modules
+               </span>
+             </div>
+           </div>
+@@ -360,7 +358,18 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
+             <span>Conception conforme NF C 15-100 · Réserve obligatoire &gt; 20%</span>
+             <span>TableauPro Electrical CAD Engine</span>
+           </div>
+-        </div>
++          </div>
++        ) : (
++          isCompletelyEmpty && (
++            <div className="absolute left-1/2 top-[34vh] -translate-x-1/2 w-[min(88vw,430px)] rounded-2xl border-2 border-dashed border-slate-300/90 bg-white/70 px-6 py-8 text-center shadow-sm backdrop-blur-xs no-print">
++              <p className="text-base font-bold text-slate-700">Projet électrique vide</p>
++              <p className="mt-2 text-xs leading-relaxed text-slate-500">
++                Commencez par ajouter un rail DIN, un appareil ou une barre de bornes depuis le panneau inférieur.
++                Le tableau se construit uniquement à partir des éléments choisis par l’utilisateur.
++              </p>
++            </div>
++          )
++        )}
+ 
+         {/* Objets libres du plan : textes, tableaux, pictogrammes */}
+         {(project.annotations ?? []).map((a) => (
+diff --git a/src/components/ProjectManagerModal.tsx b/src/components/ProjectManagerModal.tsx
+new file mode 100644
+index 0000000..12c6ba3
+--- /dev/null
++++ b/src/components/ProjectManagerModal.tsx
+@@ -0,0 +1,162 @@
++import React from 'react';
++import { Copy, Plus, QrCode, Settings, Trash2, X } from 'lucide-react';
++import { ElectricalPanelProject } from '../types/panel';
++
++interface ProjectManagerModalProps {
++  projects: ElectricalPanelProject[];
++  currentProjectId: string;
++  onClose: () => void;
++  onOpenProject: (projectId: string) => void;
++  onCreateProject: () => void;
++  onDuplicateProject: (projectId: string) => void;
++  onDeleteProject: (projectId: string) => void;
++  onScanQr: () => void;
++}
++
++const formatUpdatedAt = (isoDate: string) => {
++  const date = new Date(isoDate);
++  if (Number.isNaN(date.getTime())) return 'Date inconnue';
++  const day = date.toLocaleDateString('fr-FR', {
++    day: '2-digit',
++    month: '2-digit',
++    year: 'numeric',
++  }).replace(/\//g, '.');
++  const time = date.toLocaleTimeString('fr-FR', {
++    hour: '2-digit',
++    minute: '2-digit',
++  });
++  return `${day}, ${time}`;
++};
++
++export const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({
++  projects,
++  currentProjectId,
++  onClose,
++  onOpenProject,
++  onCreateProject,
++  onDuplicateProject,
++  onDeleteProject,
++  onScanQr,
++}) => {
++  const sortedProjects = [...projects].sort(
++    (a, b) => new Date(b.dateUpdated).getTime() - new Date(a.dateUpdated).getTime()
++  );
++
++  return (
++    <div className="fixed inset-0 z-50 bg-black/35 backdrop-blur-xs animate-in fade-in duration-150">
++      <div className="absolute inset-x-2 top-3 bottom-3 mx-auto max-w-3xl rounded-[28px] bg-[#f4f4f6] shadow-2xl overflow-hidden flex flex-col border border-white/60">
++        {/* Header matching the mobile project sheet */}
++        <div className="flex items-center justify-between px-5 pt-4 pb-1">
++          <button
++            type="button"
++            onClick={onClose}
++            className="text-[#007aff] text-sm font-semibold hover:opacity-75 transition-opacity cursor-pointer"
++          >
++            Fermer
++          </button>
++          <button
++            type="button"
++            className="inline-flex items-center gap-1.5 rounded-full bg-[#dbeafe] px-3 py-1.5 text-xs font-semibold text-slate-800"
++            title="Paramètres projets"
++          >
++            <Settings className="h-3.5 w-3.5 text-slate-500" />
++            Paramètres
++          </button>
++        </div>
++
++        <div className="px-5 pb-3">
++          <h1 className="text-3xl font-bold tracking-tight text-slate-950">Projets</h1>
++        </div>
++
++        <div className="flex-1 overflow-y-auto px-4 pb-4">
++          {sortedProjects.length === 0 ? (
++            <div className="mt-8 rounded-2xl border-2 border-dashed border-slate-300 bg-white/70 p-8 text-center">
++              <p className="font-bold text-slate-700">Aucun projet enregistré</p>
++              <p className="mt-1 text-xs text-slate-500">Créez un nouveau projet pour commencer un tableau électrique vide.</p>
++            </div>
++          ) : (
++            <div className="divide-y divide-slate-200 rounded-2xl bg-white/95 shadow-sm overflow-hidden">
++              {sortedProjects.map((project) => {
++                const isCurrent = project.id === currentProjectId;
++                return (
++                  <div
++                    key={project.id}
++                    className={`flex items-center gap-3 px-4 py-3 transition-colors ${
++                      isCurrent ? 'bg-blue-50/50' : 'hover:bg-slate-50'
++                    }`}
++                  >
++                    <button
++                      type="button"
++                      onClick={() => onOpenProject(project.id)}
++                      className="min-w-0 flex-1 text-left cursor-pointer"
++                      title="Ouvrir ce projet"
++                    >
++                      <div className="flex items-center gap-2">
++                        <h2 className="truncate text-sm font-bold text-slate-900">{project.title || 'Projet sans nom'}</h2>
++                        {isCurrent && (
++                          <span className="rounded-full bg-[#dbeafe] px-2 py-0.5 text-[10px] font-semibold text-[#007aff]">
++                            actuel
++                          </span>
++                        )}
++                      </div>
++                      <p className="mt-0.5 text-xs text-slate-500">
++                        Modifié : {formatUpdatedAt(project.dateUpdated)}
++                      </p>
++                    </button>
++
++                    <button
++                      type="button"
++                      onClick={() => onDuplicateProject(project.id)}
++                      className="rounded-lg p-2 text-[#007aff] hover:bg-blue-50 transition-colors cursor-pointer"
++                      title="Dupliquer le projet"
++                    >
++                      <Copy className="h-5 w-5" />
++                    </button>
++                    <button
++                      type="button"
++                      onClick={() => onDeleteProject(project.id)}
++                      className="rounded-full bg-red-600 p-2 text-white shadow-sm hover:bg-red-700 transition-colors cursor-pointer"
++                      title="Supprimer le projet"
++                    >
++                      <Trash2 className="h-4 w-4" />
++                    </button>
++                  </div>
++                );
++              })}
++            </div>
++          )}
++        </div>
++
++        <div className="space-y-2 px-4 pb-5 pt-1">
++          <button
++            type="button"
++            onClick={onCreateProject}
++            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#cde5ff] px-4 py-3 text-sm font-semibold text-slate-900 shadow-sm transition-colors hover:bg-[#bcdcff] cursor-pointer"
++          >
++            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#007aff] text-white">
++              <Plus className="h-3.5 w-3.5" />
++            </span>
++            Créer un nouveau projet
++          </button>
++          <button
++            type="button"
++            onClick={onScanQr}
++            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#cde5ff] px-4 py-3 text-sm font-semibold text-slate-900 shadow-sm transition-colors hover:bg-[#bcdcff] cursor-pointer"
++          >
++            <QrCode className="h-5 w-5 text-[#007aff]" />
++            Scanner le code QR
++          </button>
++        </div>
++      </div>
++
++      <button
++        type="button"
++        aria-label="Fermer la gestion des projets"
++        onClick={onClose}
++        className="absolute right-4 top-4 rounded-full bg-white/90 p-2 text-slate-500 shadow-md hover:text-slate-800 md:hidden"
++      >
++        <X className="h-5 w-5" />
++      </button>
++    </div>
++  );
++};
