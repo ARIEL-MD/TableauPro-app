@@ -10,6 +10,7 @@ import {
   CatalogItem,
 } from '../types/panel';
 import { DinRailSvg } from './DinRailSvg';
+import { ElectricalDeviceSvg } from './ElectricalDeviceSvg';
 import { CableOverlay, locateAnchor, WirePreview } from './CableOverlay';
 import { defaultRoute, Pt } from './wireRoute';
 import { TerminalBarSvg } from './TerminalBarSvg';
@@ -43,6 +44,7 @@ interface CanvasWorkspaceProps {
   onDeleteTerminalBar: (id: string) => void;
   onDeleteDistributionBlock: (id: string) => void;
   onAddDeviceToRailQuick: (railId: string) => void;
+  onMoveFreeDevice?: (id: string, x: number, y: number) => void;
   onUpdateTitle: (newTitle: string) => void;
   onUpdateAnnotation: (id: string, patch: Partial<PanelAnnotation>) => void;
   onDeleteAnnotation: (id: string) => void;
@@ -74,6 +76,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
   onDeleteTerminalBar,
   onDeleteDistributionBlock,
   onAddDeviceToRailQuick,
+  onMoveFreeDevice,
   onUpdateTitle,
   onUpdateAnnotation,
   onDeleteAnnotation,
@@ -355,7 +358,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
             {[...project.rails]
               .sort((a, b) => a.order - b.order)
               .map((rail) => {
-                const railDevices = project.devices.filter((d) => d.railId === rail.id);
+                const railDevices = project.devices.filter((d) => d.railId === rail.id && !d.free);
                 return (
                   <DinRailSvg
                     key={rail.id}
@@ -381,6 +384,20 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
           </div>
         </div>
 
+        {/* Appareils libres posés sur le plan (déplaçables un par un) */}
+        {project.devices
+          .filter((d) => d.free)
+          .map((d) => (
+            <FreeDevice
+              key={d.id}
+              device={d}
+              zoom={zoom}
+              isSelected={selectedDeviceId === d.id}
+              onSelect={() => onSelectDevice(d)}
+              onMove={(x, y) => onMoveFreeDevice?.(d.id, x, y)}
+            />
+          ))}
+
         {/* Objets libres du plan : textes, tableaux, pictogrammes */}
         {(project.annotations ?? []).map((a) => (
           <AnnotationObject
@@ -400,6 +417,60 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
           />
         ))}
       </div>
+    </div>
+  );
+};
+
+/* Appareil libre : glisser pour le déplacer (même logique que les objets libres) */
+const FreeDevice: React.FC<{
+  device: ElectricalDevice;
+  zoom: number;
+  isSelected: boolean;
+  onSelect: () => void;
+  onMove: (x: number, y: number) => void;
+}> = ({ device, zoom, isSelected, onSelect, onMove }) => {
+  const drag = useRef<{ startX: number; startY: number; originX: number; originY: number; moved: boolean } | null>(null);
+  const [live, setLive] = useState<{ x: number; y: number } | null>(null);
+  const x = live ? live.x : device.x ?? 0;
+  const y = live ? live.y : device.y ?? 0;
+
+  const down = (e: React.PointerEvent) => {
+    e.stopPropagation();
+    onSelect();
+    drag.current = { startX: e.clientX, startY: e.clientY, originX: device.x ?? 0, originY: device.y ?? 0, moved: false };
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+  const move = (e: React.PointerEvent) => {
+    const d = drag.current;
+    if (!d) return;
+    const dx = (e.clientX - d.startX) / zoom;
+    const dy = (e.clientY - d.startY) / zoom;
+    if (!d.moved && Math.abs(dx) + Math.abs(dy) < 3) return;
+    d.moved = true;
+    setLive({ x: Math.round(d.originX + dx), y: Math.round(d.originY + dy) });
+  };
+  const up = (e: React.PointerEvent) => {
+    const d = drag.current;
+    drag.current = null;
+    try {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {
+      /* déjà relâché */
+    }
+    if (d?.moved && live) onMove(live.x, live.y);
+    setLive(null);
+  };
+
+  return (
+    <div
+      onPointerDown={down}
+      onPointerMove={move}
+      onPointerUp={up}
+      onPointerCancel={up}
+      style={{ position: 'absolute', left: x, top: y, touchAction: 'none', cursor: 'move' }}
+      className="z-30"
+    >
+      <ElectricalDeviceSvg device={device} isSelected={isSelected} />
     </div>
   );
 };

@@ -623,22 +623,26 @@ export default function App() {
         indicatorCount,
         colorTag: category === 'breaker' || category === 'differential' || category === 'rcbo' || category === 'switch_disconnector' ? colorTag : undefined,
         isOn: true,
+        free: true,
+        x: 120 + (prev.devices.filter((d) => d.free).length % 6) * 200,
+        y: 160 + Math.floor(prev.devices.filter((d) => d.free).length / 6) * 170,
       };
 
-      setSelectedRailId(targetRail.id);
-      showToast(`${name} ajouté sur le rail "${targetRail.label}"`);
+      showToast(`${name} ajouté sur le plan`);
 
       return {
         ...prev,
-        enclosure: {
-          ...prev.enclosure,
-          rows: Math.max(prev.enclosure.rows, rails.length),
-          modulesPerRow: Math.max(prev.enclosure.modulesPerRow, ...rails.map((r) => r.capacityModules)),
-        },
-        rails,
         devices: [...prev.devices, newDevice],
       };
     });
+  };
+
+  // Déplacer un appareil libre sur le plan
+  const handleMoveFreeDevice = (id: string, x: number, y: number) => {
+    updateProjectWithHistory((prev) => ({
+      ...prev,
+      devices: prev.devices.map((d) => (d.id === id ? { ...d, x, y } : d)),
+    }));
   };
 
   // Add terminal bar
@@ -1146,6 +1150,7 @@ export default function App() {
       <main className="w-full h-full relative overflow-hidden">
         <CanvasWorkspace
           project={project}
+          onMoveFreeDevice={handleMoveFreeDevice}
           selectedDeviceId={selectedDeviceId || undefined}
           selectedRailId={selectedRailId || undefined}
           showWiringMode={showWiringMode}

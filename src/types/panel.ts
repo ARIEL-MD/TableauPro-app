@@ -134,6 +134,10 @@ export interface ElectricalDevice {
   colorTag?: 'red' | 'green' | 'blue' | 'orange' | 'yellow';
   notes?: string;
   upstreamId?: string;
+  /** true = appareil libre posé sur le plan (x/y), indépendant des rails */
+  free?: boolean;
+  x?: number;
+  y?: number;
 }
 
 export interface DinRail {
