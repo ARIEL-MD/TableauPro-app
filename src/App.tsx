@@ -18,8 +18,6 @@ import { BottomDrawer } from './components/BottomDrawer';
 import { AppMenuDrawer } from './components/AppMenuDrawer';
 import { PropertyInspector } from './components/PropertyInspector';
 import { BOMModal } from './components/BOMModal';
-import { ArchitectureModal } from './components/ArchitectureModal';
-import { NfcComplianceModal } from './components/NfcComplianceModal';
 import { ProjectManagerModal } from './components/ProjectManagerModal';
 import { FileText } from 'lucide-react';
 import { WireRouteBar } from './components/WireRouteBar';
@@ -128,8 +126,6 @@ export default function App() {
 
   // Modals
   const [isBOMModalOpen, setIsBOMModalOpen] = useState(false);
-  const [isArchitectureModalOpen, setIsArchitectureModalOpen] = useState(false);
-  const [isNfcModalOpen, setIsNfcModalOpen] = useState(false);
 
   // Toast notification state (in-place of alerts)
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -1225,7 +1221,6 @@ export default function App() {
         onImportJSON={handleImportJSON}
         onPrint={() => window.print()}
         onOpenBOM={() => setIsBOMModalOpen(true)}
-        onOpenArchitecture={() => setIsArchitectureModalOpen(true)}
         canUndo={history.length > 0}
         canRedo={redoStack.length > 0}
         onUndo={handleUndo}
@@ -1234,7 +1229,6 @@ export default function App() {
         onToggleGrid={() => setShowGrid(!showGrid)}
         showWiringMode={showWiringMode}
         onToggleWiringMode={() => setShowWiringMode(!showWiringMode)}
-        onRunNfcCheck={() => setIsNfcModalOpen(true)}
       />
 
       {/* Nomenclature (BOM) Modal */}
@@ -1245,21 +1239,8 @@ export default function App() {
         />
       )}
 
-      {/* Architecture & JSON Schema Modal */}
-      {isArchitectureModalOpen && (
-        <ArchitectureModal
-          currentProject={project}
-          onClose={() => setIsArchitectureModalOpen(false)}
-        />
-      )}
 
       {/* NF C 15-100 Compliance Diagnostic Modal */}
-      {isNfcModalOpen && (
-        <NfcComplianceModal
-          project={project}
-          onClose={() => setIsNfcModalOpen(false)}
-        />
-      )}
 
       {/* Réglage du tracé du fil aux flèches (après le choix de la borne d'arrivée) */}
       {pendingWire?.to && pendingWire.route && (

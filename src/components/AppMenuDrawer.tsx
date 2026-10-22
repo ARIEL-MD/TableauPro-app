@@ -27,7 +27,6 @@ interface AppMenuDrawerProps {
   onImportJSON: (file: File) => void;
   onPrint: () => void;
   onOpenBOM: () => void;
-  onOpenArchitecture: () => void;
   canUndo: boolean;
   canRedo: boolean;
   onUndo: () => void;
@@ -36,7 +35,6 @@ interface AppMenuDrawerProps {
   onToggleGrid: () => void;
   showWiringMode: boolean;
   onToggleWiringMode: () => void;
-  onRunNfcCheck: () => void;
 }
 
 export const AppMenuDrawer: React.FC<AppMenuDrawerProps> = ({
@@ -48,7 +46,6 @@ export const AppMenuDrawer: React.FC<AppMenuDrawerProps> = ({
   onImportJSON,
   onPrint,
   onOpenBOM,
-  onOpenArchitecture,
   canUndo,
   canRedo,
   onUndo,
@@ -57,7 +54,6 @@ export const AppMenuDrawer: React.FC<AppMenuDrawerProps> = ({
   onToggleGrid,
   showWiringMode,
   onToggleWiringMode,
-  onRunNfcCheck,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -210,19 +206,6 @@ export const AppMenuDrawer: React.FC<AppMenuDrawerProps> = ({
                 </span>
               </button>
 
-              <button
-                onClick={() => {
-                  onRunNfcCheck();
-                  onClose();
-                }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-700 font-medium transition-colors cursor-pointer"
-              >
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span className="flex-1 text-left">Contrôle Norme NF C 15-100</span>
-                <span className="text-[10px] bg-emerald-50 text-emerald-700 font-semibold px-1.5 py-0.5 rounded">
-                  Audit
-                </span>
-              </button>
 
               <button
                 onClick={() => {
@@ -276,16 +259,6 @@ export const AppMenuDrawer: React.FC<AppMenuDrawerProps> = ({
             <div className="mt-1 space-y-1">
 
 
-              <button
-                onClick={() => {
-                  onOpenArchitecture();
-                  onClose();
-                }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-700 font-medium transition-colors cursor-pointer"
-              >
-                <FileCode className="w-4 h-4 text-slate-500" />
-                <span>Architecture & Modèle JSON</span>
-              </button>
             </div>
           </div>
         </div>
