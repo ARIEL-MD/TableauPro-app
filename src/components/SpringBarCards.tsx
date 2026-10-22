@@ -15,7 +15,9 @@ const px = (n: number) => n * S;
 const CARD_BG = '#6f6f6f';
 const CARD_H = 147;
 const HOUSING = '#d3d6dc';
+const HOUSING_EDGE = '#aab0b8';
 const SCREW = '#8a9099';
+const SCREW_IN = '#5d636b';
 
 type ChipKey = 'blue' | 'green';
 
@@ -27,41 +29,46 @@ const PALETTE: Record<ChipKey, { body: string; slot: string; teeth: string }> = 
 };
 
 /** Cotes mesurées sur la capture, dans l'ordre des cartes (gauche → droite, haut → bas). */
-const BARS: { label: string; slots: number; h: number; holes: number; cardW: number }[] = [
-  { label: '5 + 1 contacts', slots: 5, h: 73, holes: 6, cardW: 264 },
-  { label: '8 + 2 contacts', slots: 8, h: 57, holes: 10, cardW: 264 },
-  { label: '11 + 3 contacts', slots: 11, h: 42, holes: 14, cardW: 277 },
-  { label: '14 + 4 contacts', slots: 14, h: 33, holes: 18, cardW: 277 },
-  { label: '17 + 5 contacts', slots: 17, h: 28, holes: 22, cardW: 277 },
-  { label: '20 + 6 contacts', slots: 20, h: 25, holes: 26, cardW: 277 },
+const BARS: { label: string; slots: number; h: number; holes: number; cardW: number; w: number }[] = [
+  { label: '5 + 1 contacts', slots: 5, h: 73, holes: 6, cardW: 264, w: 72 },
+  { label: '8 + 2 contacts', slots: 8, h: 57, holes: 10, cardW: 264, w: 84 },
+  { label: '11 + 3 contacts', slots: 11, h: 42, holes: 14, cardW: 277, w: 84 },
+  { label: '14 + 4 contacts', slots: 14, h: 33, holes: 18, cardW: 277, w: 84 },
+  { label: '17 + 5 contacts', slots: 17, h: 28, holes: 22, cardW: 277, w: 84 },
+  { label: '20 + 6 contacts', slots: 20, h: 25, holes: 26, cardW: 277, w: 84 },
 ];
 
-/** Dessin d'une barre auto-serrante — viewBox 84 × h, comme sur la capture. */
+/** Dessin d'une barre auto-serrante — viewBox w × h, comme sur la capture. */
 export const SpringBarDrawing: React.FC<{
   slots: number;
   h: number;
+  w: number;
   width: number;
   palette: { body: string; slot: string; teeth: string };
-}> = ({ slots, h, width, palette }) => {
-  const W = 84;
-  const top = h * 0.38;
-  const mid = h * 0.72;
+}> = ({ slots, h, w, width, palette }) => {
+  const top = h * 0.42;
+  const mid = h * 0.7;
   const teeth = slots * 2;
-  const slotW = Math.max(1.6, Math.min(3.2, 60 / slots));
-  const slotH = Math.max(1, (mid - top) * 0.4);
-  const screwR = Math.min(4, h * 0.1);
-  const screwY = top * 0.5;
+  const slotW = Math.max(1.4, Math.min(4.2, ((w - 12) / slots) * 0.5));
+  const slotH = Math.max(1, (mid - top) * 0.45);
+  const screwR = Math.min(4.5, h * 0.1);
 
   return (
-    <svg width={width} height={(width * h) / W} viewBox={`0 0 ${W} ${h}`} aria-hidden>
-      {/* Capot supérieur gris clair avec vis */}
-      <rect x="0" y="0" width={W} height={top} rx="2" fill={HOUSING} />
+    <svg width={width} height={(width * h) / w} viewBox={`0 0 ${w} ${h}`} aria-hidden>
+      {/* Capot gris clair avec bord et vis */}
+      <rect x="0" y="0" width={w} height={top} rx={Math.min(4, h * 0.08)} fill={HOUSING} />
+      <rect x="0" y={top - 0.8} width={w} height={0.8} fill={HOUSING_EDGE} />
       {h >= 40 &&
-        [22, 62].map((x) => <circle key={x} cx={x} cy={screwY} r={screwR} fill={SCREW} />)}
+        [0.25, 0.75].map((f) => (
+          <g key={f}>
+            <circle cx={w * f} cy={top / 2} r={screwR} fill={SCREW} />
+            <circle cx={w * f} cy={top / 2} r={screwR * 0.45} fill={SCREW_IN} />
+          </g>
+        ))}
       {/* Corps bleu avec logements des contacts */}
-      <rect x="0" y={top} width={W} height={mid - top} fill={palette.body} />
+      <rect x="0" y={top} width={w} height={mid - top} fill={palette.body} />
       {Array.from({ length: slots }).map((_, i) => {
-        const cx = slots === 1 ? W / 2 : 8 + i * ((W - 16) / (slots - 1));
+        const cx = slots === 1 ? w / 2 : 6 + i * ((w - 12) / (slots - 1));
         return (
           <rect
             key={i}
@@ -74,10 +81,10 @@ export const SpringBarDrawing: React.FC<{
           />
         );
       })}
-      {/* Peigne inférieur */}
+      {/* Peigne inférieur, dents longues */}
       {Array.from({ length: teeth }).map((_, i) => {
-        const x = 3 + i * ((W - 6) / (teeth - 1));
-        return <rect key={i} x={x - 0.6} y={mid} width={1.2} height={h - mid} fill={palette.teeth} />;
+        const x = 3 + i * ((w - 6) / (teeth - 1));
+        return <rect key={i} x={x - 0.55} y={mid} width={1.1} height={h - mid} fill={palette.teeth} />;
       })}
     </svg>
   );
@@ -110,12 +117,12 @@ export const SpringBarCards: React.FC<Props> = ({ onAddTerminalBar }) => {
           <div
             style={{
               position: 'absolute',
-              left: px(b.cardW * 0.35 - 42),
+              left: px(b.cardW * 0.35 - b.w / 2),
               top: px(54 - b.h / 2),
-              width: px(84),
+              width: px(b.w),
             }}
           >
-            <SpringBarDrawing slots={b.slots} h={b.h} width={px(84)} palette={PALETTE[color]} />
+            <SpringBarDrawing slots={b.slots} h={b.h} w={b.w} width={px(b.w)} palette={PALETTE[color]} />
           </div>
 
           {/* Libellé */}
