@@ -169,10 +169,25 @@ const ModularDevice: React.FC<ModularDeviceProps> = ({ kind, modules, slim, stri
 const Defs: React.FC = () => (
   <defs>
     <linearGradient id="dt-body" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stopColor="#d9dce1" />
-      <stop offset="0.5" stopColor="#f4f5f7" />
-      <stop offset="1" stopColor="#d3d6dc" />
+      <stop offset="0" stopColor="#d4d9e0" />
+      <stop offset="0.35" stopColor="#f6f7f9" />
+      <stop offset="0.7" stopColor="#eceff3" />
+      <stop offset="1" stopColor="#c9ced6" />
     </linearGradient>
+    <linearGradient id="dt-gloss" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stopColor="#ffffff" stopOpacity="0.55" />
+      <stop offset="0.25" stopColor="#ffffff" stopOpacity="0" />
+      <stop offset="0.85" stopColor="#000000" stopOpacity="0" />
+      <stop offset="1" stopColor="#000000" stopOpacity="0.12" />
+    </linearGradient>
+    <radialGradient id="dt-screw" cx="0.35" cy="0.35" r="0.7">
+      <stop offset="0" stopColor="#ffffff" />
+      <stop offset="0.6" stopColor="#b7bdc6" />
+      <stop offset="1" stopColor="#7d8592" />
+    </radialGradient>
+    <filter id="dt-shadow" x="-10%" y="-5%" width="130%" height="120%">
+      <feDropShadow dx="1" dy="2" stdDeviation="1.4" floodOpacity="0.35" />
+    </filter>
     <linearGradient id="dt-dark" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stopColor="#4b5563" />
       <stop offset="1" stopColor="#1f2937" />
@@ -199,15 +214,18 @@ const Defs: React.FC = () => (
 
 const Screw: React.FC<{ cx: number; cy: number; r?: number }> = ({ cx, cy, r = 4.2 }) => (
   <g>
-    <circle cx={cx} cy={cy} r={r} fill="#9aa0a8" stroke="#6b7280" strokeWidth={0.6} />
-    <circle cx={cx} cy={cy} r={r * 0.72} fill="#c9cdd3" />
-    <line x1={cx - r * 0.5} y1={cy} x2={cx + r * 0.5} y2={cy} stroke="#5b616b" strokeWidth={0.9} />
-    <line x1={cx} y1={cy - r * 0.5} x2={cx} y2={cy + r * 0.5} stroke="#5b616b" strokeWidth={0.9} />
+    <circle cx={cx} cy={cy} r={r} fill="url(#dt-screw)" stroke="#6b7280" strokeWidth={0.6} />
+    <path
+      d={`M${cx - r * 0.55} ${cy - r * 0.55} L${cx + r * 0.55} ${cy + r * 0.55} M${cx + r * 0.55} ${cy - r * 0.55} L${cx - r * 0.55} ${cy + r * 0.55}`}
+      stroke="#3f4650"
+      strokeWidth={r * 0.38}
+      strokeLinecap="round"
+    />
   </g>
 );
 
 const MODULE = 18;
-const PAD = 1.5;
+const PAD = 2.5;
 const H = 90;
 
 /** Plain DIN body: `modules` wide, with dividers, screws and a band. */
@@ -223,7 +241,8 @@ const Body: React.FC<{
   return (
     <svg viewBox={`0 0 ${W + PAD * 2} ${h + PAD * 2}`} className={className} fill="none" preserveAspectRatio="xMidYMid meet">
       <Defs />
-      <rect x={PAD} y={PAD} width={W} height={h} rx={2} fill="url(#dt-body)" stroke="#9ca3af" strokeWidth={0.8} />
+      <rect x={PAD} y={PAD} width={W} height={h} rx={2} fill="url(#dt-body)" stroke="#2b3038" strokeWidth={0.9} filter="url(#dt-shadow)" />
+      <rect x={PAD + 0.5} y={PAD + 0.5} width={W - 1} height={h - 1} rx={1.6} fill="url(#dt-gloss)" />
       {Array.from({ length: Math.max(0, modules - 1) }).map((_, i) => (
         <line key={i} x1={PAD + (i + 1) * MODULE} y1={PAD + 1} x2={PAD + (i + 1) * MODULE} y2={PAD + h - 1} stroke="#b8bcc4" strokeWidth={0.7} />
       ))}
