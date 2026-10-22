@@ -157,10 +157,10 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                     <div
                       key={item.label}
                       onClick={() => onAddDeviceByType(item.type, { color: colors.mcb })}
-                      className="group relative w-20 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
+                      className="group relative w-24 h-28 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
                     >
                       <div className="flex-1 flex items-center justify-center">
-                        <DeviceThumbSvg type={item.type} color={colors.mcb} className="h-16 w-auto max-w-full" />
+                        <DeviceThumbSvg type={item.type} color={colors.mcb} className="h-14 w-auto max-w-full" />
                       </div>
                       <span className="text-[10px] text-white font-medium text-center truncate w-full">
                         {item.label}
@@ -171,7 +171,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                   {/* + Ajouter Card */}
                   <div
                     onClick={() => onAddDeviceByType('MCB 1P', { color: colors.mcb })}
-                    className="relative w-20 h-24 rounded-xl border-2 border-dashed border-slate-300 bg-slate-100/70 hover:bg-slate-200/70 transition-all cursor-pointer flex flex-col items-center justify-center p-2 shrink-0"
+                    className="relative w-24 h-28 rounded-xl border-2 border-dashed border-slate-300 bg-slate-100/70 hover:bg-slate-200/70 transition-all cursor-pointer flex flex-col items-center justify-center p-2 shrink-0"
                   >
                     <Plus className="w-5 h-5 text-slate-500" />
                     <span className="text-[10px] text-slate-500 font-medium mt-1">Ajouter</span>
@@ -193,10 +193,10 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                     <div
                       key={item.label}
                       onClick={() => onAddDeviceByType(item.type, { color: colors.rcd })}
-                      className="group relative w-20 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
+                      className="group relative w-24 h-28 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
                     >
                       <div className="flex-1 flex items-center justify-center">
-                        <DeviceThumbSvg type={item.type} color={colors.rcd} className="h-16 w-auto max-w-full" />
+                        <DeviceThumbSvg type={item.type} color={colors.rcd} className="h-14 w-auto max-w-full" />
                       </div>
                       <span className="text-[10px] text-white font-medium text-center truncate w-full">
                         {item.label}
@@ -206,7 +206,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
 
                   <div
                     onClick={() => onAddDeviceByType('RCCB 2P', { color: colors.rcd })}
-                    className="relative w-20 h-24 rounded-xl border-2 border-dashed border-slate-300 bg-slate-100/70 hover:bg-slate-200/70 transition-all cursor-pointer flex flex-col items-center justify-center p-2 shrink-0"
+                    className="relative w-24 h-28 rounded-xl border-2 border-dashed border-slate-300 bg-slate-100/70 hover:bg-slate-200/70 transition-all cursor-pointer flex flex-col items-center justify-center p-2 shrink-0"
                   >
                     <Plus className="w-5 h-5 text-slate-500" />
                     <span className="text-[10px] text-slate-500 font-medium mt-1">Ajouter</span>
@@ -229,10 +229,10 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                     <div
                       key={item.label}
                       onClick={() => onAddDeviceByType(item.type, { color: colors.rcbo })}
-                      className="group relative w-20 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
+                      className="group relative w-24 h-28 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
                     >
                       <div className="flex-1 flex items-center justify-center">
-                        <DeviceThumbSvg type={item.type} color={colors.rcbo} className="h-16 w-auto max-w-full" />
+                        <DeviceThumbSvg type={item.type} color={colors.rcbo} className="h-14 w-auto max-w-full" />
                       </div>
                       <span className="text-[10px] text-white font-medium text-center truncate w-full">
                         {item.label}
@@ -241,7 +241,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                   ))}
                   <div
                     onClick={() => onAddDeviceByType('RCBO 2P', { color: colors.rcbo })}
-                    className="relative w-20 h-24 rounded-xl border-2 border-dashed border-slate-300 bg-slate-100/70 hover:bg-slate-200/70 transition-all cursor-pointer flex flex-col items-center justify-center p-2 shrink-0"
+                    className="relative w-24 h-28 rounded-xl border-2 border-dashed border-slate-300 bg-slate-100/70 hover:bg-slate-200/70 transition-all cursor-pointer flex flex-col items-center justify-center p-2 shrink-0"
                   >
                     <Plus className="w-5 h-5 text-slate-500" />
                     <span className="text-[10px] text-slate-500 font-medium mt-1">Ajouter</span>
@@ -258,10 +258,10 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                     <div
                       key={lbl}
                       onClick={() => onAddDeviceByType(lbl, { color: colors.sd })}
-                      className="group relative w-20 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
+                      className="group relative w-24 h-28 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
                     >
                       <div className="flex-1 flex items-center justify-center">
-                        <DeviceThumbSvg type={lbl} color={colors.sd} className="h-16 w-auto max-w-full" />
+                        <DeviceThumbSvg type={lbl} color={colors.sd} className="h-14 w-auto max-w-full" />
                       </div>
                       <span className="text-[10px] text-white font-medium text-center truncate w-full">
                         {lbl}
@@ -270,7 +270,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                   ))}
                   <div
                     onClick={() => onAddDeviceByType('SD 2P', { color: colors.sd })}
-                    className="relative w-20 h-24 rounded-xl border-2 border-dashed border-slate-300 bg-slate-100/70 hover:bg-slate-200/70 transition-all cursor-pointer flex flex-col items-center justify-center p-2 shrink-0"
+                    className="relative w-24 h-28 rounded-xl border-2 border-dashed border-slate-300 bg-slate-100/70 hover:bg-slate-200/70 transition-all cursor-pointer flex flex-col items-center justify-center p-2 shrink-0"
                   >
                     <Plus className="w-5 h-5 text-slate-400" />
                     <span className="text-[10px] text-slate-500 font-medium mt-1">Ajouter</span>
@@ -292,7 +292,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                       className="group relative w-36 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
                     >
                       <div className="flex-1 flex items-center justify-center">
-                        <DeviceThumbSvg type={item.label} className="h-16 w-auto max-w-full" />
+                        <DeviceThumbSvg type={item.label} className="h-14 w-auto max-w-full" />
                       </div>
                       <span className="text-[10px] text-white font-medium text-center truncate w-full">
                         {item.label}
@@ -301,7 +301,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                   ))}
                   <div
                     onClick={() => onAddDeviceByType('VoltageRelay')}
-                    className="relative w-20 h-24 rounded-xl border-2 border-dashed border-slate-300 bg-slate-100/70 hover:bg-slate-200/70 transition-all cursor-pointer flex flex-col items-center justify-center p-2 shrink-0"
+                    className="relative w-24 h-28 rounded-xl border-2 border-dashed border-slate-300 bg-slate-100/70 hover:bg-slate-200/70 transition-all cursor-pointer flex flex-col items-center justify-center p-2 shrink-0"
                   >
                     <Plus className="w-5 h-5 text-slate-400" />
                     <span className="text-[10px] text-slate-500 font-medium mt-1">Ajouter</span>
@@ -324,7 +324,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                       className="group relative w-32 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
                     >
                       <div className="flex-1 flex items-center justify-center">
-                        <DeviceThumbSvg type={lbl} className="h-16 w-auto max-w-full" />
+                        <DeviceThumbSvg type={lbl} className="h-14 w-auto max-w-full" />
                       </div>
                       <span className="text-[10px] text-white font-medium text-center truncate w-full">
                         {lbl}
@@ -333,7 +333,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                   ))}
                   <div
                     onClick={() => onAddDeviceByType('Contacteur')}
-                    className="relative w-20 h-24 rounded-xl border-2 border-dashed border-slate-300 bg-slate-100/70 hover:bg-slate-200/70 transition-all cursor-pointer flex flex-col items-center justify-center p-2 shrink-0"
+                    className="relative w-24 h-28 rounded-xl border-2 border-dashed border-slate-300 bg-slate-100/70 hover:bg-slate-200/70 transition-all cursor-pointer flex flex-col items-center justify-center p-2 shrink-0"
                   >
                     <Plus className="w-5 h-5 text-slate-400" />
                     <span className="text-[10px] text-slate-500 font-medium mt-1">Ajouter</span>
@@ -352,7 +352,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                       className="group relative w-32 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
                     >
                       <div className="flex-1 flex items-center justify-center">
-                        <DeviceThumbSvg type={lbl} className="h-16 w-auto max-w-full" />
+                        <DeviceThumbSvg type={lbl} className="h-14 w-auto max-w-full" />
                       </div>
                       <span className="text-[10px] text-white font-medium text-center truncate w-full">
                         {lbl}
@@ -376,7 +376,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                       className="group relative w-40 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
                     >
                       <div className="flex-1 flex items-center justify-center">
-                        <DeviceThumbSvg type={lbl} className="h-16 w-auto max-w-full" />
+                        <DeviceThumbSvg type={lbl} className="h-14 w-auto max-w-full" />
                       </div>
                       <span className="text-[10px] text-white font-medium text-center truncate w-full">
                         {lbl}
@@ -397,7 +397,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                       className="group relative w-24 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
                     >
                       <div className="flex-1 flex items-center justify-center">
-                        <DeviceThumbSvg type={lbl} className="h-16 w-auto max-w-full" />
+                        <DeviceThumbSvg type={lbl} className="h-14 w-auto max-w-full" />
                       </div>
                       <span className="text-[10px] text-white font-medium text-center truncate w-full">
                         {lbl}
@@ -415,10 +415,10 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                     <div
                       key={lbl}
                       onClick={() => onAddDeviceByType(lbl)}
-                      className="group relative w-20 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
+                      className="group relative w-24 h-28 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
                     >
                       <div className="flex-1 flex items-center justify-center">
-                        <DeviceThumbSvg type={lbl} className="h-16 w-auto max-w-full" />
+                        <DeviceThumbSvg type={lbl} className="h-14 w-auto max-w-full" />
                       </div>
                       <span className="text-[10px] text-white font-medium text-center truncate w-full">
                         {lbl}
@@ -510,7 +510,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                       className="group relative min-w-[90px] h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
                     >
                       <div className="flex-1 flex items-center justify-center">
-                        <DeviceThumbSvg type={item.label} className="h-16 w-auto max-w-full" />
+                        <DeviceThumbSvg type={item.label} className="h-14 w-auto max-w-full" />
                       </div>
                       <span className="text-[10px] text-white font-medium text-center truncate w-full px-1">
                         {item.label}
