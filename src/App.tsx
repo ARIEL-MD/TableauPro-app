@@ -351,8 +351,9 @@ export default function App() {
           calibre = 20;
           ratedVoltage = '400V';
         } else {
-          moduleWidth = 2;
-          poles = '1P+N';
+          const oneN = deviceType.includes('1P');
+          moduleWidth = oneN ? 1 : 2;
+          poles = oneN ? '1P+N' : '2P';
           name = 'Disjoncteur Différentiel 16A 30mA';
           manufacturer = 'Legrand';
           modelSeries = 'Drivia';
