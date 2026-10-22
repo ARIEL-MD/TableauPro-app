@@ -38,9 +38,9 @@ interface ModularDeviceProps {
  * Light grey body, coloured band, screw terminals top/bottom, black toggle.
  */
 const ModularDevice: React.FC<ModularDeviceProps> = ({ kind, modules, slim, stripe, className, label }) => {
-  // Dessin en unités : 1 module = 36, hauteur 200 (proportions d'un appareil réel)
+  // Dessin en unités : 1 module = 36 (18 mm réels), hauteur 180 (≈ 90 mm réels, fiches Hager)
   const MW = 36;
-  const H = 200;
+  const H = 180;
   const PAD = 6;
   const W = slim ? 18 : modules * MW;
   const cols = slim ? 1 : modules;
