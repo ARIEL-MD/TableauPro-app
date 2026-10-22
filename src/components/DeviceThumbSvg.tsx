@@ -335,6 +335,267 @@ const McbDevice: React.FC<{
 
 
 /* ------------------------------------------------------------------ */
+/*  Appareils « référence » : RCD (RCCB), RCBO, contacteur 1M           */
+/*  Même langage graphique que McbDevice : cotes = fractions de la      */
+/*  hauteur relevées sur les images de référence.                       */
+/* ------------------------------------------------------------------ */
+
+const REF_RED = '#e8141b';
+const refBand = (stripe: string) => (stripe === STRIPE_COLORS.red ? REF_RED : stripe);
+
+const refGeom = (cols: number) => {
+  const K = 2;
+  const u = (mm: number) => mm * K;
+  const modW = u(18);
+  const W = cols * modW;
+  const H = u(90);
+  const P = 4;
+  const fy = (f: number) => P + f * H;
+  return { u, modW, W, H, P, fy, vb: `0 0 ${W + P * 2} ${H + P * 2}` };
+};
+type RefGeom = ReturnType<typeof refGeom>;
+
+const REF_FONT = 'Arial, Helvetica, sans-serif';
+
+const RefScrew: React.FC<{ cx: number; cy: number; r: number }> = ({ cx, cy, r }) => (
+  <g>
+    <circle cx={cx} cy={cy} r={r} fill="url(#ref-screw)" stroke="#5f646b" strokeWidth={1} />
+    <path
+      d={`M${cx - r * 0.45} ${cy - r * 0.45} L${cx + r * 0.45} ${cy + r * 0.45} M${cx + r * 0.45} ${cy - r * 0.45} L${cx - r * 0.45} ${cy + r * 0.45}`}
+      stroke="#4a4f56"
+      strokeWidth={r * 0.2}
+      strokeLinecap="round"
+    />
+  </g>
+);
+
+const RefLed: React.FC<{ g: RefGeom; x: number; f: number; w?: number }> = ({ g, x, f, w = 5.5 }) => (
+  <rect x={x} y={g.fy(f)} width={g.u(w)} height={g.fy(f + 0.032) - g.fy(f)} rx={g.u(0.4)} fill="#0f7d3d" stroke="#2fb36b" strokeWidth={1} />
+);
+
+interface RefLayout {
+  mid: string;
+  grayTop: [number, number];
+  grayBottom: [number, number, string][];
+  red: [number, number];
+}
+const RCD_LAYOUT: RefLayout = {
+  mid: '#ebedef',
+  grayTop: [0.205, 0.234],
+  grayBottom: [[0.732, 0.757, '#eceeef'], [0.77, 0.795, '#d8dbdd']],
+  red: [0.252, 0.288],
+};
+
+const RefShell: React.FC<{ g: RefGeom; cols: number; band: string; layout: RefLayout; children?: React.ReactNode }> = ({ g, cols, band, layout, children }) => {
+  const { P, W, H, modW, fy, u } = g;
+  return (
+    <>
+      <defs>
+        <radialGradient id="ref-screw" cx="0.4" cy="0.4" r="0.75">
+          <stop offset="0" stopColor="#a1a5aa" />
+          <stop offset="1" stopColor="#868a90" />
+        </radialGradient>
+      </defs>
+      <rect x={P} y={P} width={W} height={H} rx={u(0.8)} fill="#f5f6f7" stroke="#8e939a" strokeWidth={1.4} />
+      <rect x={P + 0.4} y={fy(layout.red[1])} width={W - 0.8} height={fy(0.735) - fy(layout.red[1])} fill={layout.mid} />
+      {Array.from({ length: cols - 1 }).map((_, i) => (
+        <g key={`sep-${i}`} stroke="#d0d3d8" strokeWidth={1.2}>
+          <line x1={P + (i + 1) * modW} y1={P} x2={P + (i + 1) * modW} y2={fy(layout.red[0])} />
+          <line x1={P + (i + 1) * modW} y1={fy(0.735)} x2={P + (i + 1) * modW} y2={P + H} />
+        </g>
+      ))}
+      <rect x={P + 0.4} y={fy(layout.grayTop[0])} width={W - 0.8} height={fy(layout.grayTop[1]) - fy(layout.grayTop[0])} fill="#d8dbdd" />
+      {layout.grayBottom.map(([a, b, c]) => (
+        <rect key={a} x={P + 0.4} y={fy(a)} width={W - 0.8} height={fy(b) - fy(a)} fill={c} />
+      ))}
+      <rect x={P + 0.4} y={fy(layout.red[0])} width={W - 0.8} height={fy(layout.red[1]) - fy(layout.red[0])} fill={band} />
+      {children}
+    </>
+  );
+};
+
+/** Découpe « A 25A 30mA » en trois lignes pour la plaquette noire. */
+const parseRcdLabel = (text: string) => {
+  const m = /^(\S+)\s+(\d+(?:[.,]\d+)?A)\s+(\d+)\s*mA$/i.exec(text.trim());
+  return m ? { kind: m[1], cal: m[2], sens: `${m[3]} mA` } : null;
+};
+
+/** Bouton test (ovale blanc + « TEST »). */
+const RefTest: React.FC<{ g: RefGeom; cx: number }> = ({ g, cx }) => {
+  const { u, fy } = g;
+  return (
+    <g>
+      <ellipse cx={cx} cy={fy(0.354)} rx={u(4.5)} ry={u(2.2)} fill="#ffffff" stroke="#8b9097" strokeWidth={1} />
+      <text x={cx} y={fy(0.354) + u(0.85)} fontSize={u(2.4)} fontWeight="bold" textAnchor="middle" fill="#6b7280" fontFamily={REF_FONT}>T</text>
+      <text x={cx + u(6.4)} y={fy(0.354) + u(0.85)} fontSize={u(2.3)} fontWeight="bold" fill="#5b6067" fontFamily={REF_FONT}>TEST</text>
+    </g>
+  );
+};
+
+/** Différentiel RCCB 2P / 4P : plaquette noire + grosse manette bleue sur le dernier module. */
+const RcdDevice: React.FC<{ modules: number; stripe: string; className?: string; label?: string }> = ({ modules, stripe, className, label }) => {
+  const g = refGeom(modules);
+  const { u, modW, W, P, fy } = g;
+  const lml = P + W - modW; // bord gauche du dernier module
+  const plateL = lml - modW + u(2.3);
+  const plateW = u(12.1);
+  const plateCx = plateL + plateW / 2;
+  const plateY = fy(0.463);
+  const plateH = fy(0.639) - plateY;
+  const text = label === undefined ? 'A 25A 30mA' : label;
+  const parts = parseRcdLabel(text);
+
+  return (
+    <svg viewBox={g.vb} className={className} fill="none" preserveAspectRatio="xMidYMid meet">
+      <RefShell g={g} cols={modules} band={refBand(stripe)} layout={RCD_LAYOUT}>
+        {Array.from({ length: modules }).map((_, i) => {
+          const cx = P + i * modW + modW / 2;
+          return (
+            <g key={`s-${i}`}>
+              <RefScrew cx={cx} cy={fy(0.09)} r={u(4.15)} />
+              <RefScrew cx={cx} cy={fy(0.912)} r={u(4.15)} />
+            </g>
+          );
+        })}
+        {modules === 4 && (
+          <>
+            <text x={P + modW / 2} y={fy(0.172)} fontSize={u(2.6)} textAnchor="middle" fill="#8b9097" fontFamily={REF_FONT}>N</text>
+            <text x={P + modW / 2} y={fy(0.842)} fontSize={u(2.6)} textAnchor="middle" fill="#8b9097" fontFamily={REF_FONT}>N</text>
+          </>
+        )}
+
+        <RefTest g={g} cx={plateCx} />
+        <RefLed g={g} x={P + W - u(2.8) - u(6)} f={0.338} w={6} />
+
+        {/* Plaquette noire */}
+        <rect x={plateL} y={plateY} width={plateW} height={plateH} rx={u(1)} fill="#0b0b0c" />
+        {parts ? (
+          <>
+            <text x={plateL + u(1.8)} y={plateY + plateH * 0.195 + u(1)} fontSize={u(2.8)} fontWeight="bold" fill="#ffffff" fontFamily={REF_FONT}>{parts.kind}</text>
+            <text x={plateCx} y={plateY + plateH * 0.53 + u(1.95)} fontSize={u(5.4)} fontWeight="bold" textAnchor="middle" fill="#ffffff" fontFamily={REF_FONT}>{parts.cal}</text>
+            <text x={plateCx} y={plateY + plateH * 0.84 + u(1.15)} fontSize={u(3.2)} fontWeight="bold" textAnchor="middle" fill="#ffffff" fontFamily={REF_FONT}>{parts.sens}</text>
+          </>
+        ) : (
+          text && (
+            <text x={plateCx} y={plateY + plateH / 2 + u(1.4)} fontSize={u(Math.min(4, 10 / (text.length * 0.6)))} fontWeight="bold" textAnchor="middle" fill="#ffffff" fontFamily={REF_FONT}>{text}</text>
+          )
+        )}
+
+        {/* Cadre + manette bleue */}
+        <rect x={lml - u(1.7)} y={fy(0.447)} width={u(17.7)} height={fy(0.6) - fy(0.447)} rx={u(0.8)} fill="#cfd3d8" stroke="#9aa0a8" strokeWidth={1} />
+        <rect x={lml + u(1.1)} y={fy(0.482)} width={u(12.2)} height={fy(0.58) - fy(0.482)} rx={u(0.8)} fill="#1c63c6" />
+        <rect x={lml + u(2)} y={fy(0.49)} width={u(10.3)} height={u(0.9)} rx={u(0.4)} fill="#4d8fe3" opacity={0.8} />
+        <rect x={lml - u(1.6)} y={fy(0.571)} width={u(17.5)} height={fy(0.653) - fy(0.571)} rx={u(1.2)} fill="#2b7de6" stroke="#1a56ae" strokeWidth={1} />
+        <rect x={lml - u(1.2)} y={fy(0.628)} width={u(16.7)} height={fy(0.65) - fy(0.628)} rx={u(0.8)} fill="#1f66c4" />
+      </RefShell>
+    </svg>
+  );
+};
+
+/** Disjoncteur différentiel RCBO 2P / 1P+N : manette bleue (différentiel) + manette noire (disjoncteur). */
+const RcboDevice: React.FC<{ stripe: string; className?: string }> = ({ stripe, className }) => {
+  const g = refGeom(2);
+  const { u, modW, W, P, fy } = g;
+  const hc = [P + modW / 2 + u(0.5), P + modW + modW / 2 - u(1.1)];
+  const tinyTop = ['L', 'N'];
+
+  return (
+    <svg viewBox={g.vb} className={className} fill="none" preserveAspectRatio="xMidYMid meet">
+      <RefShell g={g} cols={2} band={refBand(stripe)} layout={RCD_LAYOUT}>
+        {hc.map((_, i) => {
+          const cx = P + i * modW + modW / 2;
+          return (
+            <g key={`s-${i}`}>
+              <RefScrew cx={cx} cy={fy(0.09)} r={u(4.15)} />
+              <RefScrew cx={cx} cy={fy(0.912)} r={u(4.15)} />
+              <text x={cx} y={fy(0.172)} fontSize={u(2.4)} textAnchor="middle" fill="#8b9097" fontFamily={REF_FONT}>{tinyTop[i]}</text>
+              <text x={cx} y={fy(0.842)} fontSize={u(2.4)} textAnchor="middle" fill="#8b9097" fontFamily={REF_FONT}>{tinyTop[i]}</text>
+            </g>
+          );
+        })}
+
+        <RefTest g={g} cx={P + modW * 0.45} />
+
+        {/* Cadres + manettes : bleue puis noire */}
+        {hc.map((cx, i) => (
+          <g key={`h-${i}`}>
+            <rect x={cx - u(7.1)} y={fy(0.44)} width={u(14.2)} height={fy(0.55) - fy(0.44)} rx={u(0.6)} fill="#e2e4e6" stroke="#9ea3a9" strokeWidth={1} />
+            <rect x={cx - u(7.1)} y={fy(0.44)} width={u(14.2)} height={u(0.6)} rx={u(0.3)} fill="#2b2e31" />
+            <rect x={cx - u(5)} y={fy(0.47)} width={u(10)} height={fy(0.552) - fy(0.47)} rx={u(0.6)} fill={i === 0 ? '#1c63c6' : '#2e3236'} />
+            {i === 0 ? (
+              <rect x={cx - u(4.2)} y={fy(0.478)} width={u(8.4)} height={u(1)} rx={u(0.4)} fill="#4d8fe3" opacity={0.85} />
+            ) : (
+              [0.485, 0.503, 0.521].map((f) => <rect key={f} x={cx - u(4.2)} y={fy(f)} width={u(8.4)} height={u(0.4)} fill="#4a4f54" />)
+            )}
+          </g>
+        ))}
+
+        {/* Barre noire commune */}
+        <rect x={P + u(2.3)} y={fy(0.545)} width={W - u(4.6)} height={fy(0.607) - fy(0.545)} rx={u(0.8)} fill="#2d3033" stroke="#1d2023" strokeWidth={0.8} />
+
+        {/* Voyants verts sous chaque manette */}
+        {hc.map((cx, i) => (
+          <RefLed key={`l-${i}`} g={g} x={cx - u(3.2)} f={0.651} w={6.4} />
+        ))}
+      </RefShell>
+    </svg>
+  );
+};
+
+/** Contacteur modulaire 1 module : bornes 1/3 en haut, 2/4 en bas, bobine A1/A2, voyant vert. */
+const CONTACTOR_LAYOUT: RefLayout = {
+  mid: '#f3f4f5',
+  grayTop: [0.223, 0.247],
+  grayBottom: [[0.674, 0.694, '#eceeef'], [0.73, 0.755, '#d8dbdd']],
+  red: [0.271, 0.307],
+};
+
+const Contactor1MDevice: React.FC<{ stripe: string; className?: string }> = ({ stripe, className }) => {
+  const g = refGeom(1);
+  const { u, modW, W, H, P, fy } = g;
+  const fx = (f: number) => P + f * modW;
+  const tiny = { fill: '#7a7f86', fontFamily: REF_FONT } as const;
+
+  return (
+    <svg viewBox={g.vb} className={className} fill="none" preserveAspectRatio="xMidYMid meet">
+      <RefShell g={g} cols={1} band={refBand(stripe)} layout={CONTACTOR_LAYOUT}>
+        {/* Blocs de bornes haut et bas (2 vis chacun) */}
+        {[0.053, 0.857].map((f0, k) => (
+          <g key={`box-${k}`}>
+            <rect x={fx(0.058)} y={fy(f0)} width={modW * 0.862} height={fy(f0 + 0.085) - fy(f0)} rx={u(1.6)} fill="#dde0e4" stroke="#b0b5bb" strokeWidth={1} />
+            <RefScrew cx={fx(0.26)} cy={fy(f0 + 0.044)} r={u(3)} />
+            <RefScrew cx={fx(0.726)} cy={fy(f0 + 0.044)} r={u(3)} />
+          </g>
+        ))}
+        <text x={fx(0.26)} y={fy(0.042)} fontSize={u(2.2)} textAnchor="middle" {...tiny}>1</text>
+        <text x={fx(0.726)} y={fy(0.042)} fontSize={u(2.2)} textAnchor="middle" {...tiny}>3</text>
+        <text x={fx(0.26)} y={fy(0.972)} fontSize={u(2.2)} textAnchor="middle" {...tiny}>2</text>
+        <text x={fx(0.726)} y={fy(0.972)} fontSize={u(2.2)} textAnchor="middle" {...tiny}>4</text>
+
+        {/* Bobine A1 (haut) / A2 (bas) */}
+        <RefScrew cx={fx(0.506)} cy={fy(0.184)} r={u(2.6)} />
+        <RefScrew cx={fx(0.506)} cy={fy(0.795)} r={u(2.6)} />
+        <text x={fx(0.17)} y={fy(0.19)} fontSize={u(2.6)} {...tiny}>A1</text>
+        <text x={fx(0.17)} y={fy(0.801)} fontSize={u(2.6)} {...tiny}>A2</text>
+
+        {/* Schéma de câblage imprimé */}
+        <text x={fx(0.27)} y={fy(0.42)} fontSize={u(2.2)} {...tiny}>A1</text>
+        <text x={fx(0.27)} y={fy(0.5)} fontSize={u(2.2)} {...tiny}>A2</text>
+        <text x={fx(0.55)} y={fy(0.42)} fontSize={u(2.2)} {...tiny}>1</text>
+        <text x={fx(0.55)} y={fy(0.5)} fontSize={u(2.2)} {...tiny}>2</text>
+        <text x={fx(0.77)} y={fy(0.42)} fontSize={u(2.2)} {...tiny}>3</text>
+        <text x={fx(0.77)} y={fy(0.5)} fontSize={u(2.2)} {...tiny}>4</text>
+        <circle cx={fx(0.36)} cy={fy(0.46)} r={u(0.45)} fill="#7a7f86" />
+        <circle cx={fx(0.8)} cy={fy(0.455)} r={u(0.5)} fill="#3a3f45" />
+
+        {/* Voyant vert */}
+        <RefLed g={g} x={fx(0.13)} f={0.585} w={5.5} />
+      </RefShell>
+    </svg>
+  );
+};
+
+/* ------------------------------------------------------------------ */
 /*  Shared helpers                                                      */
 /* ------------------------------------------------------------------ */
 
@@ -494,12 +755,12 @@ export const DeviceThumbSvg: React.FC<DeviceThumbSvgProps> = ({
     case 'MCB 1P + N':
       return <McbDevice modules={1} slim stripe={stripe} className={className} label={label} />;
     case 'RCCB 2P':
-      return <ModularDevice kind="rccb" modules={2} stripe={stripe} className={className} label={label} />;
+      return <RcdDevice modules={2} stripe={stripe} className={className} label={label} />;
     case 'RCCB 4P':
-      return <ModularDevice kind="rccb" modules={4} stripe={stripe} className={className} label={label} />;
+      return <RcdDevice modules={4} stripe={stripe} className={className} label={label} />;
     case 'RCBO 2P':
     case 'RCBO 1P + N':
-      return <ModularDevice kind="rcbo" modules={2} stripe={stripe} className={className} label={label} />;
+      return <RcboDevice stripe={stripe} className={className} />;
     case 'RCBO 4P':
       return <ModularDevice kind="rcbo" modules={4} stripe={stripe} className={className} label={label} />;
     case 'SD 1P':
@@ -513,13 +774,7 @@ export const DeviceThumbSvg: React.FC<DeviceThumbSvgProps> = ({
 
     /* ---------- Contactors / impulse relays ---------- */
     case 'Contactor 1M':
-      return (
-        <Body modules={1} className={className}>
-          <TextLines x={PAD + 4} y={PAD + 28} w={10} n={4} />
-          <rect x={PAD + 5} y={PAD + 48} width={8} height={9} rx={1} fill="#e5e7eb" stroke="#9aa0a8" strokeWidth={0.5} />
-          <rect x={PAD + 6.5} y={PAD + 63} width={5} height={1.8} rx={0.6} fill="#2e9e5b" />
-        </Body>
-      );
+      return <Contactor1MDevice stripe={stripe} className={className} />;
     case 'Contactor 4NO':
       return (
         <Body modules={3} h={85} stripe="" screws={false} className={className}>

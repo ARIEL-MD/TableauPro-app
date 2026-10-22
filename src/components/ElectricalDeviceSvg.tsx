@@ -83,7 +83,7 @@ export const terminalCount = (d: ElectricalDevice): number => {
 const deviceLabel = (d: ElectricalDevice, type: string): string | undefined => {
   const cal = typeof d.calibre === 'number' ? d.calibre : undefined;
   if (type === 'RCCB 2P' || type === 'RCCB 4P' || type === 'RCBO 2P' || type === 'RCBO 4P' || type === 'RCBO 1P + N') {
-    if (type.startsWith('RCCB') && cal === undefined) return undefined;
+    if (type.startsWith('RCCB') && cal === undefined) return ''; // plaquette noire vide tant que le calibre n'est pas choisi
     const sens = typeof d.differentialSensibility === 'number' ? d.differentialSensibility : 30;
     const kind = d.differentialType ?? 'A';
     return `${kind} ${cal ?? 25}A ${sens}mA`;
