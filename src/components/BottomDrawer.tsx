@@ -550,25 +550,70 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                 <SpringBarCards onAddTerminalBar={onAddTerminalBar} />
               </div>
 
-              {/* Group 3: Barres à vis */}
+              {/* Group 3: Barres à vis — dimensions et disposition calquées sur la capture de référence, sans badge PRO */}
               <div>
-                <h3 className="text-xs font-bold text-slate-900 mb-2">Barres à vis</h3>
-                <div className="flex items-center gap-3 overflow-x-auto pb-1">
-                  {([6, 11, 16, 21, 26] as const).map((cnt) => (
+                <h3 className="text-[22px] leading-7 font-bold text-[#202020] mb-2">Barres à vis</h3>
+                <div className="flex flex-wrap items-start gap-3 pb-1">
+                  {([
+                    { count: 6, width: 226, thumbWidth: 84 },
+                    { count: 11, width: 239, thumbWidth: 84 },
+                    { count: 16, width: 239, thumbWidth: 84 },
+                    { count: 21, width: 239, thumbWidth: 84 },
+                    { count: 26, width: 239, thumbWidth: 84 },
+                  ] as const).map(({ count, width, thumbWidth }) => (
                     <div
-                      key={cnt}
-                      onClick={() => onAddTerminalBar('screw', cnt)}
-                      className="group relative w-32 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
+                      key={count}
+                      onClick={() => onAddTerminalBar('screw', count)}
+                      className="group relative shrink-0 cursor-pointer transition-colors"
+                      style={{
+                        width,
+                        height: 148,
+                        borderRadius: 16,
+                        backgroundColor: '#6f6f6f',
+                      }}
+                      aria-label={`Barre à vis ${count} contacts`}
                     >
-                      <div className="flex items-center justify-between w-full px-1">
-                        <DeviceThumbSvg type="TerminalBar" variant="screw" count={Math.min(14, cnt)} className="w-16 h-6" />
-                        <div className="flex flex-col gap-0.5">
-                          <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                        </div>
+                      <div
+                        className="absolute flex items-center justify-center"
+                        style={{ left: 28, top: 27, width: thumbWidth, height: 48 }}
+                      >
+                        <DeviceThumbSvg
+                          type="TerminalBar"
+                          variant="screw"
+                          count={count}
+                          className="block h-auto max-w-full"
+                          style={undefined}
+                        />
                       </div>
-                      <span className="text-[10px] text-white font-medium text-center">
-                        {cnt} contacts
+                      <div
+                        className="absolute flex items-center justify-center rounded-full"
+                        style={{
+                          right: 25,
+                          top: 25,
+                          width: 42,
+                          height: 42,
+                          backgroundColor: '#4ba9f3',
+                          border: '4px solid #ffffff',
+                          boxSizing: 'border-box',
+                        }}
+                        aria-hidden="true"
+                      />
+                      <div
+                        className="absolute rounded-full"
+                        style={{
+                          right: 25,
+                          top: 81,
+                          width: 42,
+                          height: 42,
+                          backgroundColor: '#6ebc71',
+                        }}
+                        aria-hidden="true"
+                      />
+                      <span
+                        className="absolute whitespace-nowrap font-normal text-white"
+                        style={{ left: 19, top: 102, fontSize: 22, lineHeight: 1 }}
+                      >
+                        {count} contacts
                       </span>
                     </div>
                   ))}
