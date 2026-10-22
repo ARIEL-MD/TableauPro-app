@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { PanelAnnotation } from '../types/panel';
-import { PictogramIcon } from './PictogramIcon';
+import { PictogramTile } from './PictogramIcon';
 import { Plus, Minus } from 'lucide-react';
 import { TEXT_BASE_PX, backgroundCss, resolveTextStyle } from './TextEditorModal';
 
@@ -229,11 +229,8 @@ export const AnnotationObject: React.FC<AnnotationObjectProps> = ({
   } else {
     const size = annotation.size || 48;
     content = (
-      <div
-        className="rounded-lg bg-white border border-slate-300 shadow-sm flex items-center justify-center text-slate-800 cursor-move"
-        style={{ width: size + 12, height: size + 12, color: annotation.color || '#1f2937' }}
-      >
-        <PictogramIcon name={annotation.pictogram} size={size} />
+      <div className="cursor-move">
+        <PictogramTile name={annotation.pictogram} size={size + 12} color={annotation.color || '#4b4b4b'} />
       </div>
     );
   }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { PictogramKey } from '../types/panel';
 import { DeviceThumbSvg } from './DeviceThumbSvg';
-import { PICTOGRAM_LIST, PictogramIcon } from './PictogramIcon';
+import { PictogramCards } from './PictogramCards';
 import { Plus, Minus } from 'lucide-react';
 import { WireTerminalCards } from './WireTerminalCards';
 import { DinRailCards } from './DinRailCards';
@@ -806,22 +806,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                 <p className="text-[10px] text-slate-500 mb-2">
                   Appareil sélectionné : le pictogramme lui est assigné. Sinon, il est posé librement sur le plan.
                 </p>
-                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2.5">
-                  {PICTOGRAM_LIST.filter((p) => p.key !== 'ev_charger' && p.key !== 'roller_shutter').map((p) => (
-                    <div
-                      key={p.key}
-                      onClick={() => onAssignPictogramToSelected(p.key)}
-                      className="group relative w-full h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] p-2 flex flex-col items-center justify-between shadow-sm cursor-pointer transition-all"
-                    >
-                      <div className="w-11 h-11 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-800 shadow-xs">
-                        <PictogramIcon name={p.key} size={22} />
-                      </div>
-                      <span className="text-[10px] text-white font-medium text-center truncate w-full px-0.5">
-                        {p.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                <PictogramCards onAdd={onAssignPictogramToSelected} />
               </div>
             </div>
           )}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { PictogramKey, PictogramInfo } from '../types/panel';
+import { PICTO_ART } from './PictogramArt';
 
 export const PICTOGRAM_LIST: PictogramInfo[] = [
   // Habitation & Pièces
@@ -53,6 +54,25 @@ interface PictogramIconProps {
 
 export const PictogramIcon: React.FC<PictogramIconProps> = ({ name, className = 'w-4 h-4', size = 16 }) => {
   if (!name) return null;
+
+  // Pictogrammes « tuile » (mêmes dessins dans le tiroir et sur le plan).
+  if (name in PICTO_ART) {
+    return (
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 64 64"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2.4}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+      >
+        {PICTO_ART[name]}
+      </svg>
+    );
+  }
 
   switch (name) {
     case 'lighting':
@@ -318,3 +338,30 @@ export const PictogramIcon: React.FC<PictogramIconProps> = ({ name, className = 
       );
   }
 };
+
+/**
+ * Tuile blanche arrondie à fine bordure sombre, avec le pictogramme au trait gris foncé.
+ * Identique dans le tiroir « Objets & Symboles » et sur le plan.
+ */
+export const PictogramTile: React.FC<{ name?: PictogramKey; size?: number; color?: string }> = ({
+  name,
+  size = 82,
+  color = '#4b4b4b',
+}) => (
+  <div
+    style={{
+      width: size,
+      height: size,
+      boxSizing: 'border-box',
+      borderRadius: size * 0.17,
+      background: '#fff',
+      border: `${Math.max(1, size * 0.018)}px solid #2b2b2b`,
+      color,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}
+  >
+    <PictogramIcon name={name} size={size * 0.78} className="shrink-0" />
+  </div>
+);
