@@ -187,8 +187,8 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                 <ColorChips group="rcd" />
                 <div className="flex items-center gap-2.5 overflow-x-auto pb-1">
                   {[
-                    { label: 'RCCB 2P', type: 'RCCB 2P' },
-                    { label: 'RCCB 4P', type: 'RCCB 4P' },
+                    { label: 'RCD 2P', type: 'RCCB 2P' },
+                    { label: 'RCD 4P', type: 'RCCB 4P' },
                   ].map((item) => (
                     <div
                       key={item.label}
@@ -637,7 +637,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                   ].map((lbl, idx) => (
                     <div
                       key={lbl}
-                      onClick={() => onAddTerminalBar('spring', idx * 3 + 6)}
+                      onClick={() => onAddTerminalBar('spring', [6, 10, 14, 18, 22, 26][idx])}
                       className="group relative w-32 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
                     >
                       <div className="flex items-center justify-between w-full px-1">
@@ -810,6 +810,47 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
 
               {/* Peignes 4 pôles (Radio: L1, L2, L3, N / N, L1, L2, L3 / L1 N, L2 N, L3 N) */}
               <div>
+                <h3 className="text-xs font-bold text-slate-900 mb-2">Peignes pour disjoncteurs (3 pôles)</h3>
+                <div className="relative w-80 h-32 rounded-xl bg-[#525862] p-2.5 flex flex-col justify-between shadow-sm">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <DeviceThumbSvg type="Comb" variant="3" count={comb3PLength} className="h-10 w-auto max-w-[180px]" />
+                      <p className="text-xs font-medium text-white mt-1">{comb3PLength} modules (3 pôles)</p>
+                    </div>
+                    <div className="flex flex-col gap-1 text-xs text-white">
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input type="radio" name="comb3p" checked readOnly className="text-[#007aff]" />
+                        <span>L1, L2, L3</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between pt-1 border-t border-slate-600/50">
+                    <div className="flex items-center gap-1.5 bg-slate-700/60 rounded px-1.5 py-0.5">
+                      <button
+                        onClick={() => setComb3PLength(Math.max(3, comb3PLength - 3))}
+                        className="text-white hover:text-amber-400 font-bold"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </button>
+                      <span className="text-xs font-mono font-bold text-white px-1">{comb3PLength}</span>
+                      <button
+                        onClick={() => setComb3PLength(Math.min(24, comb3PLength + 3))}
+                        className="text-white hover:text-amber-400 font-bold"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => onAddBusbarComb(3, comb3PLength, 'L1_L2_L3')}
+                      className="px-2.5 py-1 bg-[#007aff] hover:bg-blue-600 text-white rounded text-[10px] font-bold cursor-pointer"
+                    >
+                      Poser
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div>
                 <h3 className="text-xs font-bold text-slate-900 mb-2">Peignes pour disjoncteurs (4 pôles)</h3>
                 <div className="relative w-80 h-32 rounded-xl bg-[#525862] p-2.5 flex flex-col justify-between shadow-sm">
                   <div className="flex items-start justify-between">
@@ -906,7 +947,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                   Appareil sélectionné : le pictogramme lui est assigné. Sinon, il est posé librement sur le plan.
                 </p>
                 <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2.5">
-                  {PICTOGRAM_LIST.map((p) => (
+                  {PICTOGRAM_LIST.filter((p) => p.key !== 'ev_charger' && p.key !== 'roller_shutter').map((p) => (
                     <div
                       key={p.key}
                       onClick={() => onAssignPictogramToSelected(p.key)}
