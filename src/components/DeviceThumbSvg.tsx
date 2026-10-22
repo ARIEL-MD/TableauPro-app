@@ -39,7 +39,7 @@ const ModularDevice: React.FC<ModularDeviceProps> = ({ kind, modules, slim, stri
   const mw = 18;
   // "1P+N" is a half-width (1 module) device in the real world: draw it narrower.
   const W = slim ? 12 : modules * mw;
-  const pad = 1.5;
+  const pad = 2.5;
   const screws = slim ? 1 : modules;
   const sw = slim ? W : mw;
   const isRes = kind === 'rccb' || kind === 'rcbo';
@@ -62,9 +62,20 @@ const ModularDevice: React.FC<ModularDeviceProps> = ({ kind, modules, slim, stri
           <stop offset="0.5" stopColor="#f4f5f7" />
           <stop offset="1" stopColor="#d3d6dc" />
         </linearGradient>
+        <linearGradient id="md-gloss" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#ffffff" stopOpacity="0.75" />
+          <stop offset="0.35" stopColor="#ffffff" stopOpacity="0" />
+          <stop offset="0.8" stopColor="#000000" stopOpacity="0" />
+          <stop offset="1" stopColor="#000000" stopOpacity="0.18" />
+        </linearGradient>
+        <filter id="md-drop" x="-20%" y="-10%" width="150%" height="130%">
+          <feDropShadow dx="0.8" dy="1.4" stdDeviation="1" floodColor="#000000" floodOpacity="0.35" />
+        </filter>
       </defs>
-      {/* Body */}
-      <rect x={pad} y={pad} width={W} height={H} rx={2} fill={`url(#body-${kind}-${modules}-${slim ? 's' : 'n'})`} stroke="#9ca3af" strokeWidth={0.8} />
+      {/* Body (ombre portée + reflet du boîtier) */}
+      <rect x={pad} y={pad} width={W} height={H} rx={2} fill={`url(#body-${kind}-${modules}-${slim ? 's' : 'n'})`} stroke="#9ca3af" strokeWidth={0.8} filter="url(#md-drop)" />
+      <rect x={pad} y={pad} width={W} height={H} rx={2} fill="url(#md-gloss)" />
+      <rect x={pad + 0.6} y={pad + 0.6} width={W - 1.2} height={1} rx={0.5} fill="#ffffff" opacity={0.7} />
       {/* Module separations */}
       {Array.from({ length: Math.max(0, modules - 1) }).map((_, i) =>
         slim ? null : (
