@@ -1,6 +1,7 @@
 import React from 'react';
 import { TerminalBar } from '../types/panel';
 import { Trash2 } from 'lucide-react';
+import { TerminalBarGraphic } from './TerminalBarGraphic';
 
 interface TerminalBarSvgProps {
   bar: TerminalBar;
@@ -18,11 +19,7 @@ export const TerminalBarSvg: React.FC<TerminalBarSvgProps> = ({
   const isEarth = bar.type === 'earth';
   const isNeutral = bar.type === 'neutral';
 
-  const bgColor = isEarth
-    ? 'bg-linear-to-r from-emerald-600 via-yellow-500 to-emerald-600 text-slate-950'
-    : isNeutral
-    ? 'bg-linear-to-r from-blue-700 via-sky-600 to-blue-700 text-white'
-    : 'bg-linear-to-r from-red-700 via-red-600 to-red-700 text-white';
+  const barColor = bar.color || (isEarth ? 'green' : isNeutral ? 'blue' : 'red');
 
   const label = isEarth
     ? `Bornier de Terre PE (${bar.holesCount} vis)`
@@ -57,20 +54,8 @@ export const TerminalBarSvg: React.FC<TerminalBarSvgProps> = ({
         </button>
       </div>
 
-      {/* Brass Bar with Screw Holes */}
-      <div
-        className={`h-7 px-2.5 rounded-md border flex items-center justify-between gap-1.5 shadow-inner ${bgColor} border-slate-600/60`}
-      >
-        {Array.from({ length: bar.holesCount }).map((_, i) => (
-          <div
-            key={i}
-            className="w-3 h-3 rounded-full bg-amber-200 border border-amber-500 shadow-inner flex items-center justify-center shrink-0"
-            title={`Borne à vis n°${i + 1}`}
-          >
-            <div className="w-1.5 h-0.5 bg-slate-800 rotate-45" />
-          </div>
-        ))}
-      </div>
+      {/* Barrette : même dessin que dans le tiroir */}
+      <TerminalBarGraphic count={bar.holesCount} color={barColor} className="h-7 w-auto block" />
     </div>
   );
 };
