@@ -112,8 +112,10 @@ const ModularDevice: React.FC<ModularDeviceProps> = ({ kind, modules, slim, stri
         return (
           <g key={`pole-${i}`}>
             {/* Bornes haute et basse, vis cruciforme (une par borne en 1P, deux en 2P+ par module) */}
-            <rect x={left} y={P + u(3)} width={bw} height={u(9)} rx={u(1)} fill="#cfd4db" stroke="#9aa1ab" strokeWidth={0.3 * K} />
-            <rect x={left} y={P + u(H / K - 12)} width={bw} height={u(9)} rx={u(1)} fill="#cfd4db" stroke="#9aa1ab" strokeWidth={0.3 * K} />
+            <rect x={left} y={P + u(3)} width={bw} height={u(9)} rx={u(1.2)} fill="#c2c8d0" stroke="#5b626c" strokeWidth={0.4 * K} />
+            <rect x={left + u(0.8)} y={P + u(4)} width={bw - u(1.6)} height={u(1.4)} rx={u(0.4)} fill="#e9ecf0" />
+            <rect x={left} y={P + u(H / K - 12)} width={bw} height={u(9)} rx={u(1.2)} fill="#c2c8d0" stroke="#5b626c" strokeWidth={0.4 * K} />
+            <rect x={left + u(0.8)} y={P + u(H / K - 11)} width={bw - u(1.6)} height={u(1.4)} rx={u(0.4)} fill="#e9ecf0" />
             {cols > 1 || slim ? (
               slim ? (
                 <>
@@ -135,15 +137,15 @@ const ModularDevice: React.FC<ModularDeviceProps> = ({ kind, modules, slim, stri
               </>
             )}
             {/* Bande de couleur (repère de la gamme) */}
-            <rect x={P + u(i * MOD + 1)} y={P + u(15)} width={u(MOD - 2)} height={u(2.4)} fill={stripe} />
+            <rect x={P + u(i * MOD + 0.8)} y={P + u(14.6)} width={u(MOD - 1.6)} height={u(3.4)} rx={u(0.4)} fill={stripe} />
             {/* Repères imprimés */}
             <rect x={P + u(i * MOD + 3)} y={P + u(62)} width={u(MOD - 6)} height={u(0.9)} fill="#9aa1ab" />
             <rect x={P + u(i * MOD + 3)} y={P + u(65)} width={u(MOD - 6)} height={u(0.9)} fill="#9aa1ab" />
             {/* Voyant vert */}
             <rect x={cx - u(1.6)} y={P + u(57)} width={u(3.2)} height={u(1.6)} rx={u(0.4)} fill="#2e9e5b" />
             {/* Manette */}
-            <rect x={P + u(i * MOD + 4)} y={P + u(33)} width={u(MOD - 8)} height={u(18)} rx={u(1.2)} fill={handleFill} stroke="#23272e" strokeWidth={0.3 * K} />
-            <rect x={P + u(i * MOD + 5.2)} y={P + u(34.5)} width={u(MOD - 10.4)} height={u(3)} rx={u(0.6)} fill="#8b929e" opacity={0.55} />
+            <rect x={P + u(i * MOD + 3.8)} y={P + u(32.5)} width={u(MOD - 7.6)} height={u(19)} rx={u(1.4)} fill={handleFill} stroke="#23272e" strokeWidth={0.4 * K} />
+            <rect x={P + u(i * MOD + 5)} y={P + u(34)} width={u(MOD - 10)} height={u(3.4)} rx={u(0.8)} fill="#ffffff" opacity={0.28} />
           </g>
         );
       })}
