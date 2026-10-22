@@ -119,6 +119,8 @@ interface Props {
 
 export const DinRailCards: React.FC<Props> = ({ onAddRailByLength }) => {
   const [pressed, setPressed] = React.useState<number | null>(null);
+  // Dernière carte touchée : reste foncée, comme la carte « 200 mm » de la capture.
+  const [selected, setSelected] = React.useState<number | null>(null);
 
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: px(12), overflowX: 'auto', paddingBottom: 4 }}>
@@ -127,7 +129,10 @@ export const DinRailCards: React.FC<Props> = ({ onAddRailByLength }) => {
         return (
           <div
             key={mm}
-            onClick={() => onAddRailByLength(mm)}
+            onClick={() => {
+              setSelected(mm);
+              onAddRailByLength(mm);
+            }}
             onPointerDown={() => setPressed(mm)}
             onPointerUp={() => setPressed(null)}
             onPointerLeave={() => setPressed(null)}
@@ -139,7 +144,7 @@ export const DinRailCards: React.FC<Props> = ({ onAddRailByLength }) => {
               width: px(121),
               height: px(146),
               borderRadius: px(20),
-              background: pressed === mm ? CARD_BG_PRESSED : CARD_BG,
+              background: pressed === mm || selected === mm ? CARD_BG_PRESSED : CARD_BG,
               transition: 'background 0.1s',
             }}
           >
