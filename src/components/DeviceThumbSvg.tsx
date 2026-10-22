@@ -64,17 +64,17 @@ const ModularDevice: React.FC<ModularDeviceProps> = ({ kind, modules, slim, stri
     </g>
   );
 
-  const labelW = label ? u(label.length * 1.95 + 2) : 0;
-  const labelH = u(4.2);
+  const labelW = label ? u(label.length * 2.1 + 2.6) : 0;
+  const labelH = u(4.8);
 
   return (
     <svg viewBox={`0 0 ${W + P * 2} ${H + P * 2}`} className={className} fill="none" preserveAspectRatio="xMidYMid meet">
       <defs>
         <linearGradient id="md-body" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#d4d9e0" />
-          <stop offset="0.35" stopColor="#f6f7f9" />
-          <stop offset="0.7" stopColor="#eceff3" />
-          <stop offset="1" stopColor="#c9ced6" />
+          <stop offset="0" stopColor="#e3e7ec" />
+          <stop offset="0.3" stopColor="#ffffff" />
+          <stop offset="0.75" stopColor="#f7f8fa" />
+          <stop offset="1" stopColor="#dde2e8" />
         </linearGradient>
         <linearGradient id="md-gloss" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#ffffff" stopOpacity="0.5" />
@@ -88,8 +88,8 @@ const ModularDevice: React.FC<ModularDeviceProps> = ({ kind, modules, slim, stri
           <stop offset="1" stopColor="#7d8592" />
         </radialGradient>
         <linearGradient id="md-handle" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#5b616b" />
-          <stop offset="1" stopColor="#2a2e35" />
+          <stop offset="0" stopColor="#7a828e" />
+          <stop offset="1" stopColor="#3a4049" />
         </linearGradient>
         <filter id="md-shadow" x="-10%" y="-5%" width="130%" height="120%">
           <feDropShadow dx={0.6 * K} dy={1 * K} stdDeviation={0.8 * K} floodOpacity="0.35" />
@@ -97,7 +97,7 @@ const ModularDevice: React.FC<ModularDeviceProps> = ({ kind, modules, slim, stri
       </defs>
 
       {/* Boîtier */}
-      <rect x={P} y={P} width={W} height={H} rx={u(2)} fill="url(#md-body)" stroke="#2b3038" strokeWidth={0.6 * K} filter="url(#md-shadow)" />
+      <rect x={P} y={P} width={W} height={H} rx={u(2)} fill="url(#md-body)" stroke="#3a4049" strokeWidth={0.35 * K} filter="url(#md-shadow)" />
       <rect x={P + u(0.5)} y={P + u(0.5)} width={W - u(1)} height={H - u(1)} rx={u(1.6)} fill="url(#md-gloss)" />
 
       {/* Séparations entre pôles */}
