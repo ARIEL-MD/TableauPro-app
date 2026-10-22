@@ -612,10 +612,13 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                         <div className="w-2 h-2 rounded-full bg-slate-900" />
                         <div className="w-2 h-2 rounded-full bg-slate-900" />
                       </div>
-                      <div className="flex flex-col gap-1">
-                        <div className="w-3.5 h-3.5 rounded-full bg-blue-500" />
-                        <div className="w-3.5 h-3.5 rounded-full bg-amber-500" />
-                        <div className="w-3.5 h-3.5 rounded-full bg-emerald-500" />
+                      <div className="grid grid-cols-3 gap-1">
+                        <div className="w-3.5 h-3.5 rounded-full bg-[#3b9cf5] ring-1 ring-white" />
+                        <div className="w-3.5 h-3.5 rounded-full bg-[#f5a033]" />
+                        <div className="w-3.5 h-3.5 rounded-full bg-[#e5484d]" />
+                        <div className="w-3.5 h-3.5 rounded-full bg-[#f2dc5b]" />
+                        <div className="w-3.5 h-3.5 rounded-full bg-[#5cc26a]" />
+                        <div className="w-3.5 h-3.5 rounded-full bg-[#2b2f36]" />
                       </div>
                     </div>
                     <span className="text-xs text-white font-semibold">Simple</span>
