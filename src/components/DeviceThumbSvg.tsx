@@ -595,6 +595,172 @@ const Contactor1MDevice: React.FC<{ stripe: string; className?: string }> = ({ s
   );
 };
 
+/** Contacteur 4NO (4 modules) : bornes 1-3-5-7 / 2-4-6-8, bobine A1/A2, schéma de contacts imprimé, voyant vert. */
+const Contactor4NODevice: React.FC<{ stripe: string; className?: string }> = ({ stripe, className }) => {
+  const g = refGeom(4);
+  const { u, W, P, fy } = g;
+  const fx = (f: number) => P + f * W;
+  const tiny = { fill: '#7a7f86', fontFamily: REF_FONT } as const;
+  const sx = [0.133, 0.33, 0.68, 0.88];
+  const topNum = ['1', '3', '5', '7(13)'];
+  const botNum = ['2', '4', '6', '8(14)'];
+  const contactX = [0.38, 0.47, 0.56, 0.645];
+
+  return (
+    <svg viewBox={g.vb} className={className} fill="none" preserveAspectRatio="xMidYMid meet">
+      <RefShell g={g} cols={1} band={refBand(stripe)} layout={{ ...RCD_LAYOUT, mid: '#f1f2f3' }}>
+        {sx.map((f, i) => (
+          <g key={`t-${i}`}>
+            <RefScrew cx={fx(f)} cy={fy(0.125)} r={u(4.15)} />
+            <RefScrew cx={fx(f)} cy={fy(0.875)} r={u(4.15)} />
+            <text x={fx(f)} y={fy(0.05)} fontSize={u(2.6)} textAnchor="middle" {...tiny}>{topNum[i]}</text>
+            <text x={fx(f)} y={fy(0.972)} fontSize={u(2.6)} textAnchor="middle" {...tiny}>{botNum[i]}</text>
+          </g>
+        ))}
+
+        {/* Bornes de bobine A1 (haut) / A2 (bas) */}
+        <RefScrew cx={fx(0.505)} cy={fy(0.066)} r={u(1.7)} />
+        <text x={fx(0.505)} y={fy(0.15)} fontSize={u(2.8)} textAnchor="middle" {...tiny}>A1</text>
+        <text x={fx(0.505)} y={fy(0.855)} fontSize={u(2.8)} textAnchor="middle" {...tiny}>A2</text>
+        <RefScrew cx={fx(0.505)} cy={fy(0.935)} r={u(1.7)} />
+
+        {/* Schéma imprimé : bobine + 4 contacts */}
+        <text x={fx(0.27)} y={fy(0.43)} fontSize={u(2.3)} textAnchor="middle" {...tiny}>A1</text>
+        <text x={fx(0.27)} y={fy(0.585)} fontSize={u(2.3)} textAnchor="middle" {...tiny}>A2</text>
+        <rect x={fx(0.23)} y={fy(0.455)} width={fx(0.31) - fx(0.23)} height={fy(0.51) - fy(0.455)} fill="none" stroke="#6b7076" strokeWidth={1} />
+        {contactX.map((f, i) => {
+          const x = fx(f);
+          return (
+            <g key={`c-${i}`} stroke="#6b7076" strokeWidth={1} strokeLinecap="round" fill="none">
+              <path d={`M${x} ${fy(0.425)} V${fy(0.465)} L${x - u(1.6)} ${fy(0.5)} M${x} ${fy(0.525)} V${fy(0.565)}`} />
+            </g>
+          );
+        })}
+        <text x={fx(0.7)} y={fy(0.43)} fontSize={u(1.9)} {...tiny}>(13)</text>
+        <text x={fx(0.7)} y={fy(0.575)} fontSize={u(1.9)} {...tiny}>(14)</text>
+
+        {/* Voyant vert */}
+        <rect x={fx(0.05)} y={fy(0.62)} width={fx(0.19) - fx(0.05)} height={fy(0.67) - fy(0.62)} rx={u(0.4)} fill="#0f7d3d" stroke="#2fb36b" strokeWidth={1} />
+      </RefShell>
+    </svg>
+  );
+};
+
+/** AFDD + MCB (2 modules) ou AFDD + RCBO (3 modules) : voyants orange et blanc, manette(s) orange, voyants verts. */
+const AFDD_ORANGE = '#e8622a';
+const AfddDevice: React.FC<{ withRcbo: boolean; stripe: string; className?: string }> = ({ withRcbo, stripe, className }) => {
+  const m = withRcbo ? 3 : 2;
+  const g = refGeom(m);
+  const { u, modW, W, P, fy } = g;
+  const handleModules = withRcbo ? [1, 2] : [1];
+  const screwModules = withRcbo ? [1, 2] : [0, 1];
+  const hx = (k: number) => P + k * modW + modW / 2 - u(0.2);
+  const firstL = hx(handleModules[0]) - u(6.8);
+  const lastR = hx(handleModules[handleModules.length - 1]) + u(6.8);
+  const tinyGrey = { fill: '#8b9097', fontFamily: REF_FONT } as const;
+
+  return (
+    <svg viewBox={g.vb} className={className} fill="none" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <linearGradient id="afdd-orange" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#f08a54" />
+          <stop offset="1" stopColor={AFDD_ORANGE} />
+        </linearGradient>
+      </defs>
+      <RefShell g={g} cols={withRcbo ? m : 1} band={refBand(stripe)} layout={RCD_LAYOUT}>
+        {/* Bornes L / N en haut et en bas */}
+        {screwModules.map((k, i) => {
+          const cx = P + k * modW + modW / 2;
+          const tag = i === 0 ? 'L' : 'N';
+          return (
+            <g key={`s-${k}`}>
+              <RefScrew cx={cx} cy={fy(0.09)} r={u(4.15)} />
+              <RefScrew cx={cx} cy={fy(0.912)} r={u(4.15)} />
+              <text x={cx} y={fy(0.172)} fontSize={u(2.4)} textAnchor="middle" {...tinyGrey}>{tag}</text>
+              <text x={cx} y={fy(0.842)} fontSize={u(2.4)} textAnchor="middle" {...tinyGrey}>{tag}</text>
+            </g>
+          );
+        })}
+
+        {/* Voyant orange (défaut d'arc) + voyant blanc (état) */}
+        <ellipse cx={P + modW * 0.74} cy={fy(0.336)} rx={u(3.9)} ry={u(1.8)} fill={AFDD_ORANGE} stroke="#c2501b" strokeWidth={1} />
+        <ellipse cx={P + modW * 0.74} cy={fy(0.336) - u(0.4)} rx={u(2.6)} ry={u(0.7)} fill="#f6a373" opacity={0.7} />
+        <ellipse cx={P + modW * 1.46} cy={fy(0.336)} rx={u(3.9)} ry={u(1.8)} fill="#ffffff" stroke="#8b9097" strokeWidth={1} />
+        <text x={P + modW * 1.46} y={fy(0.336) + u(0.85)} fontSize={u(2.4)} fontWeight="bold" textAnchor="middle" fill="#6b7280" fontFamily={REF_FONT}>1</text>
+
+        {/* Pictogrammes imprimés à gauche : état et test */}
+        <circle cx={P + modW * 0.48} cy={fy(0.5)} r={u(1.9)} fill="none" stroke="#9aa0a8" strokeWidth={1} />
+        <circle cx={P + modW * 0.48} cy={fy(0.5)} r={u(0.7)} fill="#b5bac1" />
+        <circle cx={P + modW * 0.48} cy={fy(0.58)} r={u(2.4)} fill="none" stroke="#9aa0a8" strokeWidth={1} />
+        <text x={P + modW * 0.48} y={fy(0.58) + u(0.85)} fontSize={u(2.4)} fontWeight="bold" textAnchor="middle" {...tinyGrey}>T</text>
+
+        {/* Manettes orange dans leur cadre */}
+        {handleModules.map((k) => {
+          const cx = hx(k);
+          return (
+            <g key={`h-${k}`}>
+              <rect x={cx - u(6.8)} y={fy(0.435)} width={u(13.6)} height={fy(0.55) - fy(0.435)} rx={u(0.6)} fill="#e2e4e6" stroke="#9ea3a9" strokeWidth={1} />
+              <rect x={cx - u(6.8)} y={fy(0.435)} width={u(13.6)} height={u(0.6)} rx={u(0.3)} fill="#2b2e31" />
+              <rect x={cx - u(5)} y={fy(0.468)} width={u(10)} height={fy(0.552) - fy(0.468)} rx={u(0.6)} fill="url(#afdd-orange)" stroke="#c2501b" strokeWidth={0.8} />
+              <rect x={cx - u(4)} y={fy(0.476)} width={u(8)} height={u(0.9)} rx={u(0.4)} fill="#f6a373" opacity={0.8} />
+            </g>
+          );
+        })}
+
+        {/* Barre orange commune sous les manettes */}
+        <rect x={firstL} y={fy(0.545)} width={lastR - firstL} height={fy(0.607) - fy(0.545)} rx={u(0.8)} fill="url(#afdd-orange)" stroke="#c2501b" strokeWidth={0.8} />
+
+        {/* Voyants verts */}
+        {(withRcbo ? [1, 2] : [0, 1]).map((k) => (
+          <RefLed key={`l-${k}`} g={g} x={P + k * modW + u(2.4)} f={0.646} w={5.5} />
+        ))}
+      </RefShell>
+    </svg>
+  );
+};
+
+/** Prise modulaire 2P+T (2 modules) : socle rond gris, deux alvéoles noires, bandes rouges interrompues. */
+const SocketDevice: React.FC<{ stripe: string; className?: string }> = ({ stripe, className }) => {
+  const g = refGeom(2);
+  const { u, modW, W, P, fy } = g;
+  const cx = P + W / 2;
+  const cy = fy(0.49);
+  const R = u(16.2);
+  const band = refBand(stripe);
+  const y0 = fy(RCD_LAYOUT.red[0]);
+  const bh = fy(RCD_LAYOUT.red[1]) - y0;
+
+  return (
+    <svg viewBox={g.vb} className={className} fill="none" preserveAspectRatio="xMidYMid meet">
+      <RefShell g={g} cols={1} band="none" layout={{ ...RCD_LAYOUT, mid: '#eff0f2' }}>
+        {/* Bandes rouges latérales (interrompues par le socle) */}
+        <rect x={P + 0.4} y={y0} width={W * 0.2} height={bh} fill={band} />
+        <rect x={P + W * 0.8 - 0.4} y={y0} width={W * 0.2} height={bh} fill={band} />
+
+        {/* Bornes : une en haut (phase/neutre), deux en bas */}
+        <RefScrew cx={cx} cy={fy(0.09)} r={u(4.15)} />
+        <path d={`M${cx + u(8.6)} ${fy(0.075)} h${u(2.4)} l${-u(1.2)} ${u(2.1)} z`} fill="#8b9097" />
+        <RefScrew cx={P + modW / 2} cy={fy(0.912)} r={u(4.15)} />
+        <RefScrew cx={P + modW * 1.5} cy={fy(0.912)} r={u(4.15)} />
+
+        {/* Socle rond */}
+        <circle cx={cx} cy={cy} r={R + u(1.2)} fill="#ffffff" stroke="#c9cdd2" strokeWidth={1.2} />
+        <circle cx={cx} cy={cy} r={R} fill="#9ca1a8" stroke="#8b9097" strokeWidth={1} />
+        {/* Pattes de terre latérales et plots haut / bas */}
+        <rect x={cx - R + u(0.4)} y={cy - u(2.4)} width={u(3.2)} height={u(4.8)} fill="#aeb3b9" />
+        <rect x={cx + R - u(3.6)} y={cy - u(2.4)} width={u(3.2)} height={u(4.8)} fill="#aeb3b9" />
+        <rect x={cx - u(3.4)} y={cy - R + u(1.2)} width={u(6.8)} height={u(3.2)} rx={u(0.6)} fill="#aeb3b9" />
+        <rect x={cx - u(3.4)} y={cy + R - u(4.4)} width={u(6.8)} height={u(3.2)} rx={u(0.6)} fill="#aeb3b9" />
+        {/* Alvéoles de phase et neutre + contact de terre central */}
+        <circle cx={cx - u(6.9)} cy={cy} r={u(2.2)} fill="#111317" />
+        <circle cx={cx + u(6.9)} cy={cy} r={u(2.2)} fill="#111317" />
+        <circle cx={cx} cy={cy} r={u(1.8)} fill="#c9cdd2" stroke="#7b8087" strokeWidth={0.8} />
+        <rect x={cx - u(0.5)} y={cy - u(1.1)} width={u(1)} height={u(2.2)} fill="#5f646b" />
+      </RefShell>
+    </svg>
+  );
+};
+
 /* ------------------------------------------------------------------ */
 /*  Shared helpers                                                      */
 /* ------------------------------------------------------------------ */
@@ -776,32 +942,7 @@ export const DeviceThumbSvg: React.FC<DeviceThumbSvgProps> = ({
     case 'Contactor 1M':
       return <Contactor1MDevice stripe={stripe} className={className} />;
     case 'Contactor 4NO':
-      return (
-        <Body modules={3} h={85} stripe="" screws={false} className={className}>
-          {/* Fenêtre frontale : symbole de bobine + voyants de contacts */}
-          <rect x={PAD + 4} y={PAD + 22} width={46} height={30} rx={2} fill="#e9edf2" stroke="#9aa1ab" strokeWidth={0.5} />
-          <path d={`M${PAD + 12} ${PAD + 36} h4 q1.5 -4 3 0 q1.5 4 3 0 q1.5 -4 3 0 q1.5 4 3 0 h4`} fill="none" stroke="#3f4650" strokeWidth={0.9} strokeLinecap="round" />
-          {[0, 1, 2, 3].map((i) => (
-            <rect key={i} x={PAD + 9 + i * 8} y={PAD + 28} width={5} height={3} rx={0.6} fill={i < 2 ? '#2e9e5b' : '#c9d0d8'} stroke="#8b929e" strokeWidth={0.3} />
-          ))}
-          {/* Bornes haute (1 3 5 7) et basse (2 4 6 8), numérotées */}
-          {[0, 1, 2, 3].map((i) => (
-            <g key={`t${i}`}>
-              <rect x={PAD + 1.5 + i * 13} y={PAD + 4} width={11} height={9} rx={1} fill="#c2c8d0" stroke="#5b626c" strokeWidth={0.5} />
-              <text x={PAD + 7 + i * 13} y={PAD + 2.6} fontSize={3.4} textAnchor="middle" fill="#334155" fontFamily="Arial, sans-serif">{[1, 3, 5, 7][i]}</text>
-              <rect x={PAD + 1.5 + i * 13} y={PAD + 72} width={11} height={9} rx={1} fill="#c2c8d0" stroke="#5b626c" strokeWidth={0.5} />
-              <text x={PAD + 7 + i * 13} y={PAD + 85.5} fontSize={3.4} textAnchor="middle" fill="#334155" fontFamily="Arial, sans-serif">{[2, 4, 6, 8][i]}</text>
-            </g>
-          ))}
-          {/* Bornes de bobine A1 / A2 */}
-          <rect x={PAD + 4} y={PAD + 58} width={12} height={6} rx={0.8} fill="#c2c8d0" stroke="#5b626c" strokeWidth={0.4} />
-          <rect x={PAD + 38} y={PAD + 58} width={12} height={6} rx={0.8} fill="#c2c8d0" stroke="#5b626c" strokeWidth={0.4} />
-          <text x={PAD + 10} y={PAD + 62.5} fontSize={3} textAnchor="middle" fill="#334155" fontFamily="Arial, sans-serif">A1</text>
-          <text x={PAD + 44} y={PAD + 62.5} fontSize={3} textAnchor="middle" fill="#334155" fontFamily="Arial, sans-serif">A2</text>
-          {/* Repère LED */}
-          <rect x={PAD + 22} y={PAD + 60} width={10} height={3} rx={1} fill="#2e9e5b" />
-        </Body>
-      );
+      return <Contactor4NODevice stripe={stripe} className={className} />;
         case 'Telerupteur':
       return (
         <Body modules={1} className={className}>
@@ -878,26 +1019,8 @@ export const DeviceThumbSvg: React.FC<DeviceThumbSvgProps> = ({
     
     /* ---------- Arc fault detection (AFDD) ---------- */
     case 'AFDD + MCB':
-    case 'AFDD + RCBO': {
-      const m = type === 'AFDD + RCBO' ? 3 : 2;
-      const W = m * MODULE;
-      return (
-        <Body modules={m} stripe="#e8c52e" className={className}>
-          <rect x={PAD + 4} y={PAD + 26} width={W - 8} height={12} rx={1.5} fill="#111827" />
-          <text x={PAD + W / 2} y={PAD + 35} fontSize={7} fontFamily="Arial, sans-serif" fontWeight="bold" textAnchor="middle" fill="#fbbf24">AFDD</text>
-          <polyline
-            points={`${PAD + 6},${PAD + 52} ${PAD + 10},${PAD + 44} ${PAD + 13},${PAD + 55} ${PAD + 17},${PAD + 46} ${PAD + 20},${PAD + 52}`}
-            stroke="#f59e0b"
-            strokeWidth={1.4}
-            strokeLinejoin="round"
-            strokeLinecap="round"
-            fill="none"
-          />
-          <rect x={PAD + W - 14} y={PAD + 44} width={8} height={18} rx={1.5} fill="#2b2f36" />
-          <circle cx={PAD + 9} cy={PAD + 64} r={2} fill="#2e9e5b" />
-        </Body>
-      );
-    }
+    case 'AFDD + RCBO':
+      return <AfddDevice withRcbo={type === 'AFDD + RCBO'} stripe={stripe} className={className} />;
 
     /* ---------- Surge protection ---------- */
     case 'SPD 1P':
@@ -939,16 +1062,7 @@ export const DeviceThumbSvg: React.FC<DeviceThumbSvgProps> = ({
 
     /* ---------- Socket (DIN-rail euro socket) ---------- */
     case 'Socket':
-      return (
-        <Body modules={2} className={className}>
-          <circle cx={PAD + 18} cy={PAD + 45} r={14} fill="#f1f5f9" stroke="#9aa0a8" strokeWidth={1} />
-          <circle cx={PAD + 18} cy={PAD + 45} r={10.5} fill="#e5e7eb" />
-          <circle cx={PAD + 13} cy={PAD + 45} r={1.8} fill="#111827" />
-          <circle cx={PAD + 23} cy={PAD + 45} r={1.8} fill="#111827" />
-          <rect x={PAD + 16} y={PAD + 30.5} width={4} height={2.5} rx={0.8} fill="#9aa0a8" />
-          <rect x={PAD + 16} y={PAD + 57} width={4} height={2.5} rx={0.8} fill="#9aa0a8" />
-        </Body>
-      );
+      return <SocketDevice stripe={stripe} className={className} />;
 
     /* ---------- Guardmotor ---------- */
     case 'Guardmotor':

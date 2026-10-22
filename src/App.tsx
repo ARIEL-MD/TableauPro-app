@@ -377,16 +377,30 @@ export default function App() {
         assignedPictogram = 'house';
       } else if (deviceType.includes('Contacteur')) {
         category = 'contactor';
-        name = 'Contacteur Heures Creuses J/N 20A';
-        manufacturer = 'Legrand';
-        modelSeries = 'Drivia';
-        reference = '412501';
-        moduleWidth = 1;
-        poles = '2P';
-        calibre = 20;
-        contactorState = 'AUTO';
-        circuitLabel = 'Chauffe-eau J/N';
-        assignedPictogram = 'boiler';
+        if (deviceType.includes('4NO')) {
+          // Contacteur 4 contacts NO : 4 modules, dessiné comme dans le tiroir
+          name = 'Contacteur 4NO 40A';
+          manufacturer = 'Générique';
+          modelSeries = '';
+          reference = 'REF-CONT-4NO';
+          moduleWidth = 4;
+          poles = '4P';
+          calibre = 40;
+          contactorState = 'AUTO';
+          circuitLabel = 'Contacteur 4 pôles';
+          assignedPictogram = 'boiler';
+        } else {
+          name = 'Contacteur Heures Creuses J/N 20A';
+          manufacturer = 'Legrand';
+          modelSeries = 'Drivia';
+          reference = '412501';
+          moduleWidth = 1;
+          poles = '2P';
+          calibre = 20;
+          contactorState = 'AUTO';
+          circuitLabel = 'Chauffe-eau J/N';
+          assignedPictogram = 'boiler';
+        }
       } else if (deviceType.includes('Télérupteur')) {
         category = 'impulse_relay';
         name = 'Télérupteur Silencieux 16A';
