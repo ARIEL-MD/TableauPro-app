@@ -14,77 +14,94 @@ const px = (n: number) => n * S;
 
 const CARD_BG = '#6f6f6f';
 const CARD_H = 147;
-const HOUSING = '#d3d6dc';
-const HOUSING_EDGE = '#aab0b8';
-const SCREW = '#8a9099';
-const SCREW_IN = '#5d636b';
+const HOUSING = '#dfe1e5';
+const SCREW = '#8d939c';
+const SCREW_RING = '#6b7280';
+const WINDOW = '#3f7fc4';
 
 type ChipKey = 'blue' | 'green';
 
 const CHIP_HEX: Record<ChipKey, string> = { blue: '#4ba9f3', green: '#6ebc71' };
 const CHIP_VALUE: Record<ChipKey, string> = { blue: 'blue', green: 'green' };
 const PALETTE: Record<ChipKey, { body: string; slot: string; teeth: string }> = {
-  blue: { body: '#5b8fcf', slot: '#2e5a92', teeth: '#6a9fdc' },
-  green: { body: '#5f9f68', slot: '#2f5d37', teeth: '#6fb277' },
+  blue: { body: '#6c9fd8', slot: '#3f6f9e', teeth: '#5f93cf' },
+  green: { body: '#6aa572', slot: '#3b6b44', teeth: '#5c9466' },
 };
 
 /** Cotes mesurées sur la capture, dans l'ordre des cartes (gauche → droite, haut → bas). */
-const BARS: { label: string; slots: number; h: number; holes: number; cardW: number; w: number }[] = [
-  { label: '5 + 1 contacts', slots: 5, h: 73, holes: 6, cardW: 264, w: 72 },
-  { label: '8 + 2 contacts', slots: 8, h: 57, holes: 10, cardW: 264, w: 84 },
-  { label: '11 + 3 contacts', slots: 11, h: 42, holes: 14, cardW: 277, w: 84 },
-  { label: '14 + 4 contacts', slots: 14, h: 33, holes: 18, cardW: 277, w: 84 },
-  { label: '17 + 5 contacts', slots: 17, h: 28, holes: 22, cardW: 277, w: 84 },
-  { label: '20 + 6 contacts', slots: 20, h: 25, holes: 26, cardW: 277, w: 84 },
+const BARS: { label: string; slots: number; poles: number; h: number; holes: number; cardW: number; w: number }[] = [
+  { label: '5 + 1 contacts', poles: 1, slots: 5, h: 73, holes: 6, cardW: 264, w: 72 },
+  { label: '8 + 2 contacts', poles: 2, slots: 8, h: 57, holes: 10, cardW: 264, w: 84 },
+  { label: '11 + 3 contacts', poles: 3, slots: 11, h: 42, holes: 14, cardW: 277, w: 84 },
+  { label: '14 + 4 contacts', poles: 4, slots: 14, h: 33, holes: 18, cardW: 277, w: 84 },
+  { label: '17 + 5 contacts', poles: 5, slots: 17, h: 28, holes: 22, cardW: 277, w: 84 },
+  { label: '20 + 6 contacts', poles: 6, slots: 20, h: 25, holes: 26, cardW: 277, w: 84 },
 ];
 
-/** Dessin d'une barre auto-serrante — viewBox w × h, comme sur la capture. */
+/** Dessin d'une barre auto-serrante (vue de face) — viewBox w × h, comme sur la capture. */
 export const SpringBarDrawing: React.FC<{
   slots: number;
+  poles: number;
   h: number;
   w: number;
   width: number;
   palette: { body: string; slot: string; teeth: string };
-}> = ({ slots, h, w, width, palette }) => {
+}> = ({ slots, poles, h, w, width, palette }) => {
   const top = h * 0.42;
   const mid = h * 0.7;
-  const teeth = slots * 2;
-  const slotW = Math.max(1.4, Math.min(4.2, ((w - 12) / slots) * 0.5));
-  const slotH = Math.max(1, (mid - top) * 0.45);
-  const screwR = Math.min(4.5, h * 0.1);
+  const chamfer = Math.min(w * 0.12, top * 0.6);
+  const chamferY = top * 0.6;
+  const teeth = Math.max(2, slots * 2 - 2);
+  const slotW = Math.max(1.4, Math.min(4.2, ((w - 8) / slots) * 0.7));
+  const slotH = Math.max(1.2, (mid - top) * 0.72);
+  const screwR = Math.min(4.2, h * 0.12);
+  const windows = poles + 1;
 
   return (
     <svg width={width} height={(width * h) / w} viewBox={`0 0 ${w} ${h}`} aria-hidden>
-      {/* Capot gris clair avec bord et vis */}
-      <rect x="0" y="0" width={w} height={top} rx={Math.min(4, h * 0.08)} fill={HOUSING} />
-      <rect x="0" y={top - 0.8} width={w} height={0.8} fill={HOUSING_EDGE} />
-      {h >= 40 &&
-        [0.25, 0.75].map((f) => (
-          <g key={f}>
-            <circle cx={w * f} cy={top / 2} r={screwR} fill={SCREW} />
-            <circle cx={w * f} cy={top / 2} r={screwR * 0.45} fill={SCREW_IN} />
-          </g>
-        ))}
-      {/* Corps bleu avec logements des contacts */}
+      {/* Capot gris clair, coins supérieurs biseautés */}
+      <path
+        d={`M${chamfer},0 L${w - chamfer},0 L${w},${chamferY} L${w},${top} L0,${top} L0,${chamferY} Z`}
+        fill={HOUSING}
+      />
+      {/* Fenêtres bleu foncé sous le capot */}
+      {Array.from({ length: windows }).map((_, i) => (
+        <rect
+          key={`win${i}`}
+          x={((i + 0.5) * w) / windows - w * 0.05}
+          y={top - top * 0.36}
+          width={w * 0.1}
+          height={top * 0.26}
+          fill={WINDOW}
+        />
+      ))}
+      {/* Vis : une par pôle */}
+      {h >= 30 &&
+        Array.from({ length: poles }).map((_, i) => {
+          const cx = ((i + 0.5) * w) / poles;
+          return (
+            <circle key={`screw${i}`} cx={cx} cy={chamferY + (top - chamferY) * 0.35} r={screwR}
+              fill={SCREW} stroke={SCREW_RING} strokeWidth={Math.min(0.6, screwR * 0.25)} />
+          );
+        })}
+      {/* Corps bleu */}
       <rect x="0" y={top} width={w} height={mid - top} fill={palette.body} />
+      {/* Logements des contacts, ovales */}
       {Array.from({ length: slots }).map((_, i) => {
-        const cx = slots === 1 ? w / 2 : 6 + i * ((w - 12) / (slots - 1));
+        const cx = slots === 1 ? w / 2 : 4 + i * ((w - 8) / (slots - 1));
         return (
-          <rect
-            key={i}
-            x={cx - slotW / 2}
-            y={top + (mid - top - slotH) / 2}
-            width={slotW}
-            height={slotH}
-            rx={slotW / 2}
-            fill={palette.slot}
-          />
+          <rect key={`slot${i}`} x={cx - slotW / 2} y={top + (mid - top - slotH) / 2}
+            width={slotW} height={slotH} rx={slotW / 2}
+            fill="#8593a6" stroke={palette.slot} strokeWidth={Math.min(0.5, slotW * 0.2)} />
         );
       })}
-      {/* Peigne inférieur, dents longues */}
+      {/* Peigne inférieur */}
       {Array.from({ length: teeth }).map((_, i) => {
-        const x = 3 + i * ((w - 6) / (teeth - 1));
-        return <rect key={i} x={x - 0.55} y={mid} width={1.1} height={h - mid} fill={palette.teeth} />;
+        const pitch = (w - 4) / teeth;
+        return (
+          <rect key={`tooth${i}`} x={2 + i * pitch + pitch * 0.15} y={mid}
+            width={pitch * 0.7} height={h - mid} fill={palette.teeth} />
+        );
       })}
     </svg>
   );
@@ -122,7 +139,7 @@ export const SpringBarCards: React.FC<Props> = ({ onAddTerminalBar }) => {
               width: px(b.w),
             }}
           >
-            <SpringBarDrawing slots={b.slots} h={b.h} w={b.w} width={px(b.w)} palette={PALETTE[color]} />
+            <SpringBarDrawing slots={b.slots} poles={b.poles} h={b.h} w={b.w} width={px(b.w)} palette={PALETTE[color]} />
           </div>
 
           {/* Libellé */}
