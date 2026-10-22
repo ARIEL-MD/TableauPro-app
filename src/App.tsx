@@ -20,7 +20,6 @@ import { PropertyInspector } from './components/PropertyInspector';
 import { BOMModal } from './components/BOMModal';
 import { ArchitectureModal } from './components/ArchitectureModal';
 import { NfcComplianceModal } from './components/NfcComplianceModal';
-import { UnifilarSchemaView } from './components/UnifilarSchemaView';
 import { ProjectManagerModal } from './components/ProjectManagerModal';
 import { FileText } from 'lucide-react';
 import { WireRouteBar } from './components/WireRouteBar';
@@ -128,8 +127,6 @@ export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Modals
-  // View mode: physical CAD canvas vs full-page unifilar / site dossier
-  const [viewMode, setViewMode] = useState<'designer' | 'unifilar'>('designer');
   const [isBOMModalOpen, setIsBOMModalOpen] = useState(false);
   const [isArchitectureModalOpen, setIsArchitectureModalOpen] = useState(false);
   const [isNfcModalOpen, setIsNfcModalOpen] = useState(false);
@@ -1121,29 +1118,6 @@ export default function App() {
     showToast('Projet supprimé');
   };
 
-  // Full-page unifilar dossier view (schema, wiring plan, calculations, labels)
-  if (viewMode === 'unifilar') {
-    return (
-      <div className="w-screen h-screen overflow-hidden bg-slate-100 font-sans text-slate-800">
-        {toastMessage && (
-          <div className="fixed top-4 left-1/2 -translate-x-1/2 z-60 bg-slate-900/95 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-xl border border-slate-700/80 backdrop-blur-xs flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-            <span>{toastMessage}</span>
-          </div>
-        )}
-        <UnifilarSchemaView
-          project={project}
-          onPrint={() => {
-            showToast("Impression : choisissez 'Enregistrer au format PDF' dans la fenêtre d'impression");
-            setTimeout(() => window.print(), 150);
-          }}
-          onExportJSON={handleExportJSON}
-          onBackToPhysical={() => setViewMode('designer')}
-        />
-      </div>
-    );
-  }
-
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-[#f6f6f4] font-sans text-slate-800 select-none">
       {/* Toast Notification Banner */}
@@ -1215,17 +1189,6 @@ export default function App() {
       </main>
 
       {/* Sliding Collapsible Bottom Component Library */}
-      {/* Floating quick access to unifilar dossier */}
-      <button
-        onClick={() => setViewMode('unifilar')}
-        className="no-print fixed top-14 right-4 z-30 px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-lg flex items-center gap-1.5 cursor-pointer transition-colors"
-        title="Schéma unifilaire, plan de câblage, calculs et étiquettes de repérage"
-      >
-        <FileText className="w-4 h-4" />
-        <span className="hidden sm:inline">Schéma Unifilaire & Dossier</span>
-      </button>
-
-
       <BottomDrawer
         onAddDeviceByType={handleAddDeviceByType}
         onAddRailByLength={handleAddRailByLength}
@@ -1263,7 +1226,6 @@ export default function App() {
         onPrint={() => window.print()}
         onOpenBOM={() => setIsBOMModalOpen(true)}
         onOpenArchitecture={() => setIsArchitectureModalOpen(true)}
-        onOpenUnifilar={() => setViewMode('unifilar')}
         canUndo={history.length > 0}
         canRedo={redoStack.length > 0}
         onUndo={handleUndo}

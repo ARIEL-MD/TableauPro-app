@@ -28,7 +28,6 @@ interface AppMenuDrawerProps {
   onPrint: () => void;
   onOpenBOM: () => void;
   onOpenArchitecture: () => void;
-  onOpenUnifilar?: () => void;
   canUndo: boolean;
   canRedo: boolean;
   onUndo: () => void;
@@ -50,7 +49,6 @@ export const AppMenuDrawer: React.FC<AppMenuDrawerProps> = ({
   onPrint,
   onOpenBOM,
   onOpenArchitecture,
-  onOpenUnifilar,
   canUndo,
   canRedo,
   onUndo,
@@ -276,21 +274,6 @@ export const AppMenuDrawer: React.FC<AppMenuDrawerProps> = ({
               Documentation & Schéma
             </span>
             <div className="mt-1 space-y-1">
-              <button
-                onClick={() => {
-                  if (onOpenUnifilar) {
-                    onOpenUnifilar();
-                    onClose();
-                  }
-                }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-700 font-medium transition-colors cursor-pointer"
-              >
-                <FileText className="w-4 h-4 text-blue-600" />
-                <span className="flex-1 text-left">Schéma Unifilaire & Dossier Chantier</span>
-                <span className="text-[10px] bg-blue-50 text-blue-700 font-semibold px-1.5 py-0.5 rounded">
-                  PDF
-                </span>
-              </button>
 
 
               <button
