@@ -1,6 +1,7 @@
 import React from 'react';
 import { ElectricalDevice } from '../types/panel';
 import { DeviceThumbSvg } from './DeviceThumbSvg';
+import { METER_GEOMETRY } from './meterGeometry';
 
 interface ElectricalDeviceSvgProps {
   device: ElectricalDevice;
@@ -64,6 +65,20 @@ export const thumbTypeForDevice = (d: ElectricalDevice): string => {
 };
 
 
+/** Hauteur d'un appareil sur le plan : fixe pour l'appareillage modulaire, proportionnelle pour un compteur. */
+export const MODULAR_HEIGHT = 118;
+export const deviceHeight = (d: ElectricalDevice, modulePixelWidth = 36): number => {
+  const geo = METER_GEOMETRY[thumbTypeForDevice(d)];
+  return geo ? Math.round((d.moduleWidth * modulePixelWidth) / geo.aspect) : MODULAR_HEIGHT;
+};
+
+/** Nombre de bornes câblables : une par module, sauf compteur (une par borne réelle du dessin). */
+export const terminalCount = (d: ElectricalDevice): number => {
+  const geo = METER_GEOMETRY[thumbTypeForDevice(d)];
+  if (geo) return geo.terminalX.length;
+  return thumbTypeForDevice(d) === 'MCB 1P + N' ? 1 : Math.max(1, d.moduleWidth);
+};
+
 /** Plaquette affichée sur le boîtier : « C16 » pour un disjoncteur, « 25A 30mA » pour un différentiel. */
 const deviceLabel = (d: ElectricalDevice, type: string): string | undefined => {
   const cal = typeof d.calibre === 'number' ? d.calibre : undefined;
@@ -89,11 +104,12 @@ export const ElectricalDeviceSvg: React.FC<ElectricalDeviceSvgProps> = ({
   modulePixelWidth = 36,
 }) => {
   const width = device.moduleWidth * modulePixelWidth;
-  const height = 118; // hauteur d'un appareil modulaire sur le rail
   const type = thumbTypeForDevice(device);
+  const height = deviceHeight(device, modulePixelWidth);
+  const meter = METER_GEOMETRY[type];
   const color =
     type === 'IndicatorLight' ? device.indicatorColor : device.colorTag || undefined;
-  const poles = type === 'MCB 1P + N' ? 1 : Math.max(1, device.moduleWidth);
+  const poles = terminalCount(device);
 
   return (
     <div
@@ -111,29 +127,39 @@ export const ElectricalDeviceSvg: React.FC<ElectricalDeviceSvgProps> = ({
       <DeviceThumbSvg type={type} color={color} label={deviceLabel(device, type)} className="w-full h-full block" />
 
       {/* Ancres par pôle : chaque vis reçoit son fil */}
-      {Array.from({ length: poles }).map((_, k) => (
-        <React.Fragment key={`pole-${k}`}>
-          <div
-            data-wire-anchor={`dev:${device.id}:top:${k}`}
-            className="absolute top-0 h-3 w-4 pointer-events-none z-20"
-            style={{ left: `calc(${((k + 0.5) / poles) * 100}% - 8px)` }}
-          />
-          <div
-            data-wire-anchor={`dev:${device.id}:bottom:${k}`}
-            className="absolute bottom-0 h-3 w-4 pointer-events-none z-20"
-            style={{ left: `calc(${((k + 0.5) / poles) * 100}% - 8px)` }}
-          />
-        </React.Fragment>
-      ))}
+      {Array.from({ length: poles }).map((_, k) => {
+        // Compteur : l'ancre est posée exactement sur la vis dessinée ; sinon répartition régulière en haut / en bas.
+        const left = meter
+          ? `calc(${meter.terminalX[k] * 100}% - 8px)`
+          : `calc(${((k + 0.5) / poles) * 100}% - 8px)`;
+        const topStyle = meter ? { top: `calc(${meter.topY * 100}% - 6px)` } : { top: 0 };
+        const bottomStyle = meter ? { top: `calc(${meter.bottomY * 100}% - 6px)` } : { bottom: 0 };
+        return (
+          <React.Fragment key={`pole-${k}`}>
+            <div
+              data-wire-anchor={`dev:${device.id}:top:${k}`}
+              className="absolute h-3 w-4 pointer-events-none z-20"
+              style={{ left, ...topStyle }}
+            />
+            <div
+              data-wire-anchor={`dev:${device.id}:bottom:${k}`}
+              className="absolute h-3 w-4 pointer-events-none z-20"
+              style={{ left, ...bottomStyle }}
+            />
+          </React.Fragment>
+        );
+      })}
 
       {/* Ancres de câblage (bornes amont / aval) */}
       <div
         data-wire-anchor={`dev:${device.id}:top`}
         className="absolute left-0 right-0 top-0 h-6 pointer-events-none z-20"
+        style={meter ? { top: `calc(${meter.topY * 100}% - 12px)` } : undefined}
       />
       <div
         data-wire-anchor={`dev:${device.id}:bottom`}
         className="absolute left-0 right-0 bottom-0 h-6 pointer-events-none z-20"
+        style={meter ? { top: `calc(${meter.bottomY * 100}% - 12px)`, bottom: 'auto' } : undefined}
       />
     </div>
   );

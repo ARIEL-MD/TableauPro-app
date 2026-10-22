@@ -744,7 +744,7 @@ export const PRESET_TEMPLATES: Record<string, Partial<ElectricalPanelProject>> =
     devices: [
       { id: 'v-p1', railId: 'rail-1', slotIndex: 0, moduleWidth: 2, category: 'surge_arrester', name: 'Parafoudre T2', reference: 'LEG-412224', poles: '1P+N', calibre: 20, circuitLabel: 'Protection Foudre', assignedPictogram: 'earth', isOn: true },
       { id: 'v-p2', railId: 'rail-1', slotIndex: 2, moduleWidth: 4, category: 'differential', name: 'Inter Diff 40A 30mA 4P Type A', reference: 'SCH-A9R11440', poles: '4P', calibre: 40, differentialSensibility: 30, differentialType: 'A', circuitLabel: 'Tête Triphasée 400V', assignedPictogram: 'motor', isOn: true },
-      { id: 'v-p3', railId: 'rail-1', slotIndex: 6, moduleWidth: 1, category: 'meter', name: 'Sous-compteur MID', reference: 'SCH-A9MEM2050', poles: '1P+N', calibre: 45, circuitLabel: 'Mesure Générale', assignedPictogram: 'solar', isOn: true },
+      { id: 'v-p3', railId: 'rail-1', slotIndex: 6, moduleWidth: 5, category: 'meter', name: 'Sous-compteur MID', reference: 'SCH-A9MEM2050', poles: '1P+N', calibre: 45, circuitLabel: 'Mesure Générale', assignedPictogram: 'solar', isOn: true },
 
       // Phase 1
       { id: 'v-r2-1', railId: 'rail-2', slotIndex: 0, moduleWidth: 2, category: 'differential', name: 'Inter Diff 40A Type A', reference: 'LEG-411631', poles: '1P+N', calibre: 40, differentialSensibility: 30, differentialType: 'A', circuitLabel: 'Phase 1 - L1', assignedPictogram: 'house', isOn: true },

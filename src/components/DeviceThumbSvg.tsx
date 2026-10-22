@@ -1,4 +1,5 @@
 import React from 'react';
+import { Meter1PSvg, Meter3PSvg } from './MeterSvg';
 
 interface DeviceThumbSvgProps {
   type: string;
@@ -563,28 +564,9 @@ export const DeviceThumbSvg: React.FC<DeviceThumbSvgProps> = ({
 
     /* ---------- Energy meters ---------- */
     case 'Meter 1P':
-    case 'Meter 3P': {
-      const three = type === 'Meter 3P';
-      const modules = three ? 4 : 2;
-      const digits = three ? '0706 15' : '000189';
-      return (
-        <Body modules={modules} h={90} stripe="" screws={false} className={className}>
-          {/* Afficheur LCD */}
-          <rect x={PAD + 3} y={PAD + 12} width={modules * MODULE - 6} height={22} rx={1.5} fill="#0f172a" stroke="#334155" strokeWidth={0.5} />
-          <text x={PAD + modules * MODULE / 2} y={PAD + 27} fontSize={7} fontFamily="monospace" fontWeight="bold" textAnchor="middle" fill="#e8f3ea" letterSpacing="1">{digits}</text>
-          {/* Bande verte d'état */}
-          <rect x={PAD + 3} y={PAD + 6} width={modules * MODULE * 0.45} height={3} rx={1} fill="#2e9e5b" />
-          <rect x={PAD + modules * MODULE - 12} y={PAD + 38} width={8} height={3} rx={1} fill="#d32f2f" />
-          {/* Bornes en rangée (bas) */}
-          {Array.from({ length: modules }).map((_, i) => (
-            <g key={`b${i}`}>
-              <rect x={PAD + 3 + i * MODULE + 1.5} y={PAD + 70} width={MODULE - 6} height={11} rx={1} fill="#9aa1ab" stroke="#5b626c" strokeWidth={0.4} />
-              <circle cx={PAD + i * MODULE + MODULE / 2} cy={PAD + 75.5} r={1.5} fill="#cfd4db" />
-            </g>
-          ))}
-        </Body>
-      );
-    }
+      return <Meter1PSvg className={className} />;
+    case 'Meter 3P':
+      return <Meter3PSvg className={className} />;
 
     /* ---------- Changeover switch-disconnector ---------- */
     case 'SD Changeover':

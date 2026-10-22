@@ -426,7 +426,7 @@ export default function App() {
         manufacturer = 'Générique';
         modelSeries = '';
         reference = 'REF-CPT-3P';
-        moduleWidth = 4;
+        moduleWidth = 7;
         poles = '3P+N';
         calibre = 63;
         ratedVoltage = '400V';
@@ -435,11 +435,11 @@ export default function App() {
         assignedPictogram = 'solar';
       } else if (deviceType.includes('Compteur') || deviceType === 'Meter') {
         category = 'meter';
-        name = 'Sous-compteur d’Énergie MID LCD';
-        manufacturer = 'Schneider Electric';
-        modelSeries = 'Acti9';
-        reference = 'A9MEM2050';
-        moduleWidth = 1;
+        name = 'Compteur d’énergie monophasé';
+        manufacturer = 'Générique';
+        modelSeries = '';
+        reference = 'REF-CPT-1P';
+        moduleWidth = 5;
         poles = '1P+N';
         calibre = 45;
         meterKwh = 482.6;

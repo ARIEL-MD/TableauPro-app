@@ -1,6 +1,6 @@
 import React from 'react';
 import { DinRail, ElectricalDevice, BusbarComb } from '../types/panel';
-import { ElectricalDeviceSvg } from './ElectricalDeviceSvg';
+import { ElectricalDeviceSvg, deviceHeight } from './ElectricalDeviceSvg';
 import { Trash2, Plus } from 'lucide-react';
 
 interface DinRailSvgProps {
@@ -33,6 +33,7 @@ export const DinRailSvg: React.FC<DinRailSvgProps> = ({
   modulePixelWidth = 36,
 }) => {
   const totalWidth = rail.capacityModules * modulePixelWidth;
+  const tallest = Math.max(115, ...devices.map((d) => deviceHeight(d, modulePixelWidth)));
   const occupiedModules = devices.reduce((sum, d) => sum + d.moduleWidth, 0);
   const remainingModules = rail.capacityModules - occupiedModules;
   const isOverflow = remainingModules < 0;
@@ -148,7 +149,7 @@ export const DinRailSvg: React.FC<DinRailSvgProps> = ({
         onDragOver={handleDragOver}
         onDrop={handleDrop}
         className="relative bg-slate-50/80 rounded-lg border border-slate-200 p-2 min-h-[135px] flex items-center overflow-x-auto shadow-inner"
-        style={{ width: `${totalWidth + 16}px` }}
+        style={{ width: `${totalWidth + 16}px`, minHeight: tallest + 20 }}
       >
         {/* Rail DIN 35 mm : profil acier, reflet, fentes régulières */}
         <div
@@ -175,7 +176,7 @@ export const DinRailSvg: React.FC<DinRailSvgProps> = ({
         </div>
 
         {/* Mounted Modular Electrical Devices */}
-        <div className="relative w-full h-[115px] flex items-center z-10 pointer-events-auto">
+        <div className="relative w-full flex items-center z-10 pointer-events-auto" style={{ height: tallest }}>
           {devices.map((device) => {
             const leftOffset = device.slotIndex * modulePixelWidth;
             return (

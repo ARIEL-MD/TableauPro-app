@@ -284,6 +284,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
       {/* ========================================================
           TOP PROJECT NAME CARD — style mobile des captures
          ======================================================== */}
+      {!selectedAnnotation && (
       <div className="absolute top-3 left-3 right-[76px] z-30 no-print">
         <div className="h-12 px-4 bg-white/95 backdrop-blur-md rounded-xl border border-slate-200/90 shadow-md flex items-center">
           <input
@@ -296,6 +297,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
           />
         </div>
       </div>
+      )}
 
       {/* ========================================================
           TOP-RIGHT FLOATING CONTROLS: [ ☰ ] and [ + ] [ - ]

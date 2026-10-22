@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { ElectricalDevice, WireTerminal, WireThickness } from '../types/panel';
+import { terminalCount } from './ElectricalDeviceSvg';
 
 /** Choix faits dans le dialogue, avant d'avoir la borne d'arrivée. */
 export interface WireDraft {
@@ -49,7 +50,7 @@ export const WireConnectionModal: React.FC<WireConnectionModalProps> = ({
   onClose,
   onConfirm,
 }) => {
-  const poles = Math.max(1, device.moduleWidth);
+  const poles = terminalCount(device);
   const TERMS: string[] = Array.from({ length: poles }).flatMap((_, k) => [`top:${k}`, `bottom:${k}`]);
   const [terminal, setTerminal] = useState<WireTerminal>('top:0');
   const poleOf = (t: string) => Number(t.split(':')[1] ?? 0);
