@@ -150,37 +150,27 @@ export const DinRailSvg: React.FC<DinRailSvgProps> = ({
         className="relative bg-slate-50/80 rounded-lg border border-slate-200 p-2 min-h-[135px] flex items-center overflow-x-auto shadow-inner"
         style={{ width: `${totalWidth + 16}px` }}
       >
-        {/* DIN Omega 35mm Metallic Profile in the Background */}
+        {/* Rail DIN 35 mm : profil acier, reflet, fentes régulières */}
         <div
-          className="absolute left-2 right-2 h-7 bg-linear-to-b from-slate-300 via-slate-100 to-slate-400 rounded-xs border-y border-slate-400/80 shadow-xs flex items-center justify-between px-3 pointer-events-none opacity-90"
-          style={{ top: 'calc(50% - 14px)' }}
-        >
-          {/* Slotted punched holes typical of DIN 35 rails */}
-          {Array.from({ length: Math.floor(rail.capacityModules / 2) }).map((_, i) => (
-            <div
-              key={i}
-              className="w-4 h-2 rounded-full bg-slate-300/80 border border-slate-400/60 shadow-inner"
-            />
-          ))}
-        </div>
-
-        {/* Slot Grid Overlay & Ticks */}
-        <div
-          className="absolute inset-x-2 top-1 bottom-1 grid pointer-events-none"
+          className="absolute left-1 right-1 h-[18px] pointer-events-none rounded-[3px]"
           style={{
-            gridTemplateColumns: `repeat(${rail.capacityModules}, ${modulePixelWidth}px)`,
+            top: 'calc(50% - 9px)',
+            background: 'linear-gradient(to bottom, #f4f6f8 0%, #d5dae0 35%, #aeb5be 70%, #8e96a1 100%)',
+            border: '1px solid #6b737e',
+            boxShadow: '0 2px 3px rgba(15,23,42,0.25), inset 0 1px 0 rgba(255,255,255,0.8)',
           }}
         >
-          {Array.from({ length: rail.capacityModules }).map((_, slotIdx) => (
+          {/* Fentes de fixation, espacées régulièrement */}
+          {Array.from({ length: Math.max(4, Math.floor((rail.capacityModules * modulePixelWidth) / 26)) }).map((_, i) => (
             <div
-              key={slotIdx}
-              className={`border-r border-slate-300/60 flex flex-col justify-between text-[7.5px] font-mono px-0.5 ${
-                slotOccupancy[slotIdx] ? 'bg-blue-500/5' : ''
-              }`}
-            >
-              <span className="text-slate-400 font-semibold">{slotIdx + 1}</span>
-              <span className="text-slate-400 font-mono text-[7px]">{slotIdx + 1}</span>
-            </div>
+              key={i}
+              className="absolute top-[4px] h-[7px] w-[13px] rounded-[2px]"
+              style={{
+                left: `${10 + i * 26}px`,
+                background: 'linear-gradient(to bottom, #5b636e, #8e96a1)',
+                boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.45)',
+              }}
+            />
           ))}
         </div>
 
