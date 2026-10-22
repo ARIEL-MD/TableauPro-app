@@ -4,6 +4,7 @@ import { DeviceThumbSvg } from './DeviceThumbSvg';
 import { PICTOGRAM_LIST, PictogramIcon } from './PictogramIcon';
 import { Plus, Minus } from 'lucide-react';
 import { WireTerminalCards } from './WireTerminalCards';
+import { DinRailCards } from './DinRailCards';
 
 export type DrawerCategory =
   | 'appareils'
@@ -527,20 +528,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
           {activeCategory === 'rails' && (
             <div>
               <h3 className="text-xs font-bold text-slate-900 mb-2.5">Tous les rails</h3>
-              <div className="flex items-center gap-3 overflow-x-auto pb-2">
-                {[100, 200, 250, 300, 400, 500, 600].map((mm) => (
-                  <div
-                    key={mm}
-                    onClick={() => onAddRailByLength(mm)}
-                    className="group relative w-24 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2.5 shadow-sm shrink-0"
-                  >
-                    <div className="flex-1 flex items-center justify-center w-full px-1">
-                      <DeviceThumbSvg type="DIN Rail" length={mm} className="w-20 h-6" />
-                    </div>
-                    <span className="text-xs text-white font-semibold">{mm} mm</span>
-                  </div>
-                ))}
-              </div>
+              <DinRailCards onAddRailByLength={onAddRailByLength} />
             </div>
           )}
 
