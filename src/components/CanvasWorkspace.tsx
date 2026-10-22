@@ -16,6 +16,8 @@ import { defaultRoute, Pt } from './wireRoute';
 import { TerminalBarSvg } from './TerminalBarSvg';
 import { DistributionBlockSvg } from './DistributionBlockSvg';
 import { AnnotationObject } from './AnnotationObject';
+import { AnnotationTopBar } from './AnnotationTopBar';
+import { TextEditorModal } from './TextEditorModal';
 import { Menu, Plus, Minus, Maximize2, Zap } from 'lucide-react';
 
 interface CanvasWorkspaceProps {
@@ -51,6 +53,7 @@ interface CanvasWorkspaceProps {
   onUpdateTitle: (newTitle: string) => void;
   onUpdateAnnotation: (id: string, patch: Partial<PanelAnnotation>) => void;
   onDeleteAnnotation: (id: string) => void;
+  onDuplicateAnnotation: (id: string) => void;
   onToggleMenu: () => void;
   isMenuOpen: boolean;
 }
@@ -86,6 +89,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
   onUpdateTitle,
   onUpdateAnnotation,
   onDeleteAnnotation,
+  onDuplicateAnnotation,
   onToggleMenu,
   isMenuOpen,
 }) => {
@@ -93,6 +97,9 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
   const [isPanning, setIsPanning] = useState(false);
   const [startPan, setStartPan] = useState({ x: 0, y: 0 });
   const [selectedAnnotationId, setSelectedAnnotationId] = useState<string | null>(null);
+  const [editingTextId, setEditingTextId] = useState<string | null>(null);
+  const selectedAnnotation = (project.annotations ?? []).find((a) => a.id === selectedAnnotationId) ?? null;
+  const editingAnnotation = (project.annotations ?? []).find((a) => a.id === editingTextId) ?? null;
   const annotationCount = (project.annotations ?? []).length;
   const previousAnnotationCount = useRef(annotationCount);
 
@@ -209,6 +216,35 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
         isPanning ? 'cursor-grabbing' : 'cursor-default'
       }`}
     >
+      {/* Barre du haut d'un objet libre sélectionné (texte, tableau, pictogramme) */}
+      {selectedAnnotation && (
+        <AnnotationTopBar
+          annotation={selectedAnnotation}
+          onEdit={() => setEditingTextId(selectedAnnotation.id)}
+          onDuplicate={() => onDuplicateAnnotation(selectedAnnotation.id)}
+          onRotate={() =>
+            onUpdateAnnotation(selectedAnnotation.id, { rotation: (((selectedAnnotation.rotation ?? 0) + 90) % 360) })
+          }
+          onToggleLock={() => onUpdateAnnotation(selectedAnnotation.id, { locked: !selectedAnnotation.locked })}
+          onDelete={() => {
+            setSelectedAnnotationId(null);
+            onDeleteAnnotation(selectedAnnotation.id);
+          }}
+        />
+      )}
+
+      {/* Panneau d'édition du texte */}
+      {editingAnnotation && editingAnnotation.kind === 'text' && (
+        <TextEditorModal
+          annotation={editingAnnotation}
+          onCancel={() => setEditingTextId(null)}
+          onConfirm={(patch) => {
+            onUpdateAnnotation(editingAnnotation.id, patch);
+            setEditingTextId(null);
+          }}
+        />
+      )}
+
       {pendingWireFrom && !pendingWireTo && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-xl bg-slate-900/95 px-4 py-2.5 text-xs text-white shadow-xl">
           <span>{pendingWireLabel || "Touchez la borne d'arrivée"}</span>
@@ -419,6 +455,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
               onSelectDevice(null);
             }}
             onUpdate={onUpdateAnnotation}
+            onRequestEdit={(id) => setEditingTextId(id)}
             onDelete={(id) => {
               setSelectedAnnotationId(null);
               onDeleteAnnotation(id);

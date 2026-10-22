@@ -749,13 +749,13 @@ export default function App() {
       const id = `ann-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
       let item: PanelAnnotation;
       if (kind === 'text') {
-        item = { id, kind, x, y, text: 'Texte', fontSize: 18 };
+        item = { id, kind, x, y, text: 'Texte', fontScale: 1.6, fieldWidth: 6, textColor: '#000000', background: 'none' };
       } else if (kind === 'table') {
         item = { id, kind, x, y, cells: [['', ''], ['', ''], ['', '']] };
       } else {
         item = { id, kind, x, y, pictogram: pictogram || 'lighting', size: 48 };
       }
-      showToast(kind === 'text' ? 'Texte ajouté — double-clic pour le modifier' : kind === 'table' ? 'Tableau ajouté' : 'Pictogramme posé sur le plan');
+      showToast(kind === 'text' ? 'Texte ajouté — touchez le crayon pour le modifier' : kind === 'table' ? 'Tableau ajouté' : 'Pictogramme posé sur le plan');
       return { ...prev, annotations: [...list, item] };
     });
   };
@@ -765,6 +765,23 @@ export default function App() {
       ...prev,
       annotations: (prev.annotations ?? []).map((a) => (a.id === id ? { ...a, ...patch } : a)),
     }));
+  };
+
+  const handleDuplicateAnnotation = (id: string) => {
+    updateProjectWithHistory((prev) => {
+      const list = prev.annotations ?? [];
+      const src = list.find((a) => a.id === id);
+      if (!src) return prev;
+      const copy: PanelAnnotation = {
+        ...src,
+        id: `ann-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        x: src.x + 24,
+        y: src.y + 24,
+        locked: false,
+        cells: src.cells?.map((row) => [...row]),
+      };
+      return { ...prev, annotations: [...list, copy] };
+    });
   };
 
   const handleDeleteAnnotation = (id: string) => {
@@ -1164,6 +1181,7 @@ export default function App() {
           onUpdateTitle={(title) => updateProjectWithHistory((p) => ({ ...p, title }))}
           onUpdateAnnotation={handleUpdateAnnotation}
           onDeleteAnnotation={handleDeleteAnnotation}
+          onDuplicateAnnotation={handleDuplicateAnnotation}
           onToggleMenu={() => setIsMenuOpen(!isMenuOpen)}
           isMenuOpen={isMenuOpen}
         />
@@ -1243,6 +1261,10 @@ export default function App() {
       {pendingWire?.to && pendingWire.route && (
         <WireRouteBar
           colorName={pendingWire.colorName}
+          color={pendingWire.color}
+          thickness={pendingWire.thickness}
+          onColor={(c) => setPendingWire({ ...pendingWire, color: c.hex, colorName: c.name })}
+          onThickness={(v) => setPendingWire({ ...pendingWire, thickness: v })}
           segment={pendingWire.segment}
           segmentCount={segmentCount(innerOf(pendingWire.route))}
           isFixed={false}

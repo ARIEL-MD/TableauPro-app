@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { PanelAnnotation } from '../types/panel';
 import { PictogramIcon } from './PictogramIcon';
-import { Trash2, Plus, Minus } from 'lucide-react';
+import { Plus, Minus } from 'lucide-react';
+import { TEXT_BASE_PX, backgroundCss, resolveTextStyle } from './TextEditorModal';
 
 interface AnnotationObjectProps {
   annotation: PanelAnnotation;
@@ -10,10 +11,10 @@ interface AnnotationObjectProps {
   onSelect: (id: string) => void;
   onUpdate: (id: string, patch: Partial<PanelAnnotation>) => void;
   onDelete: (id: string) => void;
+  /** Ouvre le panneau d'édition d'un texte (double-clic). */
+  onRequestEdit?: (id: string) => void;
 }
 
-const MIN_FONT = 8;
-const MAX_FONT = 72;
 const MIN_ICON = 24;
 const MAX_ICON = 160;
 const MAX_TABLE = 12;
@@ -22,7 +23,8 @@ const MAX_TABLE = 12;
  * Objet libre posé sur le plan (onglet Marquage) : texte, tableau ou pictogramme.
  * - glisser pour déplacer (une seule entrée dans l'historique annuler/rétablir par déplacement)
  * - clic pour sélectionner et afficher la barre d'outils
- * - double-clic sur un texte pour le modifier ; les cellules d'un tableau sont directement éditables
+ * - double-clic sur un texte pour ouvrir son panneau d'édition ; les cellules d'un tableau sont directement éditables
+ * - la barre du haut (AnnotationTopBar) gère dupliquer / modifier / pivoter / verrouiller / supprimer
  */
 export const AnnotationObject: React.FC<AnnotationObjectProps> = ({
   annotation,
@@ -31,9 +33,9 @@ export const AnnotationObject: React.FC<AnnotationObjectProps> = ({
   onSelect,
   onUpdate,
   onDelete,
+  onRequestEdit,
 }) => {
   const [livePos, setLivePos] = useState<{ x: number; y: number } | null>(null);
-  const [isEditingText, setIsEditingText] = useState(false);
   const drag = useRef<{ startX: number; startY: number; originX: number; originY: number; moved: boolean } | null>(null);
 
   const x = livePos ? livePos.x : annotation.x;
@@ -41,9 +43,9 @@ export const AnnotationObject: React.FC<AnnotationObjectProps> = ({
 
   // ---- Déplacement ----
   const handlePointerDown = (e: React.PointerEvent) => {
-    if (isEditingText) return;
     e.stopPropagation();
     onSelect(annotation.id);
+    if (annotation.locked) return; // verrouillé : sélectionnable mais pas déplaçable
     drag.current = { startX: e.clientX, startY: e.clientY, originX: annotation.x, originY: annotation.y, moved: false };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
@@ -95,21 +97,11 @@ export const AnnotationObject: React.FC<AnnotationObjectProps> = ({
     </button>
   );
 
-  const toolbar = isSelected && (
+  const toolbar = isSelected && annotation.kind !== 'text' && (
     <div
       className="no-print absolute -top-8 left-0 flex items-center gap-1 bg-slate-900/95 rounded-lg px-1.5 py-1 shadow-lg z-50 whitespace-nowrap"
       onPointerDown={(e) => e.stopPropagation()}
     >
-      {annotation.kind === 'text' && (
-        <>
-          <ToolButton title="Réduire le texte" onClick={() => onUpdate(annotation.id, { fontSize: Math.max(MIN_FONT, (annotation.fontSize || 18) - 2) })}>
-            A<Minus className="w-2.5 h-2.5" />
-          </ToolButton>
-          <ToolButton title="Agrandir le texte" onClick={() => onUpdate(annotation.id, { fontSize: Math.min(MAX_FONT, (annotation.fontSize || 18) + 2) })}>
-            A<Plus className="w-2.5 h-2.5" />
-          </ToolButton>
-        </>
-      )}
       {annotation.kind === 'table' && (
         <>
           <ToolButton
@@ -174,9 +166,6 @@ export const AnnotationObject: React.FC<AnnotationObjectProps> = ({
           ))}
         </>
       )}
-      <ToolButton title="Supprimer" danger onClick={() => onDelete(annotation.id)}>
-        <Trash2 className="w-3 h-3" />
-      </ToolButton>
     </div>
   );
 
@@ -184,32 +173,22 @@ export const AnnotationObject: React.FC<AnnotationObjectProps> = ({
   let content: React.ReactNode = null;
 
   if (annotation.kind === 'text') {
-    const fontSize = annotation.fontSize || 18;
-    content = isEditingText ? (
-      <textarea
-        autoFocus
-        defaultValue={annotation.text || ''}
-        onBlur={(e) => {
-          setIsEditingText(false);
-          const value = e.target.value;
-          if (value !== (annotation.text || '')) onUpdate(annotation.id, { text: value });
-        }}
-        onKeyDown={(e) => {
-          if (e.key === 'Escape') (e.target as HTMLTextAreaElement).blur();
-        }}
-        onPointerDown={(e) => e.stopPropagation()}
-        rows={Math.max(1, (annotation.text || '').split('\n').length)}
-        style={{ fontSize }}
-        className="select-text bg-white/90 border border-blue-400 rounded px-1 py-0.5 text-slate-900 font-semibold outline-none resize min-w-[80px] leading-tight"
-      />
-    ) : (
+    const st = resolveTextStyle(annotation);
+    content = (
       <div
         onDoubleClick={(e) => {
           e.stopPropagation();
-          setIsEditingText(true);
+          onRequestEdit?.(annotation.id);
         }}
-        style={{ fontSize }}
-        className="px-1 py-0.5 text-slate-900 font-semibold whitespace-pre leading-tight cursor-move"
+        style={{
+          fontSize: st.scale * TEXT_BASE_PX,
+          minWidth: `${st.width}ch`,
+          color: st.color,
+          backgroundColor: backgroundCss(st.background),
+          fontWeight: st.bold ? 700 : 400,
+          fontStyle: st.italic ? 'italic' : 'normal',
+        }}
+        className={`px-1.5 py-0.5 rounded text-center whitespace-pre leading-tight ${annotation.locked ? 'cursor-default' : 'cursor-move'}`}
         title="Double-clic pour modifier"
       >
         {annotation.text || 'Texte'}
@@ -269,7 +248,7 @@ export const AnnotationObject: React.FC<AnnotationObjectProps> = ({
       className={`z-30 ${isSelected ? 'outline outline-2 outline-[#007aff] outline-offset-2 rounded' : ''}`}
     >
       {toolbar}
-      {content}
+      <div style={{ transform: `rotate(${annotation.rotation ?? 0}deg)`, transformOrigin: 'center' }}>{content}</div>
     </div>
   );
 };

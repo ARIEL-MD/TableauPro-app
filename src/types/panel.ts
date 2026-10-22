@@ -204,8 +204,16 @@ export interface PanelAnnotation {
   kind: 'text' | 'table' | 'pictogram';
   x: number;
   y: number;
-  text?: string; // kind = 'text'
-  fontSize?: number; // kind = 'text' (px)
+  text?: string; // kind = 'text' (30 caractères max)
+  fontSize?: number; // kind = 'text' (px) — anciens projets ; remplacé par fontScale
+  fontScale?: number; // kind = 'text' : taille du texte en « x » (0,5 à 4)
+  fieldWidth?: number; // kind = 'text' : largeur du champ, en caractères (2 à 20)
+  bold?: boolean; // kind = 'text'
+  italic?: boolean; // kind = 'text'
+  textColor?: string; // kind = 'text' (couleur CSS)
+  background?: string; // kind = 'text' : couleur d'arrière-plan ('none' = fond blanc neutre)
+  rotation?: number; // tous types : 0, 90, 180 ou 270 degrés
+  locked?: boolean; // tous types : bloque le déplacement
   cells?: string[][]; // kind = 'table' (lignes x colonnes)
   pictogram?: PictogramKey; // kind = 'pictogram'
   size?: number; // kind = 'pictogram' (px)
