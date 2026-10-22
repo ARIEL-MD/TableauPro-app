@@ -81,7 +81,7 @@ export interface PictogramInfo {
   category?: string;
 }
 
-export type WireTerminal = 'top' | 'bottom';
+export type WireTerminal = string; // 'top:k' | 'bottom:k' (k = numéro du pôle)
 
 /**
  * Ancre d'une borne : `dev:<deviceId>:top|bottom` pour une borne d'appareil,

@@ -37,7 +37,6 @@ export const WIRE_THICKNESSES: { value: WireThickness; label: string; px: number
   { value: 4, label: '10 mm²', px: 7 },
 ];
 
-const TERMINALS: WireTerminal[] = ['top', 'bottom'];
 
 interface WireConnectionModalProps {
   device: ElectricalDevice;
@@ -50,14 +49,17 @@ export const WireConnectionModal: React.FC<WireConnectionModalProps> = ({
   onClose,
   onConfirm,
 }) => {
-  const [terminal, setTerminal] = useState<WireTerminal>('top');
+  const poles = Math.max(1, device.moduleWidth);
+  const TERMS: string[] = Array.from({ length: poles }).flatMap((_, k) => [`top:${k}`, `bottom:${k}`]);
+  const [terminal, setTerminal] = useState<WireTerminal>('top:0');
+  const poleOf = (t: string) => Number(t.split(':')[1] ?? 0);
   const [color, setColor] = useState(WIRE_COLORS[2]);
   const [thickness, setThickness] = useState<WireThickness>(3);
 
   const step = (dir: -1 | 1) => {
-    const i = TERMINALS.indexOf(terminal);
-    const next = (i + dir + TERMINALS.length) % TERMINALS.length;
-    setTerminal(TERMINALS[next]);
+    const i = TERMS.indexOf(terminal);
+    const next = (i + dir + TERMS.length) % TERMS.length;
+    setTerminal(TERMS[next]);
   };
 
   const handleConfirm = () => {
@@ -89,13 +91,16 @@ export const WireConnectionModal: React.FC<WireConnectionModalProps> = ({
           {/* Terminal selector: device drawing with the chosen terminal highlighted */}
           <div className="flex flex-col items-center">
             <p className="text-sm font-semibold text-slate-700 mb-2">{device.name}</p>
+            <p className="text-xs text-slate-500 mb-1">
+              {terminal.startsWith('top') ? 'Haute' : 'Basse'} · pôle {poleOf(terminal) + 1}/{poles}
+            </p>
             <div className="relative flex flex-col items-center py-2">
               <button
                 type="button"
                 aria-label="Borne haute"
-                onClick={() => setTerminal('top')}
+                onClick={() => setTerminal(`top:${poleOf(terminal)}`)}
                 className={`w-6 h-6 rounded-full bg-red-600 border-2 border-slate-900 ${
-                  terminal === 'top' ? 'ring-4 ring-red-400' : 'opacity-60'
+                  terminal.startsWith('top') ? 'ring-4 ring-red-400' : 'opacity-60'
                 }`}
               />
               <div className="w-8 h-16 my-2 rounded-sm bg-slate-100 border border-slate-400 flex items-center justify-center">
@@ -104,9 +109,9 @@ export const WireConnectionModal: React.FC<WireConnectionModalProps> = ({
               <button
                 type="button"
                 aria-label="Borne basse"
-                onClick={() => setTerminal('bottom')}
+                onClick={() => setTerminal(`bottom:${poleOf(terminal)}`)}
                 className={`w-6 h-6 rounded-full bg-red-600 border-2 border-slate-900 ${
-                  terminal === 'bottom' ? 'ring-4 ring-red-400' : 'opacity-60'
+                  terminal.startsWith('bottom') ? 'ring-4 ring-red-400' : 'opacity-60'
                 }`}
               />
             </div>

@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState, useEffect } from 'react';
+import React, { useLayoutEffect, useState, useEffect, useRef } from 'react';
 import { CableWire, ElectricalPanelProject, WireThickness } from '../types/panel';
 import { WIRE_THICKNESSES } from './WireConnectionModal';
 import {
@@ -19,6 +19,8 @@ export interface WirePreview {
 
 interface Drawn {
   id: string;
+  wireId?: string;
+  pts?: Pt[];
   d: string;
   color: string;
   px: number;
@@ -38,7 +40,7 @@ export function locateAnchor(
   if (!el) return null;
   const sRect = surface.getBoundingClientRect();
   const r = el.getBoundingClientRect();
-  const isBottom = anchor.endsWith(':bottom');
+  const isBottom = anchor.includes(':bottom');
   return {
     p: {
       x: (r.left + r.width / 2 - sRect.left) / zoom,
@@ -107,7 +109,49 @@ interface CableOverlayProps {
   surfaceRef: React.RefObject<HTMLDivElement | null>;
   zoom: number;
   preview?: WirePreview | null;
+  selectedWireId?: string | null;
+  onSelectWire?: (id: string | null) => void;
+  onMoveWire?: (wireId: string, pts: Pt[]) => void;
 }
+
+/** Poignée d'un coude : on la glisse pour déplacer le fil. */
+const WireHandle: React.FC<{ at: Pt; zoom: number; onDrop: (p: Pt) => void }> = ({ at, zoom, onDrop }) => {
+  const [live, setLive] = useState<Pt | null>(null);
+  const drag = useRef<{ sx: number; sy: number; ox: number; oy: number } | null>(null);
+  const shown = live ?? at;
+  return (
+    <circle
+      cx={shown.x}
+      cy={shown.y}
+      r={6}
+      fill="#ffffff"
+      stroke="#007aff"
+      strokeWidth={2}
+      style={{ pointerEvents: 'auto', cursor: 'move' }}
+      onPointerDown={(e) => {
+        e.stopPropagation();
+        drag.current = { sx: e.clientX, sy: e.clientY, ox: at.x, oy: at.y };
+        (e.currentTarget as unknown as Element).setPointerCapture(e.pointerId);
+      }}
+      onPointerMove={(e) => {
+        const d = drag.current;
+        if (!d) return;
+        setLive({ x: d.ox + (e.clientX - d.sx) / zoom, y: d.oy + (e.clientY - d.sy) / zoom });
+      }}
+      onPointerUp={(e) => {
+        const d = drag.current;
+        drag.current = null;
+        try {
+          (e.currentTarget as unknown as Element).releasePointerCapture(e.pointerId);
+        } catch {
+          /* déjà relâché */
+        }
+        if (d && live) onDrop(live);
+        setLive(null);
+      }}
+    />
+  );
+};
 
 /**
  * Calque des fils : il lit la position réelle des bornes dans le DOM
@@ -120,6 +164,9 @@ export const CableOverlay: React.FC<CableOverlayProps> = ({
   surfaceRef,
   zoom,
   preview,
+  selectedWireId,
+  onSelectWire,
+  onMoveWire,
 }) => {
   const [drawn, setDrawn] = useState<Drawn[]>([]);
   const [tick, setTick] = useState(0);
@@ -156,7 +203,7 @@ export const CableOverlay: React.FC<CableOverlayProps> = ({
       const b = locateAnchor(surface, to, zoom);
       if (!a || !b) return; // appareil ou bornier supprimé
       const pts = route ? pointsFromRoute(route, a, b) : defaultRoute(a, b);
-      out.push(buildDrawn(id, pts, color, thickness));
+      out.push({ ...buildDrawn(id, pts, color, thickness), wireId: id === 'preview' ? undefined : id, pts });
     };
 
     for (const w of wires) {
@@ -177,6 +224,20 @@ export const CableOverlay: React.FC<CableOverlayProps> = ({
     >
       {drawn.map((d) => (
         <g key={d.id}>
+          {/* Zone de clic élargie : sélectionne le fil */}
+          {d.wireId && (
+            <path
+              d={d.d}
+              fill="none"
+              stroke="transparent"
+              strokeWidth={Math.max(14, d.px + 12)}
+              style={{ pointerEvents: 'stroke', cursor: 'pointer' }}
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                onSelectWire?.(d.wireId === selectedWireId ? null : d.wireId!);
+              }}
+            />
+          )}
           {/* Liseré noir, puis âme de couleur : le fil ressort sur le plan */}
           <path
             d={d.d}
@@ -206,6 +267,21 @@ export const CableOverlay: React.FC<CableOverlayProps> = ({
               strokeLinecap="round"
             />
           ))}
+          {/* Poignées des coudes, visibles quand le fil est sélectionné */}
+          {d.wireId && d.wireId === selectedWireId &&
+            (d.pts ?? []).slice(1, -1).map((p, i) => (
+              <WireHandle
+                key={`h-${i}`}
+                at={p}
+                zoom={zoom}
+                onDrop={(np) =>
+                  onMoveWire?.(
+                    d.wireId!,
+                    (d.pts ?? []).map((q, k) => (k === i + 1 ? np : q))
+                  )
+                }
+              />
+            ))}
         </g>
       ))}
     </svg>

@@ -92,6 +92,7 @@ export const ElectricalDeviceSvg: React.FC<ElectricalDeviceSvgProps> = ({
   const type = thumbTypeForDevice(device);
   const color =
     type === 'IndicatorLight' ? device.indicatorColor : device.colorTag || undefined;
+  const poles = type === 'MCB 1P + N' ? 1 : Math.max(1, device.moduleWidth);
 
   return (
     <div
@@ -107,6 +108,22 @@ export const ElectricalDeviceSvg: React.FC<ElectricalDeviceSvgProps> = ({
 
       {/* Même dessin que l'aperçu du tiroir */}
       <DeviceThumbSvg type={type} color={color} label={deviceLabel(device, type)} className="w-full h-full block" />
+
+      {/* Ancres par pôle : chaque vis reçoit son fil */}
+      {Array.from({ length: poles }).map((_, k) => (
+        <React.Fragment key={`pole-${k}`}>
+          <div
+            data-wire-anchor={`dev:${device.id}:top:${k}`}
+            className="absolute top-0 h-3 w-4 pointer-events-none z-20"
+            style={{ left: `calc(${((k + 0.5) / poles) * 100}% - 8px)` }}
+          />
+          <div
+            data-wire-anchor={`dev:${device.id}:bottom:${k}`}
+            className="absolute bottom-0 h-3 w-4 pointer-events-none z-20"
+            style={{ left: `calc(${((k + 0.5) / poles) * 100}% - 8px)` }}
+          />
+        </React.Fragment>
+      ))}
 
       {/* Ancres de câblage (bornes amont / aval) */}
       <div

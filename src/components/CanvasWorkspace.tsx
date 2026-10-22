@@ -45,6 +45,9 @@ interface CanvasWorkspaceProps {
   onDeleteDistributionBlock: (id: string) => void;
   onAddDeviceToRailQuick: (railId: string) => void;
   onMoveFreeDevice?: (id: string, x: number, y: number) => void;
+  selectedWireId?: string | null;
+  onSelectWire?: (id: string | null) => void;
+  onMoveWire?: (wireId: string, pts: { x: number; y: number }[]) => void;
   onUpdateTitle: (newTitle: string) => void;
   onUpdateAnnotation: (id: string, patch: Partial<PanelAnnotation>) => void;
   onDeleteAnnotation: (id: string) => void;
@@ -77,6 +80,9 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
   onDeleteDistributionBlock,
   onAddDeviceToRailQuick,
   onMoveFreeDevice,
+  selectedWireId,
+  onSelectWire,
+  onMoveWire,
   onUpdateTitle,
   onUpdateAnnotation,
   onDeleteAnnotation,
@@ -314,6 +320,9 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
           surfaceRef={surfaceRef}
           zoom={zoom}
           preview={pendingWirePreview ?? null}
+          selectedWireId={selectedWireId}
+          onSelectWire={onSelectWire}
+          onMoveWire={onMoveWire}
         />
 
         {/* Surface de travail libre : pas de cadre d'armoire, les modèles sont posés directement */}

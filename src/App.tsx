@@ -802,6 +802,7 @@ export default function App() {
   };
 
   // Delete device
+  const [selectedWireId, setSelectedWireId] = useState<string | null>(null);
   const handleStartWire = (fromAnchor: string, draft: { color: string; colorName: string; thickness: CableWire['thickness'] }) => {
     setPendingWire({ from: fromAnchor, ...draft, segment: 0, step: STEP_DEFAULT });
     setSelectedDeviceId(null);
@@ -823,6 +824,13 @@ export default function App() {
       step: STEP_DEFAULT,
       hint: null,
     });
+  };
+
+  const handleMoveWire = (wireId: string, pts: Pt[]) => {
+    updateProjectWithHistory((prev) => ({
+      ...prev,
+      wires: (prev.wires ?? []).map((w) => (w.id === wireId ? { ...w, route: pts } : w)),
+    }));
   };
 
   const handleConfirmWire = () => {
@@ -1151,6 +1159,9 @@ export default function App() {
         <CanvasWorkspace
           project={project}
           onMoveFreeDevice={handleMoveFreeDevice}
+          selectedWireId={selectedWireId}
+          onSelectWire={setSelectedWireId}
+          onMoveWire={handleMoveWire}
           selectedDeviceId={selectedDeviceId || undefined}
           selectedRailId={selectedRailId || undefined}
           showWiringMode={showWiringMode}
