@@ -880,47 +880,50 @@ const TIMER_RED = '#c8353a';
 /** Relais temporisé électromécanique : cadran à anneau gris, 5 bornes en bas. */
 const TimerMechDevice: React.FC<{ className?: string }> = ({ className }) => (
   <svg viewBox="0 0 100 188" className={className} fill="none" preserveAspectRatio="xMidYMid meet">
-    <rect x={2} y={2} width={96} height={184} rx={2.5} fill={TIMER_BODY} stroke={TIMER_EDGE} strokeWidth={0.8} />
+    <rect x={2} y={2} width={96} height={184} rx={2} fill={TIMER_BODY} stroke={TIMER_EDGE} strokeWidth={0.8} />
     {/* crans en haut + repères ◂ ▸ */}
     {[14, 33, 52, 71, 90].map((x) => (
-      <rect key={x} x={x - 3} y={2} width={6} height={3} fill={TIMER_EDGE} />
+      <rect key={x} x={x - 3} y={2} width={6} height={2.5} fill="#a9abb0" />
     ))}
-    <path d="M46 26 L42 30 L46 34 Z" fill="#6f7176" />
-    <path d="M90 26 L94 30 L90 34 Z" fill="#6f7176" />
+    <path d="M46 12 L42.5 16 L46 20 Z" fill="#6f7176" />
+    <path d="M90 12 L93.5 16 L90 20 Z" fill="#6f7176" />
+    <line x1={4} y1={30} x2={96} y2={30} stroke={TIMER_EDGE} strokeWidth={0.7} />
     {/* bandeau rouge */}
-    <rect x={0} y={42} width={100} height={8} rx={1} fill={TIMER_RED} />
-    <rect x={0} y={42} width={100} height={2.5} rx={1} fill="#e0575a" opacity={0.6} />
-    {/* cadran */}
-    <circle cx={50} cy={105} r={38.5} stroke={TIMER_GREY} strokeWidth={9} />
-    <circle cx={50} cy={105} r={34} fill="#e7e7e9" />
+    <rect x={0} y={44} width={100} height={8} rx={1} fill={TIMER_RED} />
+    <rect x={0} y={44} width={100} height={2.5} rx={1} fill="#e0575a" opacity={0.6} />
+    {/* cadran : l'anneau touche le bandeau rouge */}
+    <circle cx={50} cy={95} r={37.5} stroke={TIMER_GREY} strokeWidth={9} />
+    <circle cx={50} cy={95} r={33} fill="#e7e7e9" />
     {Array.from({ length: 48 }).map((_, i) => {
       const a = (i * Math.PI) / 24;
       const long = i % 4 === 0;
-      const r1 = long ? 25 : 28;
+      const r1 = long ? 24 : 27;
       return (
         <line
           key={i}
           x1={50 + Math.sin(a) * r1}
-          y1={105 - Math.cos(a) * r1}
-          x2={50 + Math.sin(a) * 31}
-          y2={105 - Math.cos(a) * 31}
+          y1={95 - Math.cos(a) * r1}
+          x2={50 + Math.sin(a) * 30}
+          y2={95 - Math.cos(a) * 30}
           stroke="#9a9ca1"
           strokeWidth={long ? 1 : 0.6}
         />
       );
     })}
-    <line x1={50} y1={105} x2={38} y2={86} stroke="#6f7176" strokeWidth={2.4} strokeLinecap="round" />
-    <line x1={50} y1={105} x2={67} y2={123} stroke="#6f7176" strokeWidth={2.6} strokeLinecap="round" />
-    <circle cx={50} cy={105} r={2.2} fill="#6f7176" />
+    <line x1={50} y1={95} x2={40} y2={78} stroke="#6f7176" strokeWidth={2.4} strokeLinecap="round" />
+    <line x1={50} y1={95} x2={65} y2={109} stroke="#6f7176" strokeWidth={2.6} strokeLinecap="round" />
+    <circle cx={50} cy={95} r={2} fill="#6f7176" />
+    {/* petit levier à gauche sous le cadran */}
+    <path d="M9 124 l5 6 M13 122 l4 7" stroke="#a5a7ab" strokeWidth={1.2} strokeLinecap="round" />
     {/* schéma de contacts */}
-    <path d="M18 156 h14 v-9 h14 v9 M66 152 h10 v4 h8" stroke="#a5a7ab" strokeWidth={0.8} />
-    {/* 5 bornes */}
+    <path d="M14 152 h12 M38 158 v-12 h14 v12 M72 148 h8 v10 h10" stroke="#a5a7ab" strokeWidth={0.8} />
+    {/* 5 bornes, collées au bord bas */}
     {[0, 1, 2, 3, 4].map((i) => (
       <g key={i}>
-        <rect x={6 + i * 17.6} y={164} width={14} height={18} rx={2} fill="#c3c4c8" stroke="#aeb0b5" strokeWidth={0.6} />
-        <circle cx={13 + i * 17.6} cy={171} r={4.3} fill={TIMER_GREY} />
-        <line x1={10.5 + i * 17.6} y1={171} x2={15.5 + i * 17.6} y2={171} stroke="#6f7176" strokeWidth={0.9} />
-        <rect x={9 + i * 17.6} y={177.5} width={8} height={2.6} rx={0.8} fill="#9d9fa5" />
+        <rect x={5 + i * 18} y={162} width={15} height={24} rx={1.5} fill="#c9cacf" stroke="#aeb0b5" strokeWidth={0.6} />
+        <circle cx={12.5 + i * 18} cy={171} r={4.6} fill={TIMER_GREY} />
+        <line x1={9.8 + i * 18} y1={171} x2={15.2 + i * 18} y2={171} stroke="#6f7176" strokeWidth={0.9} />
+        <rect x={8.5 + i * 18} y={179} width={8} height={4.5} rx={0.8} fill="#a3a5aa" />
       </g>
     ))}
   </svg>
