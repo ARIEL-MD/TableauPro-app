@@ -555,35 +555,33 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                 <h3 className="text-[22px] leading-7 font-bold text-[#202020] mb-2">Barres à vis</h3>
                 <div className="flex flex-wrap items-start gap-3 pb-1">
                   {([
-                    { count: 6, width: 226, thumbWidth: 84 },
-                    { count: 11, width: 239, thumbWidth: 84 },
-                    { count: 16, width: 239, thumbWidth: 84 },
-                    { count: 21, width: 239, thumbWidth: 84 },
-                    { count: 26, width: 239, thumbWidth: 84 },
-                  ] as const).map(({ count, width, thumbWidth }) => (
+                    // Miniatures = pixels exacts de la capture (public/assets/vis/*.png), placées à leur position mesurée.
+                    { count: 6, width: 225, thumb: { x: 30, y: 36, w: 86, h: 37 } },
+                    { count: 11, width: 238, thumb: { x: 36, y: 43, w: 89, h: 22 } },
+                    { count: 16, width: 238, thumb: { x: 36, y: 43, w: 86, h: 20 } },
+                    { count: 21, width: 238, thumb: { x: 36, y: 47, w: 86, h: 14 } },
+                    { count: 26, width: 238, thumb: { x: 36, y: 49, w: 86, h: 11 } },
+                  ] as const).map(({ count, width, thumb }) => (
                     <div
                       key={count}
                       onClick={() => onAddTerminalBar('screw', count)}
                       className="group relative shrink-0 cursor-pointer transition-colors"
                       style={{
                         width,
-                        height: 148,
+                        height: 146,
                         borderRadius: 16,
                         backgroundColor: '#6f6f6f',
                       }}
                       aria-label={`Barre à vis ${count} contacts`}
                     >
-                      <div
-                        className="absolute flex items-center justify-center"
-                        style={{ left: 28, top: 27, width: thumbWidth, height: 48 }}
-                      >
-                        <DeviceThumbSvg
-                          type="TerminalBar"
-                          variant="screw"
-                          count={count}
-                          className="block w-full h-auto max-w-full"
-                        />
-                      </div>
+                      <img
+                        src={`/assets/vis/${count}.png`}
+                        alt=""
+                        aria-hidden="true"
+                        draggable={false}
+                        className="absolute block select-none"
+                        style={{ left: thumb.x, top: thumb.y, width: thumb.w, height: thumb.h }}
+                      />
                       <div
                         className="absolute flex items-center justify-center rounded-full"
                         style={{
