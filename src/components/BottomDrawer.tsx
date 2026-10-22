@@ -4,16 +4,6 @@ import { DeviceThumbSvg } from './DeviceThumbSvg';
 import { PICTOGRAM_LIST, PictogramIcon } from './PictogramIcon';
 import { Plus, Minus } from 'lucide-react';
 
-/* Badge PRO affiché sur les tuiles payantes (même logique que la référence) */
-const FREE_ITEMS: (string | number)[] = ['MCB 1P', 'MCB 2P', 'RCCB 2P', 200];
-const isProItem = (x: string | number) => !FREE_ITEMS.includes(x);
-const ProBadge = () => (
-  <span className="absolute -top-1.5 -right-1.5 z-10 rounded-md bg-[#ff9f0a] px-1 py-px text-[8px] font-bold leading-tight text-white shadow-sm">
-    PRO
-  </span>
-);
-
-
 export type DrawerCategory =
   | 'appareils'
   | 'rails'
@@ -169,7 +159,6 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                       onClick={() => onAddDeviceByType(item.type, { color: colors.mcb })}
                       className="group relative w-20 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
                     >
-{isProItem(item.label) && <ProBadge />}
                       <div className="flex-1 flex items-center justify-center">
                         <DeviceThumbSvg type={item.type} color={colors.mcb} className="h-16 w-auto max-w-full" />
                       </div>
@@ -206,7 +195,6 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                       onClick={() => onAddDeviceByType(item.type, { color: colors.rcd })}
                       className="group relative w-20 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
                     >
-{isProItem(item.label) && <ProBadge />}
                       <div className="flex-1 flex items-center justify-center">
                         <DeviceThumbSvg type={item.type} color={colors.rcd} className="h-16 w-auto max-w-full" />
                       </div>
@@ -243,7 +231,6 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                       onClick={() => onAddDeviceByType(item.type, { color: colors.rcbo })}
                       className="group relative w-20 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
                     >
-{isProItem(item.label) && <ProBadge />}
                       <div className="flex-1 flex items-center justify-center">
                         <DeviceThumbSvg type={item.type} color={colors.rcbo} className="h-16 w-auto max-w-full" />
                       </div>
@@ -273,7 +260,6 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                       onClick={() => onAddDeviceByType(lbl, { color: colors.sd })}
                       className="group relative w-20 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
                     >
-{isProItem(lbl) && <ProBadge />}
                       <div className="flex-1 flex items-center justify-center">
                         <DeviceThumbSvg type={lbl} color={colors.sd} className="h-16 w-auto max-w-full" />
                       </div>
@@ -305,7 +291,6 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                       onClick={() => onAddDeviceByType(item.label)}
                       className="group relative w-36 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
                     >
-{isProItem(item.label) && <ProBadge />}
                       <div className="flex-1 flex items-center justify-center">
                         <DeviceThumbSvg type={item.label} className="h-16 w-auto max-w-full" />
                       </div>
@@ -338,7 +323,6 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                       onClick={() => onAddDeviceByType(lbl)}
                       className="group relative w-32 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
                     >
-{isProItem(lbl) && <ProBadge />}
                       <div className="flex-1 flex items-center justify-center">
                         <DeviceThumbSvg type={lbl} className="h-16 w-auto max-w-full" />
                       </div>
@@ -367,7 +351,6 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                       onClick={() => onAddDeviceByType(lbl)}
                       className="group relative w-32 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
                     >
-{isProItem(lbl) && <ProBadge />}
                       <div className="flex-1 flex items-center justify-center">
                         <DeviceThumbSvg type={lbl} className="h-16 w-auto max-w-full" />
                       </div>
@@ -392,7 +375,6 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                       onClick={() => onAddDeviceByType(lbl)}
                       className="group relative w-40 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
                     >
-{isProItem(lbl) && <ProBadge />}
                       <div className="flex-1 flex items-center justify-center">
                         <DeviceThumbSvg type={lbl} className="h-16 w-auto max-w-full" />
                       </div>
@@ -414,7 +396,6 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                       onClick={() => onAddDeviceByType(lbl)}
                       className="group relative w-24 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
                     >
-{isProItem(lbl) && <ProBadge />}
                       <div className="flex-1 flex items-center justify-center">
                         <DeviceThumbSvg type={lbl} className="h-16 w-auto max-w-full" />
                       </div>
@@ -436,7 +417,6 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                       onClick={() => onAddDeviceByType(lbl)}
                       className="group relative w-20 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
                     >
-{isProItem(lbl) && <ProBadge />}
                       <div className="flex-1 flex items-center justify-center">
                         <DeviceThumbSvg type={lbl} className="h-16 w-auto max-w-full" />
                       </div>
@@ -555,7 +535,6 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                     onClick={() => onAddRailByLength(mm)}
                     className="group relative w-24 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2.5 shadow-sm shrink-0"
                   >
-                    {isProItem(mm) && <ProBadge />}
                     <div className="flex-1 flex items-center justify-center w-full px-1">
                       <DeviceThumbSvg type="DIN Rail" length={mm} className="w-20 h-6" />
                     </div>
