@@ -16,7 +16,7 @@ import { PRESET_TEMPLATES, ELECTRICAL_CATALOG } from './data/componentsCatalog';
 import { CanvasWorkspace } from './components/CanvasWorkspace';
 import { BottomDrawer } from './components/BottomDrawer';
 import { AppMenuDrawer } from './components/AppMenuDrawer';
-import { PropertyInspector } from './components/PropertyInspector';
+import { DeviceToolbar } from './components/DeviceToolbar';
 import { BOMModal } from './components/BOMModal';
 import { ProjectManagerModal } from './components/ProjectManagerModal';
 import { FileText } from 'lucide-react';
@@ -1170,16 +1170,13 @@ export default function App() {
 
         {/* Side Property Inspector (Slides out when a device is selected) */}
         {selectedDevice && (
-          <PropertyInspector
+          <DeviceToolbar
             device={selectedDevice}
-            allWires={project.wires ?? []}
             onStartWire={handleStartWire}
-            onDeleteWire={handleDeleteWire}
             onClose={() => setSelectedDeviceId(null)}
             onUpdateDevice={handleUpdateDevice}
             onDeleteDevice={handleDeleteDevice}
             onDuplicateDevice={handleDuplicateDevice}
-            onMoveDevice={handleMoveDevice}
           />
         )}
       </main>
