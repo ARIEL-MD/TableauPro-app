@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { PictogramKey } from '../types/panel';
 import { DeviceThumbSvg } from './DeviceThumbSvg';
 import { PictogramCards } from './PictogramCards';
+import { TextCards } from './TextCards';
 import { Plus, Minus } from 'lucide-react';
 import { WireTerminalCards } from './WireTerminalCards';
 import { DinRailCards } from './DinRailCards';
@@ -773,39 +774,13 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
             <div className="space-y-4">
               {/* Group: Texte */}
               <div>
-                <h3 className="text-xs font-bold text-slate-900 mb-2">Texte & Tableaux</h3>
-                <div className="flex items-center gap-3">
-                  <div
-                    onClick={() => onAddAnnotation('text')}
-                    className="relative w-24 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] p-2 flex flex-col items-center justify-between shadow-sm cursor-pointer"
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-white/20 border border-white/40 flex items-center justify-center text-white font-serif text-lg font-bold">
-                      T=
-                    </div>
-                    <span className="text-xs text-white font-medium">Texte</span>
-                  </div>
-
-                  <div
-                    onClick={() => onAddAnnotation('table')}
-                    className="relative w-24 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] p-2 flex flex-col items-center justify-between shadow-sm cursor-pointer"
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-white/20 border border-white/40 grid grid-cols-2 grid-rows-2 p-1 gap-1">
-                      <div className="bg-white/40 rounded-xs" />
-                      <div className="bg-white/40 rounded-xs" />
-                      <div className="bg-white/40 rounded-xs" />
-                      <div className="bg-white/40 rounded-xs" />
-                    </div>
-                    <span className="text-xs text-white font-medium">Tableau</span>
-                  </div>
-                </div>
+                <h3 className="text-xs font-bold text-slate-900 mb-1.5">Texte</h3>
+                <TextCards onAddText={() => onAddAnnotation('text')} onAddTable={() => onAddAnnotation('table')} />
               </div>
 
               {/* Group: Objets (Pictogrammes) */}
               <div>
-                <h3 className="text-xs font-bold text-slate-900 mb-0.5">Objets & Symboles</h3>
-                <p className="text-[10px] text-slate-500 mb-2">
-                  Appareil sélectionné : le pictogramme lui est assigné. Sinon, il est posé librement sur le plan.
-                </p>
+                <h3 className="text-xs font-bold text-slate-900 mb-1.5">Objets</h3>
                 <PictogramCards onAdd={onAssignPictogramToSelected} />
               </div>
             </div>

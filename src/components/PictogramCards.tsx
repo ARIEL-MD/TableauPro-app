@@ -4,15 +4,24 @@ import { PictogramTile } from './PictogramIcon';
 
 /**
  * Cartes « Objets & Symboles » — reproduction de la capture de référence (sans badge PRO).
+ * « Éclairage » et « Prise » sont les cartes gratuites (fond plus foncé).
  * Cotes mesurées sur la capture (en px) : carte 158 de haut (largeur selon le libellé, mini 120),
  * rayon 20, espacement 12, fond #6f6f6f, tuile blanche 82 × 82 à 18 px du haut,
  * libellé blanc 22 px centré à 125 px du haut. Tout est multiplié par `scale` (0.55).
  * Les lignes passent à la ligne selon la largeur disponible.
  */
 const CARD = '#6f6f6f';
+const CARD_FREE = '#4e4e4e';
 const CARD_PRESSED = '#3b3b3b';
 
-const ITEMS: { key: PictogramKey; label: string }[] = [
+const ITEMS: { key: PictogramKey; label: string; free?: boolean }[] = [
+  { key: 'lighting', label: 'Éclairage', free: true },
+  { key: 'socket', label: 'Prise', free: true },
+  { key: 'oven', label: 'Four' },
+  { key: 'washing_machine', label: 'Lave-linge' },
+  { key: 'earth', label: 'Mise à la terre' },
+  { key: 'boiler', label: 'Chaudière' },
+  { key: 'air_conditioning', label: 'Climatiseur' },
   { key: 'bathroom', label: 'Salle de bain' },
   { key: 'kitchen', label: 'Cuisine' },
   { key: 'microwave', label: 'Micro-ondes' },
@@ -35,16 +44,6 @@ const ITEMS: { key: PictogramKey; label: string }[] = [
   { key: 'alarm', label: 'Alarme' },
   { key: 'camera', label: 'Caméra' },
   { key: 'blank', label: '---' },
-  // Symboles déjà présents dans l'application, présentés dans la même tuile
-  { key: 'lighting', label: 'Éclairage' },
-  { key: 'socket', label: 'Prise' },
-  { key: 'earth', label: 'Terre' },
-  { key: 'oven', label: 'Four' },
-  { key: 'washing_machine', label: 'Lave-linge' },
-  { key: 'boiler', label: 'Chauffe-eau' },
-  { key: 'air_conditioning', label: 'Climatisation' },
-  { key: 'heat_pump', label: 'Pompe à chaleur' },
-  { key: 'solar', label: 'Onduleur solaire' },
 ];
 
 interface Props {
@@ -74,7 +73,7 @@ export const PictogramCards: React.FC<Props> = ({ onAdd, scale = 0.55 }) => {
             height: px(158),
             padding: `${px(18)}px ${px(18)}px 0`,
             borderRadius: px(20),
-            background: pressed === it.key ? CARD_PRESSED : CARD,
+            background: pressed === it.key ? CARD_PRESSED : it.free ? CARD_FREE : CARD,
             transition: 'background 0.1s',
             display: 'flex',
             flexDirection: 'column',

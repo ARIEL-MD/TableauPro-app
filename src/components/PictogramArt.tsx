@@ -25,6 +25,71 @@ const Fan: React.FC = () => (
 );
 
 export const PICTO_ART: Partial<Record<PictogramKey, React.ReactNode>> = {
+  lighting: (
+    <g>
+      <path d="M32 6 a16 16 0 0 0 -9.5 28.8 c2 1.6 3 3.6 3 6.2 v2 h13 v-2 c0 -2.6 1 -4.6 3 -6.2 A16 16 0 0 0 32 6 Z" />
+      <path d="M27 18 l5 10 l5 -10 M32 28 V41" />
+      <path d="M25.5 47 h13 M26.5 52 h11 M28.5 57 h7" />
+    </g>
+  ),
+  socket: (
+    <g>
+      <circle cx={32} cy={32} r={27} />
+      <circle cx={32} cy={32} r={21} />
+      <rect x={28} y={5} width={8} height={8} rx={1} fill="currentColor" />
+      <rect x={28} y={51} width={8} height={8} rx={1} fill="currentColor" />
+      <circle cx={23} cy={32} r={4.5} fill="currentColor" />
+      <circle cx={41} cy={32} r={4.5} fill="currentColor" />
+    </g>
+  ),
+  oven: (
+    <g>
+      <rect x={6} y={8} width={52} height={48} rx={5} />
+      {[13, 19, 25, 31, 37, 43, 49].map((x) => (
+        <circle key={x} cx={x} cy={15} r={1.3} fill="currentColor" />
+      ))}
+      <path d="M6 21 H58" />
+      <path d="M13 26 H51" />
+      <rect x={12} y={29} width={40} height={21} rx={2} />
+    </g>
+  ),
+  washing_machine: (
+    <g>
+      <rect x={7} y={7} width={50} height={50} rx={5} />
+      {[14, 20, 26, 32].map((x) => (
+        <circle key={x} cx={x} cy={14} r={1.3} fill="currentColor" />
+      ))}
+      <path d="M40 14 h11" />
+      <path d="M7 21 H57" />
+      <circle cx={32} cy={39} r={14} />
+      <circle cx={32} cy={39} r={8.5} />
+      <path d="M26.5 41 q5.5 6 11 0" />
+    </g>
+  ),
+  earth: (
+    <g>
+      <path d="M32 6 V30" />
+      <path d="M10 30 H54 M18 40 H46 M26 50 H38" />
+    </g>
+  ),
+  boiler: (
+    <g>
+      <rect x={18} y={16} width={28} height={36} rx={5} />
+      <path d="M26 16 V9 h-5 M38 16 V9 h5" />
+      <path d="M26 52 V58 M38 52 V58" />
+      <circle cx={32} cy={36} r={5.5} />
+      <circle cx={32} cy={36} r={1.6} fill="currentColor" />
+      <path d="M32 22 V28" />
+    </g>
+  ),
+  air_conditioning: (
+    <g>
+      <rect x={6} y={8} width={52} height={24} rx={5} />
+      <path d="M10 25 H54" />
+      <path d="M14 15 H26" />
+      <path d="M18 38 q3.5 4.5 0 9 t0 9 M32 38 q3.5 4.5 0 9 t0 9 M46 38 q3.5 4.5 0 9 t0 9" />
+    </g>
+  ),
   bathroom: (
     <g>
       <path d="M8 32 H56 V36 a10 10 0 0 1 -10 10 H18 a10 10 0 0 1 -10 -10 Z" />
