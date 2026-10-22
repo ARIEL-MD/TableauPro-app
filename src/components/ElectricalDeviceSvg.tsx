@@ -73,7 +73,9 @@ const deviceLabel = (d: ElectricalDevice, type: string): string | undefined => {
     return `${cal ?? 25}A ${sens}mA`;
   }
   if (type.startsWith('MCB')) {
-    return `${d.curve ?? 'C'}${cal ?? 16}`;
+    if (cal === undefined) return undefined;
+    const curve = d.curve && d.curve !== 'none' ? d.curve : '';
+    return `${curve}${cal}`;
   }
   return undefined;
 };

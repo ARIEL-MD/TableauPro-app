@@ -50,7 +50,7 @@ const MANUFACTURER_PRESETS: {
   category: ElectricalDevice['category'];
   poles: ElectricalDevice['poles'];
   calibre?: number;
-  curve?: 'B' | 'C' | 'D';
+  curve?: 'A' | 'B' | 'C' | 'D' | 'K' | 'Z' | 'none';
   differentialType?: DifferentialType;
   differentialSensibility?: DifferentialSensibility;
   breakingCapacity?: '4.5 kA' | '6 kA' | '10 kA';
@@ -317,6 +317,107 @@ const MANUFACTURER_PRESETS: {
   },
 ];
 
+
+/* Courbes et intensités proposées selon le type d'appareil */
+const CURVES: ('A' | 'B' | 'C' | 'D' | 'K' | 'Z' | 'none')[] = ['A', 'B', 'C', 'D', 'K', 'Z', 'none'];
+const MCB_INTENSITIES = [1, 2, 3, 4, 6, 8, 10, 13, 16, 20, 25, 32, 40, 50, 63];
+const RCD_INTENSITIES = [25, 40, 63];
+
+const calibreChip = (d: ElectricalDevice): string => {
+  if (d.category === 'differential') {
+    const sens = typeof d.differentialSensibility === 'number' ? d.differentialSensibility : 30;
+    return `${d.calibre ?? '—'}A ${sens}mA`;
+  }
+  const curve = d.curve && d.curve !== 'none' ? d.curve : '';
+  return d.calibre === undefined ? '—' : `${curve}${d.calibre}`;
+};
+
+const CalibreModal: React.FC<{
+  device: ElectricalDevice;
+  onClose: () => void;
+  onSave: (patch: Partial<ElectricalDevice>) => void;
+}> = ({ device, onClose, onSave }) => {
+  const isDiffDev = device.category === 'differential';
+  const intensities = isDiffDev ? RCD_INTENSITIES : MCB_INTENSITIES;
+  const [curve, setCurve] = useState<NonNullable<ElectricalDevice['curve']>>(device.curve ?? 'C');
+  const [cal, setCal] = useState<number | undefined>(typeof device.calibre === 'number' ? device.calibre : undefined);
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40" onClick={onClose}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-md bg-white rounded-t-2xl shadow-2xl p-4 text-slate-900"
+      >
+        <div className="flex items-center justify-between mb-3">
+          <button type="button" onClick={onClose} className="text-[#007aff] text-sm cursor-pointer">Annuler</button>
+          <span className="font-bold text-sm">Calibre</span>
+          <span className="w-12" />
+        </div>
+        <div className="flex gap-4">
+          <div className="flex flex-col items-center gap-1 w-20">
+            <span className="text-xs font-bold">{device.name}</span>
+            <span className="text-[10px] px-1 rounded bg-black text-white font-mono">{cal === undefined ? '—' : `${isDiffDev ? '' : curve === 'none' ? '' : curve}${cal}`}</span>
+          </div>
+          <div className="flex-1">
+            {!isDiffDev && (
+              <>
+                <p className="text-xs text-slate-500 mb-1">Courbe de déclenchement</p>
+                <div className="grid grid-cols-4 gap-1.5 mb-3">
+                  {CURVES.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setCurve(c)}
+                      className={`py-1.5 rounded-md text-xs font-bold cursor-pointer ${curve === c ? 'bg-[#007aff] text-white' : 'bg-slate-100 text-slate-700'}`}
+                    >
+                      {c === 'none' ? '—' : c}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+            <p className="text-xs text-slate-500 mb-1">Intensité</p>
+            <div className="max-h-44 overflow-y-auto grid grid-cols-3 gap-1.5">
+              {intensities.map((i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setCal(i)}
+                  className={`py-1.5 rounded-md text-xs font-mono font-bold cursor-pointer ${cal === i ? 'bg-[#007aff] text-white' : 'bg-slate-100 text-slate-700'}`}
+                >
+                  {i}A
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={() => onSave({ calibre: undefined, curve: undefined })}
+            className="w-full py-2 rounded-lg bg-red-50 text-red-600 text-xs font-bold cursor-pointer"
+          >
+            Supprimer le calibre
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              onSave({
+                calibre: cal,
+                curve: isDiffDev ? device.curve : curve,
+                wireGauge: cal !== undefined && cal >= 32 ? '6mm²' : cal !== undefined && cal >= 20 ? '2.5mm²' : '1.5mm²',
+              });
+              onClose();
+            }}
+            className="w-full py-2 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold cursor-pointer"
+          >
+            Enregistrer
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const PropertyInspector: React.FC<PropertyInspectorProps> = ({
   device,
   allWires = [],
@@ -329,6 +430,7 @@ export const PropertyInspector: React.FC<PropertyInspectorProps> = ({
   onMoveDevice,
 }) => {
   const [wireModalOpen, setWireModalOpen] = useState(false);
+  const [calibreModalOpen, setCalibreModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'specs' | 'circuit' | 'presets'>('specs');
 
   if (!device) return null;
@@ -387,6 +489,14 @@ export const PropertyInspector: React.FC<PropertyInspectorProps> = ({
   };
 
   return (
+    <>
+    {calibreModalOpen && (
+      <CalibreModal
+        device={device}
+        onClose={() => setCalibreModalOpen(false)}
+        onSave={(patch) => onUpdateDevice({ ...device, ...patch })}
+      />
+    )}
     <aside
       aria-label="Inspecteur de modèle de composant"
       className="fixed top-14 right-0 bottom-0 w-88 sm:w-96 z-40 bg-slate-900/98 backdrop-blur-xl border-l border-slate-700/80 shadow-2xl p-4 flex flex-col justify-between overflow-y-auto no-print text-slate-100 font-sans"
@@ -403,6 +513,16 @@ export const PropertyInspector: React.FC<PropertyInspectorProps> = ({
             </h3>
           </div>
           <div className="flex items-center gap-1">
+          {(isBreaker || isRcbo || isDiff) && (
+            <button
+              type="button"
+              onClick={() => setCalibreModalOpen(true)}
+              className="px-2 py-0.5 rounded-md bg-black text-white text-[11px] font-bold font-mono hover:bg-slate-800 cursor-pointer"
+              title="Modifier le calibre"
+            >
+              {calibreChip(device)}
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setWireModalOpen(true)}
@@ -590,7 +710,7 @@ export const PropertyInspector: React.FC<PropertyInspectorProps> = ({
                       <button
                         key={c}
                         type="button"
-                        onClick={() => onUpdateDevice({ ...device, curve: c as 'B' | 'C' | 'D' })}
+                        onClick={() => onUpdateDevice({ ...device, curve: c as ElectricalDevice['curve'] })}
                         className={`py-1.5 rounded text-[11px] font-semibold transition-all cursor-pointer ${
                           (device.curve || 'C') === c
                             ? 'bg-[#007aff] text-white shadow-xs'
@@ -1004,5 +1124,6 @@ export const PropertyInspector: React.FC<PropertyInspectorProps> = ({
         </button>
       </div>
     </aside>
+    </>
   );
 };

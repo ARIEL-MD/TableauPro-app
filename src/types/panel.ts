@@ -116,7 +116,7 @@ export interface ElectricalDevice {
   modelSeries?: string; // e.g. "Drivia", "Resi9", "SanVis", "Acti9"
   poles: DevicePoles;
   calibre?: BreakerCalibre | number;
-  curve?: 'B' | 'C' | 'D';
+  curve?: 'A' | 'B' | 'C' | 'D' | 'K' | 'Z' | 'none';
   differentialSensibility?: DifferentialSensibility | number;
   differentialType?: DifferentialType;
   breakingCapacity?: '4.5 kA' | '6 kA' | '10 kA';
@@ -239,7 +239,7 @@ export interface CatalogItem {
   moduleWidth: number;
   poles: DevicePoles;
   calibre?: BreakerCalibre;
-  curve?: 'B' | 'C' | 'D';
+  curve?: 'A' | 'B' | 'C' | 'D' | 'K' | 'Z' | 'none';
   differentialSensibility?: DifferentialSensibility;
   differentialType?: DifferentialType;
   description: string;
