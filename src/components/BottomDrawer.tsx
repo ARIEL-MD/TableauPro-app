@@ -5,6 +5,7 @@ import { PICTOGRAM_LIST, PictogramIcon } from './PictogramIcon';
 import { Plus, Minus } from 'lucide-react';
 import { WireTerminalCards } from './WireTerminalCards';
 import { DinRailCards } from './DinRailCards';
+import { SpringBarCards } from './SpringBarCards';
 
 export type DrawerCategory =
   | 'appareils'
@@ -546,33 +547,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
               {/* Group 2: Barres auto-serrantes */}
               <div>
                 <h3 className="text-xs font-bold text-slate-900 mb-2">Barres auto-serrantes</h3>
-                <div className="flex items-center gap-3 overflow-x-auto pb-1">
-                  {[
-                    '5 + 1 contacts',
-                    '8 + 2 contacts',
-                    '11 + 3 contacts',
-                    '14 + 4 contacts',
-                    '17 + 5 contacts',
-                    '20 + 6 contacts',
-                  ].map((lbl, idx) => (
-                    <div
-                      key={lbl}
-                      onClick={() => onAddTerminalBar('spring', [6, 10, 14, 18, 22, 26][idx])}
-                      className="group relative w-32 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
-                    >
-                      <div className="flex items-center justify-between w-full px-1">
-                        <DeviceThumbSvg type="TerminalBar" variant="spring" count={Math.min(14, idx * 3 + 6)} className="w-16 h-6" />
-                        <div className="flex flex-col gap-0.5">
-                          <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                        </div>
-                      </div>
-                      <span className="text-[10px] text-white font-medium text-center truncate w-full">
-                        {lbl}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                <SpringBarCards onAddTerminalBar={onAddTerminalBar} />
               </div>
 
               {/* Group 3: Barres à vis */}
