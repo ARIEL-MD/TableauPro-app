@@ -7,6 +7,7 @@ import { WireTerminalCards } from './WireTerminalCards';
 import { DinRailCards } from './DinRailCards';
 import { ColorChips as ColorChipsView } from './ColorChips';
 import { McbCards } from './McbCards';
+import { TimerRelayCards, AfddCards } from './ProDeviceCards';
 import { SpringBarCards } from './SpringBarCards';
 
 export type DrawerCategory =
@@ -321,46 +322,13 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
               {/* SECTION: Relais temporisés */}
               <div>
                 <h3 className="text-xs font-bold text-slate-900 mb-1.5">Relais temporisés</h3>
-                <div className="flex items-center gap-2.5 overflow-x-auto pb-1">
-                  {[
-                    'Relais temporisé (électromécanique)',
-                    'Relais temporisé (numérique)',
-                  ].map((lbl) => (
-                    <div
-                      key={lbl}
-                      onClick={() => onAddDeviceByType(lbl)}
-                      className="group relative w-40 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
-                    >
-                      <div className="flex-1 flex items-center justify-center">
-                        <DeviceThumbSvg type={lbl} className="h-14 w-auto max-w-full" />
-                      </div>
-                      <span className="text-[10px] text-white font-medium text-center truncate w-full">
-                        {lbl}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                <TimerRelayCards onAdd={(type) => onAddDeviceByType(type)} />
               </div>
 
               {/* SECTION: Dispositif de détection d'arc électrique (AFDD) */}
               <div>
                 <h3 className="text-xs font-bold text-slate-900 mb-1.5">Dispositif de détection d’arc électrique</h3>
-                <div className="flex items-center gap-2.5 overflow-x-auto pb-1">
-                  {['AFDD + MCB', 'AFDD + RCBO'].map((lbl) => (
-                    <div
-                      key={lbl}
-                      onClick={() => onAddDeviceByType(lbl)}
-                      className="group relative w-24 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
-                    >
-                      <div className="flex-1 flex items-center justify-center">
-                        <DeviceThumbSvg type={lbl} className="h-14 w-auto max-w-full" />
-                      </div>
-                      <span className="text-[10px] text-white font-medium text-center truncate w-full">
-                        {lbl}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                <AfddCards onAdd={(type) => onAddDeviceByType(type)} />
               </div>
 
               {/* SECTION: Parafoudre (SPD) */}
