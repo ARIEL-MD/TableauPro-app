@@ -661,6 +661,8 @@ export default function App() {
         id: `term-${Date.now()}`,
         type: barType,
         holesCount: (holes as any) || 8,
+        subType: type === 'custom' ? 'custom_contacts' : type,
+        color,
         x: 60 + prev.terminalBars.length * 150,
         y: 40,
       };

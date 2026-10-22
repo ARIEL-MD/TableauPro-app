@@ -1,5 +1,6 @@
 import React from 'react';
 import { Meter1PSvg, Meter3PSvg } from './MeterSvg';
+import { TerminalBarGraphic } from './TerminalBarGraphic';
 
 interface DeviceThumbSvgProps {
   type: string;
@@ -1124,6 +1125,7 @@ export const DeviceThumbSvg: React.FC<DeviceThumbSvgProps> = ({
     /* ---------- Terminal bars ---------- */
     case 'TerminalBar': {
       const n = Math.min(count || 8, 14);
+      if (variant !== 'spring') return <TerminalBarGraphic count={n} color={color} className={className} />;
       const colors: Record<string, string> = { blue: '#4b86c6', orange: '#e58a1f', yellow: '#e6c53a', green: '#3f9d5a', black: '#2d3139', red: '#d94a4a' };
       const body = colors[color || 'blue'] || (color && color.startsWith('#') ? color : '#4b86c6');
       const spring = variant === 'spring';
