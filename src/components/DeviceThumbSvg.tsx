@@ -376,19 +376,32 @@ export const DeviceThumbSvg: React.FC<DeviceThumbSvgProps> = ({
       );
     case 'Contactor 4NO':
       return (
-        <Body modules={4} className={className}>
-          <rect x={PAD + 5} y={PAD + 26} width={62} height={38} rx={2} fill="#e5e7eb" stroke="#b8bcc4" strokeWidth={0.6} />
+        <Body modules={3} h={85} stripe="" screws={false} className={className}>
+          {/* Fenêtre frontale : symbole de bobine + voyants de contacts */}
+          <rect x={PAD + 4} y={PAD + 22} width={46} height={30} rx={2} fill="#e9edf2" stroke="#9aa1ab" strokeWidth={0.5} />
+          <path d={`M${PAD + 12} ${PAD + 36} h4 q1.5 -4 3 0 q1.5 4 3 0 q1.5 -4 3 0 q1.5 4 3 0 h4`} fill="none" stroke="#3f4650" strokeWidth={0.9} strokeLinecap="round" />
           {[0, 1, 2, 3].map((i) => (
-            <TextLines key={i} x={PAD + 10 + i * 15} y={PAD + 30} w={9} n={3} />
+            <rect key={i} x={PAD + 9 + i * 8} y={PAD + 28} width={5} height={3} rx={0.6} fill={i < 2 ? '#2e9e5b' : '#c9d0d8'} stroke="#8b929e" strokeWidth={0.3} />
           ))}
-          <rect x={PAD + 8} y={PAD + 48} width={56} height={10} rx={1.5} fill="#cbd5e1" />
+          {/* Bornes haute (1 3 5 7) et basse (2 4 6 8), numérotées */}
           {[0, 1, 2, 3].map((i) => (
-            <rect key={i} x={PAD + 11 + i * 14} y={PAD + 50} width={8} height={6} rx={1} fill="#f8fafc" stroke="#94a3b8" strokeWidth={0.4} />
+            <g key={`t${i}`}>
+              <rect x={PAD + 1.5 + i * 13} y={PAD + 4} width={11} height={9} rx={1} fill="#c2c8d0" stroke="#5b626c" strokeWidth={0.5} />
+              <text x={PAD + 7 + i * 13} y={PAD + 2.6} fontSize={3.4} textAnchor="middle" fill="#334155" fontFamily="Arial, sans-serif">{[1, 3, 5, 7][i]}</text>
+              <rect x={PAD + 1.5 + i * 13} y={PAD + 72} width={11} height={9} rx={1} fill="#c2c8d0" stroke="#5b626c" strokeWidth={0.5} />
+              <text x={PAD + 7 + i * 13} y={PAD + 85.5} fontSize={3.4} textAnchor="middle" fill="#334155" fontFamily="Arial, sans-serif">{[2, 4, 6, 8][i]}</text>
+            </g>
           ))}
-          <rect x={PAD + 6} y={PAD + 66} width={6} height={1.8} rx={0.6} fill="#2e9e5b" />
+          {/* Bornes de bobine A1 / A2 */}
+          <rect x={PAD + 4} y={PAD + 58} width={12} height={6} rx={0.8} fill="#c2c8d0" stroke="#5b626c" strokeWidth={0.4} />
+          <rect x={PAD + 38} y={PAD + 58} width={12} height={6} rx={0.8} fill="#c2c8d0" stroke="#5b626c" strokeWidth={0.4} />
+          <text x={PAD + 10} y={PAD + 62.5} fontSize={3} textAnchor="middle" fill="#334155" fontFamily="Arial, sans-serif">A1</text>
+          <text x={PAD + 44} y={PAD + 62.5} fontSize={3} textAnchor="middle" fill="#334155" fontFamily="Arial, sans-serif">A2</text>
+          {/* Repère LED */}
+          <rect x={PAD + 22} y={PAD + 60} width={10} height={3} rx={1} fill="#2e9e5b" />
         </Body>
       );
-    case 'Telerupteur':
+        case 'Telerupteur':
       return (
         <Body modules={1} className={className}>
           <TextLines x={PAD + 4} y={PAD + 28} w={10} n={3} />
@@ -441,24 +454,27 @@ export const DeviceThumbSvg: React.FC<DeviceThumbSvgProps> = ({
     /* ---------- Voltage relays ---------- */
     case 'VoltageRelay 1P':
       return (
-        <Body modules={2} className={className}>
-          <rect x={PAD + 4} y={PAD + 28} width={28} height={16} rx={2} fill="#111827" />
-          <text x={PAD + 18} y={PAD + 40} fontSize={10} fontFamily="monospace" fontWeight="bold" textAnchor="middle" fill="#ef4444">230</text>
-          <circle cx={PAD + 10} cy={PAD + 55} r={2} fill="#2e9e5b" />
-          <circle cx={PAD + 26} cy={PAD + 55} r={2} fill="#f59e0b" />
+        <Body modules={1} stripe="" screws={false} className={className}>
+          <rect x={PAD + 2} y={PAD + 26} width={14} height={14} rx={1.5} fill="#111827" />
+          <text x={PAD + 9} y={PAD + 36} fontSize={6} fontFamily="monospace" fontWeight="bold" textAnchor="middle" fill="#ef4444">230</text>
+          <circle cx={PAD + 5} cy={PAD + 46} r={1.4} fill="#2e9e5b" />
+          <circle cx={PAD + 13} cy={PAD + 46} r={1.4} fill="#f59e0b" />
         </Body>
       );
-    case 'VoltageRelay 3P':
+        case 'VoltageRelay 3P':
       return (
-        <Body modules={4} className={className}>
-          <rect x={PAD + 6} y={PAD + 28} width={60} height={16} rx={2} fill="#111827" />
-          <text x={PAD + 36} y={PAD + 40} fontSize={10} fontFamily="monospace" fontWeight="bold" textAnchor="middle" fill="#ef4444">400</text>
+        <Body modules={4} stripe="" screws={false} className={className}>
           {[0, 1, 2].map((i) => (
-            <circle key={i} cx={PAD + 14 + i * 22} cy={PAD + 56} r={2} fill={['#2e9e5b', '#2e9e5b', '#2e9e5b'][i]} />
+            <g key={i}>
+              <rect x={PAD + 4 + i * 22} y={PAD + 24} width={18} height={14} rx={1.5} fill="#111827" />
+              <text x={PAD + 13 + i * 22} y={PAD + 34.5} fontSize={7} fontFamily="monospace" fontWeight="bold" textAnchor="middle" fill="#ef4444">230</text>
+              <circle cx={PAD + 9 + i * 22} cy={PAD + 45} r={1.3} fill={['#2e9e5b', '#f59e0b', '#2e9e5b'][i]} />
+            </g>
           ))}
+          <rect x={PAD + 4} y={PAD + 52} width={64} height={3} rx={1} fill="#c2c8d0" />
         </Body>
       );
-
+    
     /* ---------- Arc fault detection (AFDD) ---------- */
     case 'AFDD + MCB':
     case 'AFDD + RCBO': {
@@ -549,30 +565,24 @@ export const DeviceThumbSvg: React.FC<DeviceThumbSvgProps> = ({
     case 'Meter 1P':
     case 'Meter 3P': {
       const three = type === 'Meter 3P';
-      const W = three ? 126 : 100;
-      const cells = three ? 6 : 4;
+      const modules = three ? 4 : 2;
+      const digits = three ? '0706 15' : '000189';
       return (
-        <svg viewBox={`0 0 ${W + 3} 83`} className={className} fill="none" preserveAspectRatio="xMidYMid meet">
-          <Defs />
-          <rect x={1.5} y={1.5} width={W} height={52} rx={3} fill="url(#dt-body)" stroke="#9ca3af" strokeWidth={0.8} />
-          <rect x={8} y={8} width={W * 0.5} height={5} rx={1} fill="url(#dt-lcd)" />
-          <rect x={W * 0.28} y={20} width={W * 0.44} height={14} rx={1.5} fill="#e5e7eb" stroke="#9aa0a8" strokeWidth={0.6} />
-          {Array.from({ length: 7 }).map((_, i) => (
-            <rect key={i} x={W * 0.3 + i * (W * 0.42 / 7)} y={22} width={W * 0.42 / 7 - 1.2} height={10} rx={0.8} fill="#111827" />
+        <Body modules={modules} h={90} stripe="" screws={false} className={className}>
+          {/* Afficheur LCD */}
+          <rect x={PAD + 3} y={PAD + 12} width={modules * MODULE - 6} height={22} rx={1.5} fill="#0f172a" stroke="#334155" strokeWidth={0.5} />
+          <text x={PAD + modules * MODULE / 2} y={PAD + 27} fontSize={7} fontFamily="monospace" fontWeight="bold" textAnchor="middle" fill="#e8f3ea" letterSpacing="1">{digits}</text>
+          {/* Bande verte d'état */}
+          <rect x={PAD + 3} y={PAD + 6} width={modules * MODULE * 0.45} height={3} rx={1} fill="#2e9e5b" />
+          <rect x={PAD + modules * MODULE - 12} y={PAD + 38} width={8} height={3} rx={1} fill="#d32f2f" />
+          {/* Bornes en rangée (bas) */}
+          {Array.from({ length: modules }).map((_, i) => (
+            <g key={`b${i}`}>
+              <rect x={PAD + 3 + i * MODULE + 1.5} y={PAD + 70} width={MODULE - 6} height={11} rx={1} fill="#9aa1ab" stroke="#5b626c" strokeWidth={0.4} />
+              <circle cx={PAD + i * MODULE + MODULE / 2} cy={PAD + 75.5} r={1.5} fill="#cfd4db" />
+            </g>
           ))}
-          <rect x={W - 14} y={42} width={8} height={5} rx={1} fill="#d32f2f" />
-          <rect x={1.5} y={53} width={W} height={29} rx={2} fill="#cfd3da" stroke="#9ca3af" strokeWidth={0.8} />
-          {Array.from({ length: cells }).map((_, i) => {
-            const cw = (W - 12) / cells;
-            const cx = 6 + i * cw;
-            return (
-              <g key={i}>
-                <rect x={cx} y={58} width={cw - 3} height={10} rx={1} fill="#f8fafc" stroke="#9aa0a8" strokeWidth={0.5} />
-                <circle cx={cx + (cw - 3) / 2} cy={74} r={3} fill="#9aa0a8" stroke="#6b7280" strokeWidth={0.5} />
-              </g>
-            );
-          })}
-        </svg>
+        </Body>
       );
     }
 
