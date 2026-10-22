@@ -38,98 +38,123 @@ interface ModularDeviceProps {
  * Light grey body, coloured band, screw terminals top/bottom, black toggle.
  */
 const ModularDevice: React.FC<ModularDeviceProps> = ({ kind, modules, slim, stripe, className, label }) => {
-  const H = 90;
-  const mw = 18;
-  // "1P+N" is a half-width (1 module) device in the real world: draw it narrower.
-  const W = slim ? 12 : modules * mw;
-  const pad = 2.5;
-  const screws = slim ? 1 : modules;
-  const sw = slim ? W : mw;
+  // Dessin en unités : 1 module = 36, hauteur 200 (proportions d'un appareil réel)
+  const MW = 36;
+  const H = 200;
+  const PAD = 6;
+  const W = slim ? 18 : modules * MW;
+  const cols = slim ? 1 : modules;
   const isRes = kind === 'rccb' || kind === 'rcbo';
-  const handleColor = kind === 'sd' ? '#c62828' : isRes ? '#1e7fd6' : '#2b2f36';
+  const id = `md-${kind}-${cols}-${slim ? 's' : 'n'}`;
+  const cx = (i: number) => PAD + i * (slim ? 18 : MW) + (slim ? 9 : MW / 2);
+  const sw = slim ? 18 : MW;
 
-  const screw = (cx: number, cy: number) => (
-    <g key={`${cx}-${cy}`}>
-      <circle cx={cx} cy={cy} r={4.2} fill="#9aa0a8" stroke="#6b7280" strokeWidth={0.6} />
-      <circle cx={cx} cy={cy} r={3} fill="#c9cdd3" />
-      <line x1={cx - 2} y1={cy} x2={cx + 2} y2={cy} stroke="#5b616b" strokeWidth={0.9} />
-      <line x1={cx} y1={cy - 2} x2={cx} y2={cy + 2} stroke="#5b616b" strokeWidth={0.9} />
+  const screw = (x: number, y: number) => (
+    <g>
+      <circle cx={x} cy={y} r={7.5} fill="url(#md-screw)" stroke="#6b7280" strokeWidth={0.8} />
+      <path d={`M${x - 4} ${y - 4} L${x + 4} ${y + 4} M${x + 4} ${y - 4} L${x - 4} ${y + 4}`} stroke="#3f4650" strokeWidth={1.6} strokeLinecap="round" />
     </g>
   );
 
+  const labelW = label ? label.length * 5.2 + 8 : 0;
+  const labelH = 11;
+
   return (
-    <svg viewBox={`0 0 ${W + pad * 2} ${H + pad * 2}`} className={className} fill="none" preserveAspectRatio="xMidYMid meet">
+    <svg
+      viewBox={`0 0 ${W + PAD * 2} ${H + PAD * 2}`}
+      className={className}
+      fill="none"
+      preserveAspectRatio="xMidYMid meet"
+    >
       <defs>
-        <linearGradient id={`body-${kind}-${modules}-${slim ? 's' : 'n'}`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#d9dce1" />
-          <stop offset="0.5" stopColor="#f4f5f7" />
-          <stop offset="1" stopColor="#d3d6dc" />
+        <linearGradient id="md-body" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#d4d9e0" />
+          <stop offset="0.35" stopColor="#f6f7f9" />
+          <stop offset="0.7" stopColor="#eceff3" />
+          <stop offset="1" stopColor="#c9ced6" />
         </linearGradient>
         <linearGradient id="md-gloss" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#ffffff" stopOpacity="0.75" />
-          <stop offset="0.35" stopColor="#ffffff" stopOpacity="0" />
-          <stop offset="0.8" stopColor="#000000" stopOpacity="0" />
-          <stop offset="1" stopColor="#000000" stopOpacity="0.18" />
+          <stop offset="0" stopColor="#ffffff" stopOpacity="0.55" />
+          <stop offset="0.25" stopColor="#ffffff" stopOpacity="0" />
+          <stop offset="0.85" stopColor="#000000" stopOpacity="0" />
+          <stop offset="1" stopColor="#000000" stopOpacity="0.12" />
         </linearGradient>
-        <filter id="md-drop" x="-20%" y="-10%" width="150%" height="130%">
-          <feDropShadow dx="0.8" dy="1.4" stdDeviation="1" floodColor="#000000" floodOpacity="0.35" />
+        <radialGradient id="md-screw" cx="0.35" cy="0.35" r="0.7">
+          <stop offset="0" stopColor="#ffffff" />
+          <stop offset="0.6" stopColor="#b7bdc6" />
+          <stop offset="1" stopColor="#7d8592" />
+        </radialGradient>
+        <linearGradient id="md-handle" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#5b616b" />
+          <stop offset="1" stopColor="#2a2e35" />
+        </linearGradient>
+        <filter id="md-shadow" x="-10%" y="-5%" width="130%" height="120%">
+          <feDropShadow dx="1" dy="2" stdDeviation="1.6" floodOpacity="0.35" />
         </filter>
       </defs>
-      {/* Body (ombre portée + reflet du boîtier) */}
-      <rect x={pad} y={pad} width={W} height={H} rx={2} fill={`url(#body-${kind}-${modules}-${slim ? 's' : 'n'})`} stroke="#9ca3af" strokeWidth={0.8} filter="url(#md-drop)" />
-      <rect x={pad} y={pad} width={W} height={H} rx={2} fill="url(#md-gloss)" />
-      <rect x={pad + 0.6} y={pad + 0.6} width={W - 1.2} height={1} rx={0.5} fill="#ffffff" opacity={0.7} />
-      {/* Module separations */}
-      {Array.from({ length: Math.max(0, modules - 1) }).map((_, i) =>
-        slim ? null : (
-          <line key={i} x1={pad + (i + 1) * mw} y1={pad + 1} x2={pad + (i + 1) * mw} y2={pad + H - 1} stroke="#b8bcc4" strokeWidth={0.7} />
-        )
-      )}
 
-      {/* Top & bottom terminal screws */}
-      {Array.from({ length: screws }).map((_, i) => screw(pad + i * sw + sw / 2, pad + 9))}
-      {Array.from({ length: screws }).map((_, i) => screw(pad + i * sw + sw / 2, pad + H - 9))}
+      {/* Boîtier */}
+      <rect x={PAD} y={PAD} width={W} height={H} rx={3} fill="url(#md-body)" stroke="#2b3038" strokeWidth={1.2} filter="url(#md-shadow)" />
+      <rect x={PAD + 1} y={PAD + 1} width={W - 2} height={H - 2} rx={2.5} fill="url(#md-gloss)" />
 
-      {/* Coloured band */}
-      <rect x={pad} y={pad + 19} width={W} height={3.2} fill={stripe} />
+      {/* Séparations entre pôles */}
+      {Array.from({ length: cols - 1 }).map((_, i) => (
+        <line key={`sep-${i}`} x1={PAD + (i + 1) * sw} y1={PAD + 6} x2={PAD + (i + 1) * sw} y2={PAD + H - 6} stroke="#aeb4bd" strokeWidth={1} />
+      ))}
 
-      {/* Barre commune reliant les manettes des pôles multiples (2P, 3P, 4P) */}
-      {!slim && screws > 1 && (
-        <rect x={pad + sw / 2 - 2} y={pad + 46} width={(screws - 1) * sw + 4} height={3.5} rx={1} fill="#3a3f47" />
-      )}
-
-      {/* Plaquette de calibre (noire, comme sur les appareils réels) */}
-      {label && (
-        <g>
-          <rect x={pad + W / 2 - (label.length * 2.9 + 3) / 2} y={pad + 24} width={label.length * 2.9 + 3} height={8} rx={1} fill="#1f2937" />
-          <text x={pad + W / 2} y={pad + 30} fontSize={5.6} fontWeight="bold" textAnchor="middle" fill="#ffffff" fontFamily="Arial, sans-serif">{label}</text>
-        </g>
-      )}
-
-      {/* Toggle zone */}
-      {Array.from({ length: screws }).map((_, i) => {
-        const x0 = pad + i * sw;
-        const cx = x0 + sw / 2;
-        const hw = slim ? 8 : 13;
+      {/* Par pôle : vis haute, bande, vis basse, repères de bornes */}
+      {Array.from({ length: cols }).map((_, i) => {
+        const x = cx(i);
         return (
-          <g key={`t-${i}`}>
-            <rect x={cx - hw / 2 - 1} y={pad + 36} width={hw + 2} height={20} rx={1.5} fill="#3a3f47" />
-            <rect x={cx - hw / 2} y={pad + 38} width={hw} height={isRes ? 9 : 10} rx={1.2} fill={handleColor} />
-            {kind === 'sd' && <circle cx={cx} cy={pad + 43} r={1.6} fill="#fff" />}
-            {/* On/off marker */}
-            {!isRes && kind !== 'sd' && <rect x={cx - 3} y={pad + 41} width={6} height={2} rx={0.6} fill="#6b7280" />}
-            {/* Green status window */}
-            {!slim && <rect x={cx - 3} y={pad + 62} width={6} height={1.8} rx={0.6} fill="#2e9e5b" />}
+          <g key={`pole-${i}`}>
+            <rect x={PAD + i * sw + 4} y={PAD + 16} width={sw - 8} height={6} rx={1} fill="#c9ced6" />
+            {screw(x - (slim ? 0 : 8), PAD + 14)}
+            {!slim && screw(x + 8, PAD + 14)}
+            <rect x={PAD + i * sw + 3} y={PAD + 32} width={sw - 6} height={5} fill={stripe} />
+            <rect x={PAD + i * sw + 6} y={PAD + H - 48} width={sw - 12} height={3} fill="#dfe3e8" />
+            <rect x={PAD + i * sw + 6} y={PAD + H - 44} width={sw - 12} height={5} fill="#b9bfc8" />
+            <rect x={PAD + i * sw + 8} y={PAD + H - 34} width={sw - 16} height={2} fill="#7c8590" />
+            <rect x={PAD + i * sw + 8} y={PAD + H - 22} width={sw - 16} height={2} fill="#7c8590" />
+            {screw(x - (slim ? 0 : 8), PAD + H - 14)}
+            {!slim && screw(x + 8, PAD + H - 14)}
           </g>
         );
       })}
 
-      {/* Test button for RCD types */}
+      {/* Barre commune reliant les manettes des pôles multiples */}
+      {cols > 1 && (
+        <rect x={PAD + 8} y={PAD + H / 2 + 22} width={W - 16} height={5} rx={2} fill="#2a2e35" />
+      )}
+
+      {/* Manettes et voyant vert par pôle */}
+      {Array.from({ length: cols }).map((_, i) => {
+        const hx = PAD + i * sw + 6;
+        const hw = sw - 12;
+        return (
+          <g key={`handle-${i}`}>
+            <rect x={hx} y={PAD + H / 2 + 6} width={hw} height={22} rx={2} fill="#4b5058" />
+            <rect x={hx + 3} y={PAD + H / 2 + 8} width={hw - 6} height={5} rx={1} fill="#6b7280" opacity={0.7} />
+            <rect x={hx + 2} y={PAD + H / 2 + 24} width={hw - 4} height={9} rx={2} fill={isRes ? "#2f6fb0" : kind === "sd" ? "#c0392b" : "url(#md-handle)"} />
+            <rect x={PAD + i * sw + (slim ? 5 : 14)} y={PAD + H / 2 + 38} width={sw - (slim ? 10 : 28)} height={4} rx={1} fill="#2e9e5b" />
+          </g>
+        );
+      })}
+
+      {/* Plaquette de calibre (noire) */}
+      {label && (
+        <g>
+          <rect x={PAD + W / 2 - labelW / 2} y={PAD + H / 2 - 36} width={labelW} height={labelH} rx={1.5} fill="#111827" />
+          <text x={PAD + W / 2} y={PAD + H / 2 - 27.8} fontSize={8.5} fontWeight="bold" textAnchor="middle" fill="#ffffff" fontFamily="Arial, sans-serif">
+            {label}
+          </text>
+        </g>
+      )}
+
+      {/* Bouton test pour les différentiels */}
       {isRes && (
         <g>
-          <rect x={pad + 3} y={pad + 66} width={9} height={6} rx={1} fill="#fff" stroke="#8b929c" strokeWidth={0.5} />
-          <text x={pad + 7.5} y={pad + 70.7} fontSize={4.6} fontWeight="bold" textAnchor="middle" fill="#1e7fd6" fontFamily="Arial, sans-serif">T</text>
-          <rect x={pad + W - 11} y={pad + 67} width={8} height={3} rx={0.8} fill="#2e9e5b" />
+          <ellipse cx={PAD + 14} cy={PAD + 60} rx={8} ry={4.5} fill="#ffffff" stroke="#8b929c" strokeWidth={0.8} />
+          <text x={PAD + 14} y={PAD + 62.6} fontSize={5.5} fontWeight="bold" textAnchor="middle" fill="#1e7fd6" fontFamily="Arial, sans-serif">T</text>
         </g>
       )}
     </svg>
