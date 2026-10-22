@@ -47,7 +47,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
   const [comb3PLength, setComb3PLength] = useState(6);
 
   const [comb4PLength, setComb4PLength] = useState(8);
-  const [comb4PConfig, setComb4PConfig] = useState<'L1_L2_L3_N' | 'N_L1_L2_L3' | 'L1N_L2N_L3N'>('L1_L2_L3_N');
+  const [comb4PConfig, setComb4PConfig] = useState<'L1_L2_L3_N' | 'N_L1_L2_L3' | 'L1N_L2N_L3N'>('N_L1_L2_L3');
 
   const [colors, setColors] = useState<Record<string, string>>({
     mcb: 'red',

@@ -205,6 +205,7 @@ export interface PanelAnnotation {
   cells?: string[][]; // kind = 'table' (lignes x colonnes)
   pictogram?: PictogramKey; // kind = 'pictogram'
   size?: number; // kind = 'pictogram' (px)
+  color?: string; // kind = 'pictogram' (couleur CSS)
 }
 
 export interface ElectricalPanelProject {

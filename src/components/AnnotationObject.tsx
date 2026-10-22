@@ -163,6 +163,15 @@ export const AnnotationObject: React.FC<AnnotationObjectProps> = ({
           <ToolButton title="Agrandir" onClick={() => onUpdate(annotation.id, { size: Math.min(MAX_ICON, (annotation.size || 48) + 8) })}>
             <Plus className="w-3 h-3" />
           </ToolButton>
+          {['#1f2937', '#2563eb', '#dc2626', '#16a34a', '#f59e0b'].map((clr) => (
+            <button
+              key={clr}
+              title="Couleur"
+              onClick={() => onUpdate(annotation.id, { color: clr })}
+              className={`w-4 h-4 rounded-full border-2 ${(annotation.color || '#1f2937') === clr ? 'border-white ring-1 ring-slate-800' : 'border-transparent'}`}
+              style={{ backgroundColor: clr }}
+            />
+          ))}
         </>
       )}
       <ToolButton title="Supprimer" danger onClick={() => onDelete(annotation.id)}>
@@ -243,7 +252,7 @@ export const AnnotationObject: React.FC<AnnotationObjectProps> = ({
     content = (
       <div
         className="rounded-lg bg-white border border-slate-300 shadow-sm flex items-center justify-center text-slate-800 cursor-move"
-        style={{ width: size + 12, height: size + 12 }}
+        style={{ width: size + 12, height: size + 12, color: annotation.color || '#1f2937' }}
       >
         <PictogramIcon name={annotation.pictogram} size={size} />
       </div>
