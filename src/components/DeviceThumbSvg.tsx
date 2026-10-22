@@ -38,34 +38,37 @@ interface ModularDeviceProps {
  * Light grey body, coloured band, screw terminals top/bottom, black toggle.
  */
 const ModularDevice: React.FC<ModularDeviceProps> = ({ kind, modules, slim, stripe, className, label }) => {
-  // Dessin en unités : 1 module = 36 (18 mm réels), hauteur 180 (≈ 90 mm réels, fiches Hager)
-  const MW = 36;
-  const H = 180;
-  const PAD = 6;
-  const W = slim ? 18 : modules * MW;
+  // Cotes réelles en millimètres (fiches fabricants) : module 18 mm, hauteur 90 mm.
+  // Le dessin utilise 2 unités par mm.
+  const K = 2;
+  const MOD = 18;
+  const HMM = 90;
+  const P = 2 * K;
   const cols = slim ? 1 : modules;
+  const WMM = cols * MOD;
+  const W = WMM * K;
+  const H = HMM * K;
   const isRes = kind === 'rccb' || kind === 'rcbo';
-  const id = `md-${kind}-${cols}-${slim ? 's' : 'n'}`;
-  const cx = (i: number) => PAD + i * (slim ? 18 : MW) + (slim ? 9 : MW / 2);
-  const sw = slim ? 18 : MW;
+  const handleFill = kind === 'sd' ? '#c0392b' : isRes ? '#2f6fb0' : 'url(#md-handle)';
+  const u = (mm: number) => mm * K;
 
   const screw = (x: number, y: number) => (
     <g>
-      <circle cx={x} cy={y} r={7.5} fill="url(#md-screw)" stroke="#6b7280" strokeWidth={0.8} />
-      <path d={`M${x - 4} ${y - 4} L${x + 4} ${y + 4} M${x + 4} ${y - 4} L${x - 4} ${y + 4}`} stroke="#3f4650" strokeWidth={1.6} strokeLinecap="round" />
+      <circle cx={x} cy={y} r={u(2.9)} fill="url(#md-screw)" stroke="#6b7280" strokeWidth={0.3 * K} />
+      <path
+        d={`M${x - u(1.6)} ${y - u(1.6)} L${x + u(1.6)} ${y + u(1.6)} M${x + u(1.6)} ${y - u(1.6)} L${x - u(1.6)} ${y + u(1.6)}`}
+        stroke="#3f4650"
+        strokeWidth={0.5 * K}
+        strokeLinecap="round"
+      />
     </g>
   );
 
-  const labelW = label ? label.length * 5.2 + 8 : 0;
-  const labelH = 11;
+  const labelW = label ? u(label.length * 1.95 + 2) : 0;
+  const labelH = u(4.2);
 
   return (
-    <svg
-      viewBox={`0 0 ${W + PAD * 2} ${H + PAD * 2}`}
-      className={className}
-      fill="none"
-      preserveAspectRatio="xMidYMid meet"
-    >
+    <svg viewBox={`0 0 ${W + P * 2} ${H + P * 2}`} className={className} fill="none" preserveAspectRatio="xMidYMid meet">
       <defs>
         <linearGradient id="md-body" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0" stopColor="#d4d9e0" />
@@ -74,10 +77,10 @@ const ModularDevice: React.FC<ModularDeviceProps> = ({ kind, modules, slim, stri
           <stop offset="1" stopColor="#c9ced6" />
         </linearGradient>
         <linearGradient id="md-gloss" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#ffffff" stopOpacity="0.55" />
-          <stop offset="0.25" stopColor="#ffffff" stopOpacity="0" />
-          <stop offset="0.85" stopColor="#000000" stopOpacity="0" />
-          <stop offset="1" stopColor="#000000" stopOpacity="0.12" />
+          <stop offset="0" stopColor="#ffffff" stopOpacity="0.5" />
+          <stop offset="0.2" stopColor="#ffffff" stopOpacity="0" />
+          <stop offset="0.9" stopColor="#000000" stopOpacity="0" />
+          <stop offset="1" stopColor="#000000" stopOpacity="0.1" />
         </linearGradient>
         <radialGradient id="md-screw" cx="0.35" cy="0.35" r="0.7">
           <stop offset="0" stopColor="#ffffff" />
@@ -89,72 +92,80 @@ const ModularDevice: React.FC<ModularDeviceProps> = ({ kind, modules, slim, stri
           <stop offset="1" stopColor="#2a2e35" />
         </linearGradient>
         <filter id="md-shadow" x="-10%" y="-5%" width="130%" height="120%">
-          <feDropShadow dx="1" dy="2" stdDeviation="1.6" floodOpacity="0.35" />
+          <feDropShadow dx={0.6 * K} dy={1 * K} stdDeviation={0.8 * K} floodOpacity="0.35" />
         </filter>
       </defs>
 
       {/* Boîtier */}
-      <rect x={PAD} y={PAD} width={W} height={H} rx={3} fill="url(#md-body)" stroke="#2b3038" strokeWidth={1.2} filter="url(#md-shadow)" />
-      <rect x={PAD + 1} y={PAD + 1} width={W - 2} height={H - 2} rx={2.5} fill="url(#md-gloss)" />
+      <rect x={P} y={P} width={W} height={H} rx={u(2)} fill="url(#md-body)" stroke="#2b3038" strokeWidth={0.6 * K} filter="url(#md-shadow)" />
+      <rect x={P + u(0.5)} y={P + u(0.5)} width={W - u(1)} height={H - u(1)} rx={u(1.6)} fill="url(#md-gloss)" />
 
       {/* Séparations entre pôles */}
       {Array.from({ length: cols - 1 }).map((_, i) => (
-        <line key={`sep-${i}`} x1={PAD + (i + 1) * sw} y1={PAD + 6} x2={PAD + (i + 1) * sw} y2={PAD + H - 6} stroke="#aeb4bd" strokeWidth={1} />
+        <line key={`sep-${i}`} x1={P + u((i + 1) * MOD)} y1={P + u(1)} x2={P + u((i + 1) * MOD)} y2={P + H - u(1)} stroke="#a8aeb7" strokeWidth={0.5 * K} />
       ))}
 
-      {/* Par pôle : vis haute, bande, vis basse, repères de bornes */}
       {Array.from({ length: cols }).map((_, i) => {
-        const x = cx(i);
+        const cx = P + u(i * MOD + MOD / 2);
+        const left = P + u(i * MOD + 2);
+        const bw = u(MOD - 4);
         return (
           <g key={`pole-${i}`}>
-            <rect x={PAD + i * sw + 4} y={PAD + 16} width={sw - 8} height={6} rx={1} fill="#c9ced6" />
-            {screw(x - (slim ? 0 : 8), PAD + 14)}
-            {!slim && screw(x + 8, PAD + 14)}
-            <rect x={PAD + i * sw + 3} y={PAD + 32} width={sw - 6} height={5} fill={stripe} />
-            <rect x={PAD + i * sw + 6} y={PAD + H - 48} width={sw - 12} height={3} fill="#dfe3e8" />
-            <rect x={PAD + i * sw + 6} y={PAD + H - 44} width={sw - 12} height={5} fill="#b9bfc8" />
-            <rect x={PAD + i * sw + 8} y={PAD + H - 34} width={sw - 16} height={2} fill="#7c8590" />
-            <rect x={PAD + i * sw + 8} y={PAD + H - 22} width={sw - 16} height={2} fill="#7c8590" />
-            {screw(x - (slim ? 0 : 8), PAD + H - 14)}
-            {!slim && screw(x + 8, PAD + H - 14)}
+            {/* Bornes haute et basse, vis cruciforme (une par borne en 1P, deux en 2P+ par module) */}
+            <rect x={left} y={P + u(3)} width={bw} height={u(9)} rx={u(1)} fill="#cfd4db" stroke="#9aa1ab" strokeWidth={0.3 * K} />
+            <rect x={left} y={P + u(H / K - 12)} width={bw} height={u(9)} rx={u(1)} fill="#cfd4db" stroke="#9aa1ab" strokeWidth={0.3 * K} />
+            {cols > 1 || slim ? (
+              slim ? (
+                <>
+                  {screw(cx, P + u(7.5))}
+                  {screw(cx, P + H - u(7.5))}
+                </>
+              ) : (
+                <>
+                  {screw(cx - u(4.5), P + u(7.5))}
+                  {screw(cx + u(4.5), P + u(7.5))}
+                  {screw(cx - u(4.5), P + H - u(7.5))}
+                  {screw(cx + u(4.5), P + H - u(7.5))}
+                </>
+              )
+            ) : (
+              <>
+                {screw(cx, P + u(7.5))}
+                {screw(cx, P + H - u(7.5))}
+              </>
+            )}
+            {/* Bande de couleur (repère de la gamme) */}
+            <rect x={P + u(i * MOD + 1)} y={P + u(15)} width={u(MOD - 2)} height={u(2.4)} fill={stripe} />
+            {/* Repères imprimés */}
+            <rect x={P + u(i * MOD + 3)} y={P + u(62)} width={u(MOD - 6)} height={u(0.9)} fill="#9aa1ab" />
+            <rect x={P + u(i * MOD + 3)} y={P + u(65)} width={u(MOD - 6)} height={u(0.9)} fill="#9aa1ab" />
+            {/* Voyant vert */}
+            <rect x={cx - u(1.6)} y={P + u(57)} width={u(3.2)} height={u(1.6)} rx={u(0.4)} fill="#2e9e5b" />
+            {/* Manette */}
+            <rect x={P + u(i * MOD + 4)} y={P + u(33)} width={u(MOD - 8)} height={u(18)} rx={u(1.2)} fill={handleFill} stroke="#23272e" strokeWidth={0.3 * K} />
+            <rect x={P + u(i * MOD + 5.2)} y={P + u(34.5)} width={u(MOD - 10.4)} height={u(3)} rx={u(0.6)} fill="#8b929e" opacity={0.55} />
           </g>
         );
       })}
 
       {/* Barre commune reliant les manettes des pôles multiples */}
-      {cols > 1 && (
-        <rect x={PAD + 8} y={PAD + H / 2 + 22} width={W - 16} height={5} rx={2} fill="#2a2e35" />
-      )}
+      {cols > 1 && <rect x={P + u(4)} y={P + u(43)} width={W - u(8)} height={u(2.2)} rx={u(0.8)} fill="#23272e" />}
 
-      {/* Manettes et voyant vert par pôle */}
-      {Array.from({ length: cols }).map((_, i) => {
-        const hx = PAD + i * sw + 6;
-        const hw = sw - 12;
-        return (
-          <g key={`handle-${i}`}>
-            <rect x={hx} y={PAD + H / 2 + 6} width={hw} height={22} rx={2} fill="#4b5058" />
-            <rect x={hx + 3} y={PAD + H / 2 + 8} width={hw - 6} height={5} rx={1} fill="#6b7280" opacity={0.7} />
-            <rect x={hx + 2} y={PAD + H / 2 + 24} width={hw - 4} height={9} rx={2} fill={isRes ? "#2f6fb0" : kind === "sd" ? "#c0392b" : "url(#md-handle)"} />
-            <rect x={PAD + i * sw + (slim ? 5 : 14)} y={PAD + H / 2 + 38} width={sw - (slim ? 10 : 28)} height={4} rx={1} fill="#2e9e5b" />
-          </g>
-        );
-      })}
-
-      {/* Plaquette de calibre (noire) */}
+      {/* Plaquette de calibre */}
       {label && (
         <g>
-          <rect x={PAD + W / 2 - labelW / 2} y={PAD + H / 2 - 36} width={labelW} height={labelH} rx={1.5} fill="#111827" />
-          <text x={PAD + W / 2} y={PAD + H / 2 - 27.8} fontSize={8.5} fontWeight="bold" textAnchor="middle" fill="#ffffff" fontFamily="Arial, sans-serif">
+          <rect x={P + W / 2 - labelW / 2} y={P + u(22)} width={labelW} height={labelH} rx={u(0.6)} fill="#111827" />
+          <text x={P + W / 2} y={P + u(22 + 4.2 * 0.74)} fontSize={u(3.2)} fontWeight="bold" textAnchor="middle" fill="#ffffff" fontFamily="Arial, sans-serif">
             {label}
           </text>
         </g>
       )}
 
-      {/* Bouton test pour les différentiels */}
+      {/* Bouton test (différentiels) */}
       {isRes && (
         <g>
-          <ellipse cx={PAD + 14} cy={PAD + 60} rx={8} ry={4.5} fill="#ffffff" stroke="#8b929c" strokeWidth={0.8} />
-          <text x={PAD + 14} y={PAD + 62.6} fontSize={5.5} fontWeight="bold" textAnchor="middle" fill="#1e7fd6" fontFamily="Arial, sans-serif">T</text>
+          <ellipse cx={P + u(4.5)} cy={P + u(58)} rx={u(3.2)} ry={u(1.8)} fill="#ffffff" stroke="#8b929e" strokeWidth={0.3 * K} />
+          <text x={P + u(4.5)} y={P + u(59.1)} fontSize={u(2)} fontWeight="bold" textAnchor="middle" fill="#1e7fd6" fontFamily="Arial, sans-serif">T</text>
         </g>
       )}
     </svg>
