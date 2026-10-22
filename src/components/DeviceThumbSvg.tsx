@@ -189,6 +189,151 @@ const ModularDevice: React.FC<ModularDeviceProps> = ({ kind, modules, slim, stri
 };
 
 
+/**
+ * Disjoncteur modulaire MCB (1P, 2P, 3P, 4P, 1P+N) dessiné à l'identique de l'image de référence :
+ * boîtier blanc plat à fin liseré gris, vis grises, bande rouge continue, plaquette noire « C16 »,
+ * manettes noires dans leur cadre reliées par une barre, voyant vert à gauche de chaque pôle.
+ * Toutes les cotes sont des fractions de la hauteur relevées sur l'image.
+ */
+const McbDevice: React.FC<{
+  modules: number;
+  slim?: boolean;
+  stripe: string;
+  className?: string;
+  label?: string;
+}> = ({ modules, slim, stripe, className, label }) => {
+  const K = 2; // 2 unités par mm
+  const MOD = 18;
+  const HMM = 90;
+  const P = 4;
+  const cols = slim ? 1 : modules;
+  const u = (mm: number) => mm * K;
+  const modW = u(MOD);
+  const W = cols * modW;
+  const H = u(HMM);
+  const fy = (f: number) => P + f * H;
+  const band = stripe === STRIPE_COLORS.red ? '#e8141b' : stripe;
+
+  const screw = (cx: number, cy: number, r: number, key: string) => (
+    <g key={key}>
+      <circle cx={cx} cy={cy} r={r} fill="url(#mcb-screw)" stroke="#5f646b" strokeWidth={0.5 * K} />
+      <path
+        d={`M${cx - r * 0.45} ${cy - r * 0.45} L${cx + r * 0.45} ${cy + r * 0.45} M${cx + r * 0.45} ${cy - r * 0.45} L${cx - r * 0.45} ${cy + r * 0.45}`}
+        stroke="#4a4f56"
+        strokeWidth={r * 0.2}
+        strokeLinecap="round"
+      />
+    </g>
+  );
+
+  const labelFontMm = label ? Math.min(5.8, 10.6 / (label.length * 0.6)) : 0;
+  const labelW = u(12.2);
+  const labelY = fy(0.332);
+  const labelH = fy(0.406) - labelY;
+
+  return (
+    <svg viewBox={`0 0 ${W + P * 2} ${H + P * 2}`} className={className} fill="none" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <radialGradient id="mcb-screw" cx="0.4" cy="0.4" r="0.75">
+          <stop offset="0" stopColor="#a1a5aa" />
+          <stop offset="1" stopColor="#868a90" />
+        </radialGradient>
+      </defs>
+
+      {/* Boîtier plat blanc */}
+      <rect x={P} y={P} width={W} height={H} rx={u(0.8)} fill="#f5f6f7" stroke="#8e939a" strokeWidth={0.7 * K} />
+
+      {/* Liserés de séparation entre pôles */}
+      {Array.from({ length: cols - 1 }).map((_, i) => (
+        <line key={`sep-${i}`} x1={P + (i + 1) * modW} y1={P} x2={P + (i + 1) * modW} y2={P + H} stroke="#d5d8dc" strokeWidth={0.6 * K} />
+      ))}
+
+      {/* Bandes grises haute et basse */}
+      <rect x={P + 0.4} y={fy(0.205)} width={W - 0.8} height={fy(0.234) - fy(0.205)} fill="#d8dbdd" />
+      <rect x={P + 0.4} y={fy(0.732)} width={W - 0.8} height={fy(0.757) - fy(0.732)} fill="#eceeef" />
+      <rect x={P + 0.4} y={fy(0.77)} width={W - 0.8} height={fy(0.795) - fy(0.77)} fill="#d8dbdd" />
+
+      {/* Bande rouge continue */}
+      <rect x={P + 0.4} y={fy(0.252)} width={W - 0.8} height={fy(0.288) - fy(0.252)} fill={band} />
+
+      {/* Vis : une par pôle, ou deux petites en 1P+N, avec repère N */}
+      {slim ? (
+        <>
+          {[0.27, 0.76].map((fx) => screw(P + fx * modW, fy(0.09), u(2.9), `st-${fx}`))}
+          {[0.27, 0.76].map((fx) => screw(P + fx * modW, fy(0.912), u(2.9), `sb-${fx}`))}
+          <text x={P + W - u(0.5)} y={fy(0.185)} fontSize={u(5.2)} textAnchor="end" fill="#5a5f65" fontFamily="Arial, sans-serif">N</text>
+          <text x={P + W - u(0.5)} y={fy(0.855)} fontSize={u(5.2)} textAnchor="end" fill="#5a5f65" fontFamily="Arial, sans-serif">N</text>
+        </>
+      ) : (
+        Array.from({ length: cols }).map((_, i) => {
+          const cx = P + i * modW + modW / 2;
+          return (
+            <g key={`sc-${i}`}>
+              {screw(cx, fy(0.09), u(4.15), 'top')}
+              {screw(cx, fy(0.912), u(4.15), 'bot')}
+            </g>
+          );
+        })
+      )}
+
+      {/* Plaquette de calibre */}
+      {label && (
+        <g>
+          <rect x={P + W / 2 - labelW / 2} y={labelY} width={labelW} height={labelH} rx={u(1)} fill="#0b0b0c" />
+          <text
+            x={P + W / 2}
+            y={labelY + labelH / 2 + u(labelFontMm) * 0.36}
+            fontSize={u(labelFontMm)}
+            fontWeight="bold"
+            textAnchor="middle"
+            fill="#ffffff"
+            fontFamily="Arial, Helvetica, sans-serif"
+          >
+            {label}
+          </text>
+        </g>
+      )}
+
+      {/* Cadres et manettes */}
+      {Array.from({ length: cols }).map((_, i) => {
+        const cx = P + i * modW + modW / 2;
+        const fy0 = fy(0.44);
+        return (
+          <g key={`hd-${i}`}>
+            <rect x={cx - u(6.7)} y={fy0} width={u(13.4)} height={fy(0.55) - fy0} rx={u(0.6)} fill="#e2e4e6" stroke="#9ea3a9" strokeWidth={0.5 * K} />
+            <rect x={cx - u(6.7)} y={fy0} width={u(13.4)} height={u(0.6)} rx={u(0.3)} fill="#2b2e31" />
+            <rect x={cx - u(4.45)} y={fy(0.47)} width={u(8.9)} height={fy(0.552) - fy(0.47)} rx={u(0.6)} fill="#2e3236" />
+            {[0.485, 0.503, 0.521].map((f) => (
+              <rect key={f} x={cx - u(3.8)} y={fy(f)} width={u(7.6)} height={u(0.4)} fill="#4a4f54" />
+            ))}
+            {slim && <rect x={cx - u(2.6)} y={fy(0.482)} width={u(5.2)} height={u(1)} rx={u(0.3)} fill="#3fcf85" opacity={0.85} />}
+          </g>
+        );
+      })}
+
+      {/* Barre noire commune sous les manettes */}
+      <rect x={P + u(1.5)} y={fy(0.545)} width={W - u(3)} height={fy(0.607) - fy(0.545)} rx={u(0.8)} fill="#34383c" stroke="#1d2023" strokeWidth={0.4 * K} />
+
+      {/* Voyants verts (à gauche de chaque pôle, absents du 1P+N) */}
+      {!slim &&
+        Array.from({ length: cols }).map((_, i) => (
+          <rect
+            key={`led-${i}`}
+            x={P + i * modW + u(2.2)}
+            y={fy(0.646)}
+            width={u(5.5)}
+            height={fy(0.678) - fy(0.646)}
+            rx={u(0.4)}
+            fill="#0f7d3d"
+            stroke="#2fb36b"
+            strokeWidth={0.5 * K}
+          />
+        ))}
+    </svg>
+  );
+};
+
+
 /* ------------------------------------------------------------------ */
 /*  Shared helpers                                                      */
 /* ------------------------------------------------------------------ */
@@ -339,15 +484,15 @@ export const DeviceThumbSvg: React.FC<DeviceThumbSvgProps> = ({
   switch (type) {
     /* ---------- Breakers / RCD / RCBO / switch-disconnectors ---------- */
     case 'MCB 1P':
-      return <ModularDevice kind="mcb" modules={1} stripe={stripe} className={className} label={label} />;
+      return <McbDevice modules={1} stripe={stripe} className={className} label={label} />;
     case 'MCB 2P':
-      return <ModularDevice kind="mcb" modules={2} stripe={stripe} className={className} label={label} />;
+      return <McbDevice modules={2} stripe={stripe} className={className} label={label} />;
     case 'MCB 3P':
-      return <ModularDevice kind="mcb" modules={3} stripe={stripe} className={className} label={label} />;
+      return <McbDevice modules={3} stripe={stripe} className={className} label={label} />;
     case 'MCB 4P':
-      return <ModularDevice kind="mcb" modules={4} stripe={stripe} className={className} label={label} />;
+      return <McbDevice modules={4} stripe={stripe} className={className} label={label} />;
     case 'MCB 1P + N':
-      return <ModularDevice kind="mcb" modules={1} slim stripe={stripe} className={className} label={label} />;
+      return <McbDevice modules={1} slim stripe={stripe} className={className} label={label} />;
     case 'RCCB 2P':
       return <ModularDevice kind="rccb" modules={2} stripe={stripe} className={className} label={label} />;
     case 'RCCB 4P':
