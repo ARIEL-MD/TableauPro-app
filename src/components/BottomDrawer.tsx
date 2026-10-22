@@ -581,8 +581,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                           type="TerminalBar"
                           variant="screw"
                           count={count}
-                          className="block h-auto max-w-full"
-                          style={undefined}
+                          className="block w-full h-auto max-w-full"
                         />
                       </div>
                       <div
