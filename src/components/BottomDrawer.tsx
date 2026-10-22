@@ -3,6 +3,7 @@ import { PictogramKey } from '../types/panel';
 import { DeviceThumbSvg } from './DeviceThumbSvg';
 import { PICTOGRAM_LIST, PictogramIcon } from './PictogramIcon';
 import { Plus, Minus } from 'lucide-react';
+import { WireTerminalCards } from './WireTerminalCards';
 
 export type DrawerCategory =
   | 'appareils'
@@ -59,8 +60,6 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
   const [indicatorCount, setIndicatorCount] = useState(1);
   const [indicatorColor, setIndicatorColor] = useState<'red' | 'teal' | 'yellow' | 'blue' | 'white'>('red');
 
-  const [customTerminalContacts, setCustomTerminalContacts] = useState(8);
-  const [customTerminalColor, setCustomTerminalColor] = useState('blue');
 
   const categories: { id: DrawerCategory; label: string }[] = [
     { id: 'appareils', label: 'Appareils' },
@@ -550,80 +549,10 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
              ======================================================== */}
           {activeCategory === 'borniers' && (
             <div className="space-y-4">
-              {/* Group 1: Barres et bornes pour fils (Configurable Card) */}
+              {/* Group 1: Barres et bornes pour fils (identique à la capture de référence, sans badge PRO) */}
               <div>
                 <h3 className="text-xs font-bold text-slate-900 mb-2">Barres et bornes pour fils</h3>
-                <div className="flex items-center gap-3 overflow-x-auto pb-1">
-                  <div className="relative w-56 h-28 rounded-xl bg-[#525862] p-2.5 flex flex-col justify-between shadow-sm shrink-0">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <DeviceThumbSvg type="TerminalBar" variant="screw" count={customTerminalContacts} color={customTerminalColor} className="w-24 h-8" />
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {['blue', 'orange', '#334155', 'yellow', 'green', 'black'].map((clr) => (
-                          <button
-                            key={clr}
-                            onClick={() => setCustomTerminalColor(clr)}
-                            className={`w-3.5 h-3.5 rounded-full border ${
-                              customTerminalColor === clr ? 'border-white scale-110' : 'border-transparent'
-                            }`}
-                            style={{ backgroundColor: clr }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between pt-1 border-t border-slate-600/50">
-                      <div className="flex items-center gap-1.5 bg-slate-700/60 rounded px-1.5 py-0.5">
-                        <button
-                          onClick={() => setCustomTerminalContacts(Math.max(4, customTerminalContacts - 1))}
-                          className="text-white hover:text-amber-400 font-bold"
-                        >
-                          <Minus className="w-3 h-3" />
-                        </button>
-                        <span className="text-xs font-mono font-bold text-white px-1">
-                          {customTerminalContacts}
-                        </span>
-                        <button
-                          onClick={() => setCustomTerminalContacts(Math.min(30, customTerminalContacts + 1))}
-                          className="text-white hover:text-amber-400 font-bold"
-                        >
-                          <Plus className="w-3 h-3" />
-                        </button>
-                        <span className="text-[9px] text-slate-300 ml-1">contacts</span>
-                      </div>
-                      <button
-                        onClick={() =>
-                          onAddTerminalBar('custom', customTerminalContacts, customTerminalColor)
-                        }
-                        className="px-2.5 py-1 bg-[#007aff] hover:bg-blue-600 text-white rounded text-[10px] font-bold cursor-pointer"
-                      >
-                        Poser
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Simple card */}
-                  <div
-                    onClick={() => onAddTerminalBar('simple', 1, 'blue')}
-                    className="relative w-36 h-28 rounded-xl bg-[#525862] hover:bg-[#454a54] p-2.5 flex flex-col justify-between shadow-sm cursor-pointer shrink-0"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="w-4 h-12 bg-sky-500 rounded border border-sky-400 flex flex-col items-center justify-between py-1">
-                        <div className="w-2 h-2 rounded-full bg-slate-900" />
-                        <div className="w-2 h-2 rounded-full bg-slate-900" />
-                      </div>
-                      <div className="grid grid-cols-3 gap-1">
-                        <div className="w-3.5 h-3.5 rounded-full bg-[#3b9cf5] ring-1 ring-white" />
-                        <div className="w-3.5 h-3.5 rounded-full bg-[#f5a033]" />
-                        <div className="w-3.5 h-3.5 rounded-full bg-[#e5484d]" />
-                        <div className="w-3.5 h-3.5 rounded-full bg-[#f2dc5b]" />
-                        <div className="w-3.5 h-3.5 rounded-full bg-[#5cc26a]" />
-                        <div className="w-3.5 h-3.5 rounded-full bg-[#2b2f36]" />
-                      </div>
-                    </div>
-                    <span className="text-xs text-white font-semibold">Simple</span>
-                  </div>
-                </div>
+                <WireTerminalCards onAddTerminalBar={onAddTerminalBar} />
               </div>
 
               {/* Group 2: Barres auto-serrantes */}
