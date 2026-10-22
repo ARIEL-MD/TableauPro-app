@@ -7,39 +7,15 @@ import { DeviceThumbSvg } from './DeviceThumbSvg';
  * reproduction de la capture de référence (mêmes cotes que McbCards, en px de capture) :
  *  - cartes : 416 × 146 (relais) / 168 × 146 (AFDD), rayon 20, espacement 12
  *  - fond #6f6f6f, miniature atténuée (70 %), libellé blanc centré à 113 px du haut
- *  - badge « PRO » orange en haut à droite de chaque carte
- *  - carte « Ajouter » : 102 × 122, fond #ebeaef, cadre pointillé, badge PRO
+ *  - carte « Ajouter » : 102 × 122, fond #ebeaef, cadre pointillé (sans badge PRO)
  * Tout est multiplié par `scale` (0.55 dans le tiroir).
  */
 const CARD = '#6f6f6f';
 const CARD_PRESSED = '#3b3b3b';
-const PRO = '#f5a623';
 
 type Item = { label: string; type: string; width: number };
 
 const font = 'Roboto, "Samsung Sans", Arial, sans-serif';
-
-const ProBadge: React.FC<{ px: (n: number) => number; top: number; right: number }> = ({ px, top, right }) => (
-  <div
-    style={{
-      position: 'absolute',
-      top: px(top),
-      right: px(right),
-      width: px(48),
-      height: px(22),
-      borderRadius: px(11),
-      background: PRO,
-      color: '#fff',
-      fontFamily: font,
-      fontWeight: 700,
-      fontSize: px(16),
-      lineHeight: `${px(22)}px`,
-      textAlign: 'center',
-    }}
-  >
-    PRO
-  </div>
-);
 
 const CardRow: React.FC<{ items: Item[]; addType: string; onAdd: (type: string) => void; scale: number }> = ({
   items,
@@ -101,7 +77,6 @@ const CardRow: React.FC<{ items: Item[]; addType: string; onAdd: (type: string) 
           >
             {it.label}
           </div>
-          <ProBadge px={px} top={10} right={9} />
         </div>
       ))}
 
@@ -150,7 +125,6 @@ const CardRow: React.FC<{ items: Item[]; addType: string; onAdd: (type: string) 
         >
           Ajouter
         </div>
-        <ProBadge px={px} top={10} right={10} />
       </div>
     </div>
   );

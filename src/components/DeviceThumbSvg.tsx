@@ -869,6 +869,105 @@ const TextLines: React.FC<{ x: number; y: number; w: number; n?: number }> = ({ 
 );
 
 /* ------------------------------------------------------------------ */
+/*  Relais temporisés — dessins calés sur la capture de référence       */
+/* ------------------------------------------------------------------ */
+
+const TIMER_BODY = '#dcdcde';
+const TIMER_EDGE = '#c3c3c7';
+const TIMER_GREY = '#8d9097';
+const TIMER_RED = '#c8353a';
+
+/** Relais temporisé électromécanique : cadran à anneau gris, 5 bornes en bas. */
+const TimerMechDevice: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 100 188" className={className} fill="none" preserveAspectRatio="xMidYMid meet">
+    <rect x={2} y={2} width={96} height={184} rx={2.5} fill={TIMER_BODY} stroke={TIMER_EDGE} strokeWidth={0.8} />
+    {/* crans en haut + repères ◂ ▸ */}
+    {[14, 33, 52, 71, 90].map((x) => (
+      <rect key={x} x={x - 3} y={2} width={6} height={3} fill={TIMER_EDGE} />
+    ))}
+    <path d="M46 26 L42 30 L46 34 Z" fill="#6f7176" />
+    <path d="M90 26 L94 30 L90 34 Z" fill="#6f7176" />
+    {/* bandeau rouge */}
+    <rect x={0} y={42} width={100} height={8} rx={1} fill={TIMER_RED} />
+    <rect x={0} y={42} width={100} height={2.5} rx={1} fill="#e0575a" opacity={0.6} />
+    {/* cadran */}
+    <circle cx={50} cy={105} r={38.5} stroke={TIMER_GREY} strokeWidth={9} />
+    <circle cx={50} cy={105} r={34} fill="#e7e7e9" />
+    {Array.from({ length: 48 }).map((_, i) => {
+      const a = (i * Math.PI) / 24;
+      const long = i % 4 === 0;
+      const r1 = long ? 25 : 28;
+      return (
+        <line
+          key={i}
+          x1={50 + Math.sin(a) * r1}
+          y1={105 - Math.cos(a) * r1}
+          x2={50 + Math.sin(a) * 31}
+          y2={105 - Math.cos(a) * 31}
+          stroke="#9a9ca1"
+          strokeWidth={long ? 1 : 0.6}
+        />
+      );
+    })}
+    <line x1={50} y1={105} x2={38} y2={86} stroke="#6f7176" strokeWidth={2.4} strokeLinecap="round" />
+    <line x1={50} y1={105} x2={67} y2={123} stroke="#6f7176" strokeWidth={2.6} strokeLinecap="round" />
+    <circle cx={50} cy={105} r={2.2} fill="#6f7176" />
+    {/* schéma de contacts */}
+    <path d="M18 156 h14 v-9 h14 v9 M66 152 h10 v4 h8" stroke="#a5a7ab" strokeWidth={0.8} />
+    {/* 5 bornes */}
+    {[0, 1, 2, 3, 4].map((i) => (
+      <g key={i}>
+        <rect x={6 + i * 17.6} y={164} width={14} height={18} rx={2} fill="#c3c4c8" stroke="#aeb0b5" strokeWidth={0.6} />
+        <circle cx={13 + i * 17.6} cy={171} r={4.3} fill={TIMER_GREY} />
+        <line x1={10.5 + i * 17.6} y1={171} x2={15.5 + i * 17.6} y2={171} stroke="#6f7176" strokeWidth={0.9} />
+        <rect x={9 + i * 17.6} y={177.5} width={8} height={2.6} rx={0.8} fill="#9d9fa5" />
+      </g>
+    ))}
+  </svg>
+);
+
+/** Relais temporisé numérique : 4 bornes en haut/bas, écran vert, 4 boutons. */
+const TimerDigitalDevice: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 84 200" className={className} fill="none" preserveAspectRatio="xMidYMid meet">
+    <rect x={2} y={2} width={80} height={196} rx={2.5} fill={TIMER_BODY} stroke={TIMER_EDGE} strokeWidth={0.8} />
+    {/* bornes du haut */}
+    {[0, 1, 2, 3].map((i) => (
+      <g key={i}>
+        <circle cx={12 + i * 20} cy={18} r={6.6} fill={TIMER_GREY} />
+        <circle cx={12 + i * 20} cy={18} r={3.6} fill="#7a7c82" />
+        <text x={12 + i * 20} y={36} fontSize={5} textAnchor="middle" fill="#8a8c91" fontFamily="Arial, sans-serif">
+          {i + 1}
+        </text>
+      </g>
+    ))}
+    {/* bandeau rouge */}
+    <rect x={0} y={55} width={84} height={8} rx={1} fill={TIMER_RED} />
+    <rect x={0} y={55} width={84} height={2.5} rx={1} fill="#e0575a" opacity={0.6} />
+    {/* écran */}
+    <rect x={11} y={66} width={62} height={52} fill="#3f8a68" />
+    <circle cx={14} cy={125} r={2} fill="#6f7176" />
+    {/* boutons */}
+    {[10, 24].map((x) => (
+      <rect key={x} x={x} y={139} width={12} height={11} rx={2} fill="#4a4a50" />
+    ))}
+    <circle cx={42} cy={144.5} r={1.4} fill="#4a4a50" />
+    {[52, 66].map((x) => (
+      <rect key={x} x={x} y={139} width={12} height={11} rx={2} fill="#4a4a50" />
+    ))}
+    {/* bornes du bas */}
+    {[0, 1, 2, 3].map((i) => (
+      <g key={i}>
+        <text x={12 + i * 20} y={166} fontSize={5} textAnchor="middle" fill="#8a8c91" fontFamily="Arial, sans-serif">
+          {i + 5}
+        </text>
+        <circle cx={12 + i * 20} cy={181} r={6.6} fill={TIMER_GREY} />
+        <circle cx={12 + i * 20} cy={181} r={3.6} fill="#7a7c82" />
+      </g>
+    ))}
+  </svg>
+);
+
+/* ------------------------------------------------------------------ */
 /*  Label → thumbnail type resolver (the drawer passes human labels)    */
 /* ------------------------------------------------------------------ */
 
@@ -956,43 +1055,9 @@ export const DeviceThumbSvg: React.FC<DeviceThumbSvgProps> = ({
 
     /* ---------- Timers ---------- */
     case 'Timer mech':
-      return (
-        <Body modules={3} className={className}>
-          <circle cx={PAD + 27} cy={PAD + 43} r={19} fill="#f8fafc" stroke="#8b929c" strokeWidth={1} />
-          {Array.from({ length: 12 }).map((_, i) => {
-            const a = (i * Math.PI) / 6;
-            return (
-              <line
-                key={i}
-                x1={PAD + 27 + Math.sin(a) * 15.5}
-                y1={PAD + 43 - Math.cos(a) * 15.5}
-                x2={PAD + 27 + Math.sin(a) * 18}
-                y2={PAD + 43 - Math.cos(a) * 18}
-                stroke="#334155"
-                strokeWidth={0.9}
-              />
-            );
-          })}
-          <line x1={PAD + 27} y1={PAD + 43} x2={PAD + 27} y2={PAD + 31} stroke="#111827" strokeWidth={1.4} strokeLinecap="round" />
-          <line x1={PAD + 27} y1={PAD + 43} x2={PAD + 35} y2={PAD + 46} stroke="#d32f2f" strokeWidth={1.2} strokeLinecap="round" />
-          <circle cx={PAD + 27} cy={PAD + 43} r={1.8} fill="#334155" />
-          <rect x={PAD + 8} y={PAD + 66} width={38} height={4} rx={1} fill="#cbd5e1" />
-        </Body>
-      );
+      return <TimerMechDevice className={className} />;
     case 'Timer digital':
-      return (
-        <Body modules={2} className={className}>
-          <rect x={PAD + 5} y={PAD + 27} width={26} height={17} rx={2} fill="url(#dt-lcd)" stroke="#1f6f4f" strokeWidth={0.6} />
-          <rect x={PAD + 8} y={PAD + 31} width={20} height={4} rx={0.8} fill="#1b5e43" opacity={0.7} />
-          <rect x={PAD + 8} y={PAD + 37} width={12} height={2.5} rx={0.8} fill="#1b5e43" opacity={0.5} />
-          {[0, 1, 2, 3].map((i) => (
-            <rect key={i} x={PAD + 6 + i * 6.5} y={PAD + 52} width={5} height={4} rx={0.8} fill="#4b5563" />
-          ))}
-          {[0, 1, 2, 3].map((i) => (
-            <rect key={i} x={PAD + 6 + i * 6.5} y={PAD + 59} width={5} height={4} rx={0.8} fill="#4b5563" />
-          ))}
-        </Body>
-      );
+      return <TimerDigitalDevice className={className} />;
 
     /* ---------- Voltage relays ---------- */
     case 'VoltageRelay 1P':
