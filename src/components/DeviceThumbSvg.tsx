@@ -37,7 +37,20 @@ interface ModularDeviceProps {
  * Realistic front view of a DIN-rail modular device (1 module = 18 mm).
  * Light grey body, coloured band, screw terminals top/bottom, black toggle.
  */
+/* Couleur de la bande selon la courbe de déclenchement (comme sur les appareils du commerce) */
+const CURVE_BAND: Record<string, string> = {
+  B: '#2f6fb0',
+  C: '#f08a24',
+  D: '#c0392b',
+  K: '#2e9e5b',
+  Z: '#8e44ad',
+  A: '#e6b800',
+};
+
 const ModularDevice: React.FC<ModularDeviceProps> = ({ kind, modules, slim, stripe, className, label }) => {
+  // La bande suit la courbe quand le libellé l'indique (ex. « C16 »), sinon la couleur choisie.
+  const curveMatch = label && (kind === 'mcb' || kind === 'rcbo') ? /^([ABCDKZ])\d/.exec(label) : null;
+  const bandFill = curveMatch ? CURVE_BAND[curveMatch[1]] : stripe;
   // Cotes réelles en millimètres (fiches fabricants) : module 18 mm, hauteur 90 mm.
   // Le dessin utilise 2 unités par mm.
   const K = 2;
@@ -137,7 +150,7 @@ const ModularDevice: React.FC<ModularDeviceProps> = ({ kind, modules, slim, stri
               </>
             )}
             {/* Bande de couleur (repère de la gamme) */}
-            <rect x={P + u(i * MOD + 0.8)} y={P + u(14.6)} width={u(MOD - 1.6)} height={u(3.4)} rx={u(0.4)} fill={stripe} />
+            <rect x={P + u(i * MOD + 0.8)} y={P + u(14.6)} width={u(MOD - 1.6)} height={u(3.4)} rx={u(0.4)} fill={bandFill} />
             {/* Repères imprimés */}
             <rect x={P + u(i * MOD + 3)} y={P + u(62)} width={u(MOD - 6)} height={u(0.9)} fill="#9aa1ab" />
             <rect x={P + u(i * MOD + 3)} y={P + u(65)} width={u(MOD - 6)} height={u(0.9)} fill="#9aa1ab" />
