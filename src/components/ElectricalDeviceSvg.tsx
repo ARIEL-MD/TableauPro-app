@@ -63,6 +63,21 @@ export const thumbTypeForDevice = (d: ElectricalDevice): string => {
   }
 };
 
+
+/** Plaquette affichée sur le boîtier : « C16 » pour un disjoncteur, « 25A 30mA » pour un différentiel. */
+const deviceLabel = (d: ElectricalDevice, type: string): string | undefined => {
+  const cal = typeof d.calibre === 'number' ? d.calibre : undefined;
+  if (type === 'RCCB 2P' || type === 'RCCB 4P' || type === 'RCBO 2P' || type === 'RCBO 4P' || type === 'RCBO 1P + N') {
+    if (type.startsWith('RCCB') && cal === undefined) return undefined;
+    const sens = typeof d.differentialSensibility === 'number' ? d.differentialSensibility : 30;
+    return `${cal ?? 25}A ${sens}mA`;
+  }
+  if (type.startsWith('MCB')) {
+    return `${d.curve ?? 'C'}${cal ?? 16}`;
+  }
+  return undefined;
+};
+
 export const ElectricalDeviceSvg: React.FC<ElectricalDeviceSvgProps> = ({
   device,
   isSelected = false,
@@ -89,7 +104,7 @@ export const ElectricalDeviceSvg: React.FC<ElectricalDeviceSvgProps> = ({
       )}
 
       {/* Même dessin que l'aperçu du tiroir */}
-      <DeviceThumbSvg type={type} color={color} className="w-full h-full block" />
+      <DeviceThumbSvg type={type} color={color} label={deviceLabel(device, type)} className="w-full h-full block" />
 
       {/* Ancres de câblage (bornes amont / aval) */}
       <div

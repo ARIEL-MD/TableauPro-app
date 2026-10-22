@@ -10,6 +10,8 @@ interface DeviceThumbSvgProps {
   count?: number;
   /** DIN rail length in mm. */
   length?: number;
+  /** Plaquette de calibre affichée sur le boîtier (ex. « C16 », « 25A 30mA »). */
+  label?: string;
 }
 
 export const STRIPE_COLORS: Record<string, string> = {
@@ -28,13 +30,14 @@ interface ModularDeviceProps {
   slim?: boolean;
   stripe: string;
   className?: string;
+  label?: string;
 }
 
 /**
  * Realistic front view of a DIN-rail modular device (1 module = 18 mm).
  * Light grey body, coloured band, screw terminals top/bottom, black toggle.
  */
-const ModularDevice: React.FC<ModularDeviceProps> = ({ kind, modules, slim, stripe, className }) => {
+const ModularDevice: React.FC<ModularDeviceProps> = ({ kind, modules, slim, stripe, className, label }) => {
   const H = 90;
   const mw = 18;
   // "1P+N" is a half-width (1 module) device in the real world: draw it narrower.
@@ -90,11 +93,24 @@ const ModularDevice: React.FC<ModularDeviceProps> = ({ kind, modules, slim, stri
       {/* Coloured band */}
       <rect x={pad} y={pad + 19} width={W} height={3.2} fill={stripe} />
 
+      {/* Barre commune reliant les manettes des pôles multiples (2P, 3P, 4P) */}
+      {!slim && screws > 1 && (
+        <rect x={pad + sw / 2 - 2} y={pad + 46} width={(screws - 1) * sw + 4} height={3.5} rx={1} fill="#3a3f47" />
+      )}
+
+      {/* Plaquette de calibre (noire, comme sur les appareils réels) */}
+      {label && (
+        <g>
+          <rect x={pad + W / 2 - (label.length * 2.9 + 3) / 2} y={pad + 24} width={label.length * 2.9 + 3} height={8} rx={1} fill="#1f2937" />
+          <text x={pad + W / 2} y={pad + 30} fontSize={5.6} fontWeight="bold" textAnchor="middle" fill="#ffffff" fontFamily="Arial, sans-serif">{label}</text>
+        </g>
+      )}
+
       {/* Toggle zone */}
       {Array.from({ length: screws }).map((_, i) => {
         const x0 = pad + i * sw;
         const cx = x0 + sw / 2;
-        const hw = slim ? 7 : 11;
+        const hw = slim ? 8 : 13;
         return (
           <g key={`t-${i}`}>
             <rect x={cx - hw / 2 - 1} y={pad + 36} width={hw + 2} height={20} rx={1.5} fill="#3a3f47" />
@@ -111,9 +127,9 @@ const ModularDevice: React.FC<ModularDeviceProps> = ({ kind, modules, slim, stri
       {/* Test button for RCD types */}
       {isRes && (
         <g>
-          <rect x={pad + 3} y={pad + 27} width={9} height={6} rx={1} fill="#fff" stroke="#8b929c" strokeWidth={0.5} />
-          <text x={pad + 7.5} y={pad + 31.7} fontSize={4.6} fontWeight="bold" textAnchor="middle" fill="#1e7fd6" fontFamily="Arial, sans-serif">T</text>
-          <rect x={pad + W - 11} y={pad + 28} width={8} height={3} rx={0.8} fill="#2e9e5b" />
+          <rect x={pad + 3} y={pad + 66} width={9} height={6} rx={1} fill="#fff" stroke="#8b929c" strokeWidth={0.5} />
+          <text x={pad + 7.5} y={pad + 70.7} fontSize={4.6} fontWeight="bold" textAnchor="middle" fill="#1e7fd6" fontFamily="Arial, sans-serif">T</text>
+          <rect x={pad + W - 11} y={pad + 67} width={8} height={3} rx={0.8} fill="#2e9e5b" />
         </g>
       )}
     </svg>
@@ -244,6 +260,7 @@ export const DeviceThumbSvg: React.FC<DeviceThumbSvgProps> = ({
   variant,
   count,
   length,
+  label,
 }) => {
   const type = resolveType(rawType);
   const stripe = STRIPE_COLORS[color || 'red'] || STRIPE_COLORS.red;
@@ -251,32 +268,32 @@ export const DeviceThumbSvg: React.FC<DeviceThumbSvgProps> = ({
   switch (type) {
     /* ---------- Breakers / RCD / RCBO / switch-disconnectors ---------- */
     case 'MCB 1P':
-      return <ModularDevice kind="mcb" modules={1} stripe={stripe} className={className} />;
+      return <ModularDevice kind="mcb" modules={1} stripe={stripe} className={className} label={label} />;
     case 'MCB 2P':
-      return <ModularDevice kind="mcb" modules={2} stripe={stripe} className={className} />;
+      return <ModularDevice kind="mcb" modules={2} stripe={stripe} className={className} label={label} />;
     case 'MCB 3P':
-      return <ModularDevice kind="mcb" modules={3} stripe={stripe} className={className} />;
+      return <ModularDevice kind="mcb" modules={3} stripe={stripe} className={className} label={label} />;
     case 'MCB 4P':
-      return <ModularDevice kind="mcb" modules={4} stripe={stripe} className={className} />;
+      return <ModularDevice kind="mcb" modules={4} stripe={stripe} className={className} label={label} />;
     case 'MCB 1P + N':
-      return <ModularDevice kind="mcb" modules={1} slim stripe={stripe} className={className} />;
+      return <ModularDevice kind="mcb" modules={1} slim stripe={stripe} className={className} label={label} />;
     case 'RCCB 2P':
-      return <ModularDevice kind="rccb" modules={2} stripe={stripe} className={className} />;
+      return <ModularDevice kind="rccb" modules={2} stripe={stripe} className={className} label={label} />;
     case 'RCCB 4P':
-      return <ModularDevice kind="rccb" modules={4} stripe={stripe} className={className} />;
+      return <ModularDevice kind="rccb" modules={4} stripe={stripe} className={className} label={label} />;
     case 'RCBO 2P':
     case 'RCBO 1P + N':
-      return <ModularDevice kind="rcbo" modules={2} stripe={stripe} className={className} />;
+      return <ModularDevice kind="rcbo" modules={2} stripe={stripe} className={className} label={label} />;
     case 'RCBO 4P':
-      return <ModularDevice kind="rcbo" modules={4} stripe={stripe} className={className} />;
+      return <ModularDevice kind="rcbo" modules={4} stripe={stripe} className={className} label={label} />;
     case 'SD 1P':
-      return <ModularDevice kind="sd" modules={1} stripe={stripe} className={className} />;
+      return <ModularDevice kind="sd" modules={1} stripe={stripe} className={className} label={label} />;
     case 'SD 2P':
-      return <ModularDevice kind="sd" modules={2} stripe={stripe} className={className} />;
+      return <ModularDevice kind="sd" modules={2} stripe={stripe} className={className} label={label} />;
     case 'SD 3P':
-      return <ModularDevice kind="sd" modules={3} stripe={stripe} className={className} />;
+      return <ModularDevice kind="sd" modules={3} stripe={stripe} className={className} label={label} />;
     case 'SD 4P':
-      return <ModularDevice kind="sd" modules={4} stripe={stripe} className={className} />;
+      return <ModularDevice kind="sd" modules={4} stripe={stripe} className={className} label={label} />;
 
     /* ---------- Contactors / impulse relays ---------- */
     case 'Contactor 1M':
