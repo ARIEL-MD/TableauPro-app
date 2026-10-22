@@ -13,7 +13,10 @@ const S = 0.55;
 const px = (n: number) => n * S;
 
 const CARD_BG = '#6f6f6f';
-const CARD_BG_PRESSED = '#4e4e50';
+const CARD_BG_PRESSED = '#3b3b3b';
+// Sur la capture, la carte « 200 mm » (sans badge PRO) est plus foncée que les autres.
+const CARD_BG_FREE = '#4e4e4e';
+const FREE_LENGTHS: number[] = [200];
 const ICON_W = 84;
 
 interface RailSpec {
@@ -119,8 +122,6 @@ interface Props {
 
 export const DinRailCards: React.FC<Props> = ({ onAddRailByLength }) => {
   const [pressed, setPressed] = React.useState<number | null>(null);
-  // Dernière carte touchée : reste foncée, comme la carte « 200 mm » de la capture.
-  const [selected, setSelected] = React.useState<number | null>(null);
 
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: px(12), overflowX: 'auto', paddingBottom: 4 }}>
@@ -129,10 +130,7 @@ export const DinRailCards: React.FC<Props> = ({ onAddRailByLength }) => {
         return (
           <div
             key={mm}
-            onClick={() => {
-              setSelected(mm);
-              onAddRailByLength(mm);
-            }}
+            onClick={() => onAddRailByLength(mm)}
             onPointerDown={() => setPressed(mm)}
             onPointerUp={() => setPressed(null)}
             onPointerLeave={() => setPressed(null)}
@@ -144,7 +142,7 @@ export const DinRailCards: React.FC<Props> = ({ onAddRailByLength }) => {
               width: px(121),
               height: px(146),
               borderRadius: px(20),
-              background: pressed === mm || selected === mm ? CARD_BG_PRESSED : CARD_BG,
+              background: pressed === mm ? CARD_BG_PRESSED : FREE_LENGTHS.includes(mm) ? CARD_BG_FREE : CARD_BG,
               transition: 'background 0.1s',
             }}
           >

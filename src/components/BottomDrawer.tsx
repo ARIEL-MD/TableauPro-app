@@ -5,6 +5,8 @@ import { PICTOGRAM_LIST, PictogramIcon } from './PictogramIcon';
 import { Plus, Minus } from 'lucide-react';
 import { WireTerminalCards } from './WireTerminalCards';
 import { DinRailCards } from './DinRailCards';
+import { ColorChips as ColorChipsView } from './ColorChips';
+import { McbCards } from './McbCards';
 import { SpringBarCards } from './SpringBarCards';
 
 export type DrawerCategory =
@@ -53,7 +55,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
   const [comb4PConfig, setComb4PConfig] = useState<'L1_L2_L3_N' | 'N_L1_L2_L3' | 'L1N_L2N_L3N'>('N_L1_L2_L3');
 
   const [colors, setColors] = useState<Record<string, string>>({
-    mcb: 'red',
+    mcb: 'orange',
     rcd: 'red',
     rcbo: 'red',
     sd: 'red',
@@ -73,29 +75,12 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
     { id: 'modeles', label: 'Modèles' },
   ];
 
-  // Color chips: pick the band colour used on the device thumbnails of a section
-  const CHIP_LIST: { key: string; hex: string }[] = [
-    { key: 'red', hex: '#d32f2f' },
-    { key: 'green', hex: '#43a047' },
-    { key: 'blue', hex: '#2f80ed' },
-    { key: 'orange', hex: '#f28c28' },
-    { key: 'yellow', hex: '#e8c52e' },
-  ];
+  // Puces de couleur (reproduction de la capture) : voir ColorChips.tsx
   const ColorChips = ({ group }: { group: string }) => (
-    <div className="flex items-center gap-1.5 mb-2.5">
-      {CHIP_LIST.map((c) => (
-        <button
-          key={c.key}
-          type="button"
-          aria-label={`Couleur ${c.key}`}
-          onClick={() => setColors((prev) => ({ ...prev, [group]: c.key }))}
-          style={{ backgroundColor: c.hex }}
-          className={`w-8 h-3.5 rounded-sm cursor-pointer hover:opacity-85 shadow-xs ${
-            colors[group] === c.key ? 'ring-2 ring-slate-900 ring-offset-1' : ''
-          }`}
-        />
-      ))}
-    </div>
+    <ColorChipsView
+      value={colors[group]}
+      onChange={(key) => setColors((prev) => ({ ...prev, [group]: key }))}
+    />
   );
 
   return (
@@ -147,37 +132,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
               <div>
                 <h3 className="text-xs font-bold text-slate-900 mb-1.5">Disjoncteurs</h3>
                 <ColorChips group="mcb" />
-                <div className="flex items-center gap-2.5 overflow-x-auto pb-1">
-                  {[
-                    { label: 'MCB 1P', type: 'MCB 1P' },
-                    { label: 'MCB 2P', type: 'MCB 2P' },
-                    { label: 'MCB 3P', type: 'MCB 3P' },
-                    { label: 'MCB 4P', type: 'MCB 4P' },
-                    { label: 'MCB 1P + N', type: 'MCB 1P + N' },
-                  ].map((item) => (
-                    <div
-                      key={item.label}
-                      onClick={() => onAddDeviceByType(item.type, { color: colors.mcb })}
-                      className="group relative w-24 h-28 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
-                    >
-                      <div className="flex-1 flex items-center justify-center">
-                        <DeviceThumbSvg type={item.type} color={colors.mcb} className="h-14 w-auto max-w-full" />
-                      </div>
-                      <span className="text-[10px] text-white font-medium text-center truncate w-full">
-                        {item.label}
-                      </span>
-                    </div>
-                  ))}
-
-                  {/* + Ajouter Card */}
-                  <div
-                    onClick={() => onAddDeviceByType('MCB 1P', { color: colors.mcb })}
-                    className="relative w-24 h-28 rounded-xl border-2 border-dashed border-slate-300 bg-slate-100/70 hover:bg-slate-200/70 transition-all cursor-pointer flex flex-col items-center justify-center p-2 shrink-0"
-                  >
-                    <Plus className="w-5 h-5 text-slate-500" />
-                    <span className="text-[10px] text-slate-500 font-medium mt-1">Ajouter</span>
-                  </div>
-                </div>
+                <McbCards color={colors.mcb} onAdd={(type) => onAddDeviceByType(type, { color: colors.mcb })} />
               </div>
 
               {/* SECTION: Dispositif différentiel résiduel */}
