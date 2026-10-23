@@ -19,7 +19,7 @@ import { AnnotationObject } from './AnnotationObject';
 import { AnnotationTopBar } from './AnnotationTopBar';
 import { RailTopBar } from './RailTopBar';
 import { TextEditorModal } from './TextEditorModal';
-import { Menu, Plus, Minus, Maximize2, Zap } from 'lucide-react';
+import { Menu, Plus, Minus, Maximize2, Zap, Share, Save } from 'lucide-react';
 
 interface CanvasWorkspaceProps {
   project: ElectricalPanelProject;
@@ -49,6 +49,8 @@ interface CanvasWorkspaceProps {
   onAddDeviceToRailQuick: (railId: string) => void;
   onMoveFreeDevice?: (id: string, x: number, y: number) => void;
   onMoveRail?: (id: string, x: number, y: number) => void;
+  onSaveProject?: () => void;
+  onShareProject?: () => void;
   selectedWireId?: string | null;
   onSelectWire?: (id: string | null) => void;
   onMoveWire?: (wireId: string, pts: { x: number; y: number }[]) => void;
@@ -86,6 +88,8 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
   onAddDeviceToRailQuick,
   onMoveFreeDevice,
   onMoveRail,
+  onSaveProject,
+  onShareProject,
   selectedWireId,
   onSelectWire,
   onMoveWire,
@@ -337,6 +341,22 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
 
         {/* Vertical Stack of Dark Zoom Buttons matching screenshots */}
         <div className="flex flex-col gap-2">
+          <button
+            onClick={onShareProject}
+            className="w-10 h-10 rounded-xl bg-[#22262d] hover:bg-[#15171b] active:scale-95 text-white flex items-center justify-center shadow-md transition-all cursor-pointer"
+            title="Partager le projet"
+            aria-label="Partager le projet"
+          >
+            <Share className="w-5 h-5 stroke-[2.2]" />
+          </button>
+          <button
+            onClick={onSaveProject}
+            className="w-10 h-10 rounded-xl bg-[#22262d] hover:bg-[#15171b] active:scale-95 text-white flex items-center justify-center shadow-md transition-all cursor-pointer"
+            title="Sauvegarder le projet"
+            aria-label="Sauvegarder le projet"
+          >
+            <Save className="w-5 h-5 stroke-[2.2]" />
+          </button>
           <button
             onClick={handleZoomIn}
             className="w-10 h-10 rounded-xl bg-[#22262d] hover:bg-[#15171b] active:scale-95 text-white flex items-center justify-center shadow-md transition-all cursor-pointer"

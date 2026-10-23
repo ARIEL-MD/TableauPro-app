@@ -1019,6 +1019,35 @@ export default function App() {
     showToast('Fichier projet téléchargé (.json)');
   };
 
+  // Sauvegarde explicite : projet courant + bibliothèque « Projets enregistrés »
+  const handleSaveProject = () => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(project));
+      const exists = projects.some((p) => p.id === project.id);
+      const next = exists ? projects.map((p) => (p.id === project.id ? project : p)) : [...projects, project];
+      localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(next));
+      showToast(`Projet « ${project.title} » sauvegardé`);
+    } catch {
+      showToast('Sauvegarde impossible : espace de stockage plein');
+    }
+  };
+
+  // Partage : fichier du projet via la feuille de partage du téléphone, sinon téléchargement
+  const handleShareProject = async () => {
+    const fileName = `${project.title.replace(/\s+/g, '_')}.tableaupro.json`;
+    const file = new File([JSON.stringify(project, null, 2)], fileName, { type: 'text/plain' });
+    try {
+      if (typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: project.title });
+        showToast('Projet partagé');
+        return;
+      }
+    } catch (e) {
+      if ((e as DOMException)?.name === 'AbortError') return; // partage annulé
+    }
+    handleExportJSON();
+  };
+
   // Import JSON file
   const handleImportJSON = (file: File) => {
     const reader = new FileReader();
@@ -1113,6 +1142,8 @@ export default function App() {
           project={project}
           onMoveFreeDevice={handleMoveFreeDevice}
           onMoveRail={handleMoveRail}
+          onSaveProject={handleSaveProject}
+          onShareProject={handleShareProject}
           selectedWireId={selectedWireId}
           onSelectWire={setSelectedWireId}
           onMoveWire={handleMoveWire}
