@@ -124,7 +124,13 @@ export const ElectricalDeviceSvg: React.FC<ElectricalDeviceSvgProps> = ({
       )}
 
       {/* Même dessin que l'aperçu du tiroir */}
-      <DeviceThumbSvg type={type} color={color} label={deviceLabel(device, type)} className="w-full h-full block" />
+      <DeviceThumbSvg
+        type={type}
+        color={color}
+        count={type === 'IndicatorLight' ? device.moduleWidth : undefined}
+        label={deviceLabel(device, type)}
+        className="w-full h-full block"
+      />
 
       {/* Ancres par pôle : chaque vis reçoit son fil */}
       {Array.from({ length: poles }).map((_, k) => {

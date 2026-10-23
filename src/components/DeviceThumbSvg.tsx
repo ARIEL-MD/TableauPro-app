@@ -1,6 +1,7 @@
 import React from 'react';
 import { Meter1PSvg, Meter3PSvg } from './MeterSvg';
 import { TerminalBarGraphic } from './TerminalBarGraphic';
+import { ChangeoverDevice, GuardmotorDevice, IndicatorLightDevice } from './RefDevices';
 
 interface DeviceThumbSvgProps {
   type: string;
@@ -1118,16 +1119,8 @@ export const DeviceThumbSvg: React.FC<DeviceThumbSvgProps> = ({
     }
 
     /* ---------- Indicator light ---------- */
-    case 'IndicatorLight': {
-      const lens =
-        color === 'red' ? '#e53935' : color === 'teal' ? '#26c6da' : color === 'yellow' ? '#f2d64b' : color === 'blue' ? '#2f9be0' : '#f8fafc';
-      return (
-        <Body modules={1} stripe="#9aa0a8" className={className}>
-          <rect x={PAD + 3} y={PAD + 30} width={12} height={28} rx={5} fill={lens} stroke="#6b7280" strokeWidth={0.8} />
-          <ellipse cx={PAD + 7.5} cy={PAD + 38} rx={2} ry={3.5} fill="#ffffff" opacity={0.45} />
-        </Body>
-      );
-    }
+    case 'IndicatorLight':
+      return <IndicatorLightDevice color={color} count={count} className={className} />;
 
     /* ---------- Socket (DIN-rail euro socket) ---------- */
     case 'Socket':
@@ -1135,15 +1128,7 @@ export const DeviceThumbSvg: React.FC<DeviceThumbSvgProps> = ({
 
     /* ---------- Guardmotor ---------- */
     case 'Guardmotor':
-      return (
-        <Body modules={2} className={className}>
-          <rect x={PAD + 4} y={PAD + 28} width={12} height={22} rx={2} fill="#d32f2f" />
-          <text x={PAD + 10} y={PAD + 41} fontSize={5.5} fontWeight="bold" fill="#fff" textAnchor="middle" fontFamily="Arial, sans-serif">O</text>
-          <rect x={PAD + 20} y={PAD + 28} width={12} height={22} rx={2} fill="#2e9e5b" />
-          <text x={PAD + 26} y={PAD + 41} fontSize={5.5} fontWeight="bold" fill="#fff" textAnchor="middle" fontFamily="Arial, sans-serif">I</text>
-          <rect x={PAD + 4} y={PAD + 56} width={28} height={3} rx={1} fill="#3b82f6" />
-        </Body>
-      );
+      return <GuardmotorDevice className={className} />;
 
     /* ---------- Energy meters ---------- */
     case 'Meter 1P':
@@ -1153,24 +1138,7 @@ export const DeviceThumbSvg: React.FC<DeviceThumbSvgProps> = ({
 
     /* ---------- Changeover switch-disconnector ---------- */
     case 'SD Changeover':
-      return (
-        <svg viewBox="0 0 104 64" className={className} fill="none" preserveAspectRatio="xMidYMid meet">
-          <Defs />
-          <rect x={1.5} y={1.5} width={101} height={61} rx={3} fill="url(#dt-dark)" stroke="#111827" strokeWidth={0.8} />
-          {Array.from({ length: 6 }).map((_, i) => (
-            <React.Fragment key={i}>
-              <Screw cx={11 + i * 16.5} cy={9} r={3.6} />
-              <Screw cx={11 + i * 16.5} cy={55} r={3.6} />
-            </React.Fragment>
-          ))}
-          <rect x={1.5} y={18} width={101} height={14} fill="#c24a4a" />
-          <rect x={1.5} y={18} width={101} height={2} fill="#e07a7a" />
-          <circle cx={52} cy={32} r={10} fill="#111827" stroke="#374151" strokeWidth={1} />
-          <rect x={49} y={24} width={6} height={16} rx={2} fill="#4b5563" />
-          <rect x={14} y={36} width={20} height={4} rx={1} fill="#6b7280" opacity={0.6} />
-          <rect x={70} y={36} width={20} height={4} rx={1} fill="#6b7280" opacity={0.6} />
-        </svg>
-      );
+      return <ChangeoverDevice className={className} />;
 
     /* ---------- DIN rail ---------- */
     case 'DIN Rail': {

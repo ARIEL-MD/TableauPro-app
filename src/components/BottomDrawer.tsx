@@ -10,6 +10,7 @@ import { ColorChips as ColorChipsView } from './ColorChips';
 import { McbCards } from './McbCards';
 import { TimerRelayCards, AfddCards } from './ProDeviceCards';
 import { SpringBarCards } from './SpringBarCards';
+import { INDICATOR_COLORS, INDICATOR_RIMS } from './RefDevices';
 
 export type DrawerCategory =
   | 'appareils'
@@ -355,64 +356,62 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
 
               {/* SECTION: Voyants */}
               <div>
-                <h3 className="text-xs font-bold text-slate-900 mb-1.5">Voyants</h3>
-                <div className="flex items-center gap-2.5 overflow-x-auto pb-1">
-                  <div className="relative w-56 h-28 rounded-xl bg-[#525862] p-2.5 flex flex-col justify-between shadow-sm shrink-0">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <DeviceThumbSvg type="IndicatorLight" color={indicatorColor} className="h-14 w-auto" />
-                        <span className="text-xs font-semibold text-white">Voyant</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {(['red', 'teal', 'yellow', 'blue', 'white'] as const).map((c) => (
-                          <button
-                            key={c}
-                            onClick={() => setIndicatorColor(c)}
-                            className={`w-4 h-4 rounded-full border-2 transition-transform ${
-                              indicatorColor === c ? 'scale-110 border-white' : 'border-transparent'
-                            } ${
-                              c === 'red'
-                                ? 'bg-red-500'
-                                : c === 'teal'
-                                ? 'bg-teal-400'
-                                : c === 'yellow'
-                                ? 'bg-yellow-400'
-                                : c === 'blue'
-                                ? 'bg-blue-500'
-                                : 'bg-white'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-1 border-t border-slate-600/50">
-                      <div className="flex items-center gap-1.5 bg-slate-700/60 rounded px-1.5 py-0.5">
+                <h3 className="text-[22px] leading-7 font-bold text-[#202020] mb-2">Voyants</h3>
+                {/* Carte identique à la capture de référence (sans badge PRO) : toucher la carte pose le voyant. */}
+                <div className="flex items-center gap-3 overflow-x-auto pb-1">
+                  <div
+                    onClick={() => onAddDeviceByType('Voyant', { count: indicatorCount, color: indicatorColor })}
+                    className="relative flex shrink-0 cursor-pointer items-center"
+                    style={{ width: 477, height: 247, borderRadius: 16, backgroundColor: '#6f6f6f' }}
+                    aria-label="Poser un voyant"
+                  >
+                    {/* Colonne de gauche : appareil, nom, nombre de lampes */}
+                    <div className="flex flex-col items-center" style={{ width: 196 }}>
+                      <DeviceThumbSvg
+                        type="IndicatorLight"
+                        color={indicatorColor}
+                        count={indicatorCount}
+                        className="h-[85px] w-auto"
+                      />
+                      <span className="mt-[14px] text-[20px] leading-6 text-white">Voyant</span>
+                      <div className="mt-[12px] flex items-center gap-[19px]" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => setIndicatorCount(Math.max(1, indicatorCount - 1))}
-                          className="text-white hover:text-amber-400 font-bold"
+                          className="flex h-[41px] w-[41px] items-center justify-center rounded-full bg-[#838383] text-white"
+                          aria-label="Moins de lampes"
                         >
-                          <Minus className="w-3 h-3" />
+                          <Minus className="h-5 w-5" strokeWidth={2.6} />
                         </button>
-                        <span className="text-xs font-mono font-bold text-white px-1">
+                        <span className="w-6 text-center text-[26px] font-bold leading-[30px] text-white">
                           {indicatorCount}
                         </span>
                         <button
                           onClick={() => setIndicatorCount(Math.min(3, indicatorCount + 1))}
-                          className="text-white hover:text-amber-400 font-bold"
+                          className="flex h-[41px] w-[41px] items-center justify-center rounded-full bg-[#838383] text-white"
+                          aria-label="Plus de lampes"
                         >
-                          <Plus className="w-3 h-3" />
+                          <Plus className="h-5 w-5" strokeWidth={2.6} />
                         </button>
-                        <span className="text-[9px] text-slate-300 ml-1">Lampes</span>
                       </div>
-                      <button
-                        onClick={() =>
-                          onAddDeviceByType('Voyant', { count: indicatorCount, color: indicatorColor })
-                        }
-                        className="px-2.5 py-1 bg-[#007aff] hover:bg-blue-600 text-white rounded text-[10px] font-bold cursor-pointer"
-                      >
-                        Poser
-                      </button>
+                      <span className="mt-[10px] text-[18px] leading-[22px] text-[#d3d3d3]">Lampes</span>
+                    </div>
+
+                    {/* Colonne de droite : cinq pastilles de couleur */}
+                    <div className="ml-[14px] flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+                      {(['red', 'teal', 'yellow', 'blue', 'white'] as const).map((c) => (
+                        <button
+                          key={c}
+                          onClick={() => setIndicatorColor(c)}
+                          aria-label={`Voyant ${c}`}
+                          style={{
+                            width: 39,
+                            height: 61,
+                            borderRadius: 14,
+                            backgroundColor: INDICATOR_COLORS[c],
+                            border: `3px solid ${indicatorColor === c ? '#ffffff' : INDICATOR_RIMS[c]}`,
+                          }}
+                        />
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -420,26 +419,34 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
 
               {/* SECTION: Plus */}
               <div>
-                <h3 className="text-xs font-bold text-slate-900 mb-1.5">Plus</h3>
-                <div className="flex items-center gap-2.5 overflow-x-auto pb-1">
+                <h3 className="text-[22px] leading-7 font-bold text-[#202020] mb-2">Plus</h3>
+                {/* Cartes identiques à la capture de référence (sans badge PRO) : 146 px de haut, fond gris, libellé 20 px. */}
+                <div className="flex flex-wrap items-start gap-3 pb-1">
                   {[
-                    { label: 'Prise', type: 'Socket' },
-                    { label: 'Compteur monophasé', type: 'Meter' },
-                    { label: 'Compteur triphasé', type: 'Meter' },
-                    { label: 'Guardmotor', type: 'Contactor' },
-                    { label: 'Interrupteur-sectionneur inverseur', type: 'MCB 4P' },
+                    { label: 'Prise', thumbH: 70 },
+                    { label: 'Compteur monophasé', thumbH: 70 },
+                    { label: 'Compteur triphasé', thumbH: 68 },
+                    { label: 'Guardmotor', thumbH: 73 },
+                    { label: 'Interrupteur-sectionneur inverseur', thumbH: 75 },
                   ].map((item) => (
                     <div
                       key={item.label}
                       onClick={() => onAddDeviceByType(item.label)}
-                      className="group relative min-w-[90px] h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
+                      className="group relative flex shrink-0 cursor-pointer flex-col items-center justify-between transition-colors hover:brightness-110"
+                      style={{
+                        minWidth: 120,
+                        height: 146,
+                        borderRadius: 16,
+                        backgroundColor: '#6f6f6f',
+                        padding: '18px 18px 14px',
+                      }}
                     >
-                      <div className="flex-1 flex items-center justify-center">
-                        <DeviceThumbSvg type={item.label} className="h-14 w-auto max-w-full" />
+                      <div className="flex flex-1 items-start justify-center">
+                        <div style={{ height: item.thumbH }}>
+                          <DeviceThumbSvg type={item.label} className="h-full w-auto" />
+                        </div>
                       </div>
-                      <span className="text-[10px] text-white font-medium text-center truncate w-full px-1">
-                        {item.label}
-                      </span>
+                      <span className="whitespace-nowrap text-[20px] leading-6 text-white">{item.label}</span>
                     </div>
                   ))}
                 </div>
