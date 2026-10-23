@@ -386,6 +386,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
          ======================================================== */}
       <div
         ref={surfaceRef}
+        data-plan-surface
         className="canvas-background absolute origin-top-left transition-transform duration-75 ease-out min-w-[2400px] min-h-[2400px] p-10 pt-16"
         style={{
           transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,

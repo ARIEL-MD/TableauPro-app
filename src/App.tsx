@@ -20,6 +20,9 @@ import { DeviceToolbar } from './components/DeviceToolbar';
 import { BOMModal } from './components/BOMModal';
 import { ProjectManagerModal } from './components/ProjectManagerModal';
 import { FileText } from 'lucide-react';
+import { CustomDeviceDef, loadCustomDevices, saveCustomDevices } from './utils/customDevices';
+import { decodeProjectLink, encodeProjectLink, hasProjectInHash } from './utils/projectLink';
+import { exportPlanToPng } from './utils/exportPng';
 import { WireRouteBar } from './components/WireRouteBar';
 import type { WirePreview } from './components/CableOverlay';
 import {
@@ -95,6 +98,12 @@ export default function App() {
     }
   });
   const [isProjectManagerOpen, setIsProjectManagerOpen] = useState(false);
+
+  // Appareils créés par l'utilisateur (communs à tous les projets)
+  const [customDevices, setCustomDevices] = useState<CustomDeviceDef[]>(() => loadCustomDevices());
+  useEffect(() => {
+    saveCustomDevices(customDevices);
+  }, [customDevices]);
 
   // Undo / Redo history
   const [history, setHistory] = useState<ElectricalPanelProject[]>([]);
@@ -571,6 +580,107 @@ export default function App() {
       };
     });
   };
+
+  // ---- Appareils personnalisés ----
+  const handleSaveCustomDevice = (def: CustomDeviceDef) => {
+    setCustomDevices((prev) => {
+      const exists = prev.some((d) => d.id === def.id);
+      return exists ? prev.map((d) => (d.id === def.id ? def : d)) : [...prev, def];
+    });
+    showToast(`Appareil « ${def.name} » enregistré`);
+  };
+
+  const handleDeleteCustomDevice = (id: string) => {
+    setCustomDevices((prev) => prev.filter((d) => d.id !== id));
+    showToast('Appareil personnalisé supprimé');
+  };
+
+  const handleAddCustomDevice = (def: CustomDeviceDef) => {
+    updateProjectWithHistory((prev) => {
+      const freeCount = prev.devices.filter((d) => d.free).length;
+      const newDevice: ElectricalDevice = {
+        id: `dev-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        railId: prev.rails.find((r) => r.id === selectedRailId)?.id ?? prev.rails[0]?.id ?? '',
+        slotIndex: 0,
+        moduleWidth: def.moduleWidth,
+        category: def.category,
+        name: def.name,
+        reference: def.reference,
+        manufacturer: def.manufacturer,
+        poles: def.poles,
+        calibre: def.calibre,
+        curve: def.category === 'breaker' || def.category === 'rcbo' ? 'C' : undefined,
+        differentialSensibility: def.category === 'differential' || def.category === 'rcbo' ? 30 : undefined,
+        differentialType: def.category === 'differential' || def.category === 'rcbo' ? 'A' : undefined,
+        circuitLabel: def.name,
+        assignedPictogram: 'blank',
+        isOn: true,
+        free: true,
+        x: 120 + (freeCount % 6) * 200,
+        y: 160 + Math.floor(freeCount / 6) * 170,
+      };
+      showToast(`${def.name} ajouté sur le plan`);
+      return { ...prev, devices: [...prev.devices, newDevice] };
+    });
+  };
+
+  // ---- Export PNG et lien de projet ----
+  const handleExportPNG = async () => {
+    const surface = document.querySelector<HTMLElement>('[data-plan-surface]');
+    if (!surface) return;
+    try {
+      showToast('Création de l’image…');
+      await exportPlanToPng(surface, `${project.title.replace(/\s+/g, '_')}.png`);
+      showToast('Image PNG enregistrée');
+    } catch {
+      showToast('Export PNG impossible : le plan est vide ou illisible');
+    }
+  };
+
+  const handleCopyProjectLink = async () => {
+    try {
+      const link = await encodeProjectLink(project);
+      try {
+        await navigator.clipboard.writeText(link);
+        showToast('Lien du projet copié');
+      } catch {
+        window.prompt('Copiez ce lien :', link);
+      }
+    } catch {
+      showToast('Impossible de créer le lien');
+    }
+  };
+
+  const handleImportProjectLink = async () => {
+    const link = window.prompt('Collez ici le lien du projet :');
+    if (!link) return;
+    const imported = await decodeProjectLink(link);
+    if (!imported) {
+      showToast('Lien invalide');
+      return;
+    }
+    updateProjectWithHistory(() => ({
+      ...imported,
+      id: `proj-${Date.now()}-link`,
+      annotations: imported.annotations ?? [],
+    }));
+    showToast(`Projet « ${imported.title} » ouvert depuis le lien`);
+  };
+
+  // Lien reçu : ouvre le projet contenu dans l'adresse (#p=...)
+  useEffect(() => {
+    if (!hasProjectInHash()) return;
+    decodeProjectLink(window.location.hash).then((imported) => {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      if (!imported) {
+        showToast('Lien de projet invalide');
+        return;
+      }
+      setProject({ ...imported, id: `proj-${Date.now()}-link`, annotations: imported.annotations ?? [] });
+      showToast(`Projet « ${imported.title} » ouvert depuis un lien`);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Déplacer un rail sur le plan
   const handleMoveRail = (id: string, x: number, y: number) => {
@@ -1208,6 +1318,10 @@ export default function App() {
         onAddAnnotation={handleAddAnnotation}
         onLoadTemplate={handleLoadTemplate}
         onCreateNewTemplate={handleCreateNewTemplate}
+        customDevices={customDevices}
+        onSaveCustomDevice={handleSaveCustomDevice}
+        onDeleteCustomDevice={handleDeleteCustomDevice}
+        onAddCustomDevice={handleAddCustomDevice}
       />
 
       {/* Project library modal */}
@@ -1233,6 +1347,9 @@ export default function App() {
         onSaveJSON={handleExportJSON}
         onImportJSON={handleImportJSON}
         onPrint={() => window.print()}
+        onExportPNG={handleExportPNG}
+        onCopyLink={handleCopyProjectLink}
+        onImportLink={handleImportProjectLink}
         onOpenBOM={() => setIsBOMModalOpen(true)}
         canUndo={history.length > 0}
         canRedo={redoStack.length > 0}

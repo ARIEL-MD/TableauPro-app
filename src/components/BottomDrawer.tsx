@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { PictogramKey } from '../types/panel';
 import { DeviceThumbSvg } from './DeviceThumbSvg';
 import { DistributionBlockThumb, DISTRIBUTION_THUMB_HEIGHT } from './DistributionBlockThumb';
@@ -12,6 +13,24 @@ import { McbCards } from './McbCards';
 import { TimerRelayCards, AfddCards } from './ProDeviceCards';
 import { SpringBarCards } from './SpringBarCards';
 import { INDICATOR_COLORS, INDICATOR_RIMS } from './RefDevices';
+import { thumbTypeForDevice } from './ElectricalDeviceSvg';
+import { CustomDeviceModal } from './CustomDeviceModal';
+import type { CustomDeviceDef } from '../utils/customDevices';
+import type { ElectricalDevice } from '../types/panel';
+import { Pencil, Trash2 } from 'lucide-react';
+
+/** Appareil fictif servant uniquement à choisir la vignette d'un appareil personnalisé. */
+const thumbTypeForCustom = (d: CustomDeviceDef): string =>
+  thumbTypeForDevice({
+    id: d.id,
+    railId: '',
+    slotIndex: 0,
+    moduleWidth: d.moduleWidth,
+    category: d.category,
+    name: d.name,
+    reference: d.reference,
+    poles: d.poles,
+  } as ElectricalDevice);
 
 export type DrawerCategory =
   | 'appareils'
@@ -32,9 +51,17 @@ interface BottomDrawerProps {
   onAddAnnotation: (kind: 'text' | 'table' | 'pictogram', pictogram?: PictogramKey) => void;
   onLoadTemplate: (templateKey: string) => void;
   onCreateNewTemplate: () => void;
+  customDevices: CustomDeviceDef[];
+  onSaveCustomDevice: (def: CustomDeviceDef) => void;
+  onDeleteCustomDevice: (id: string) => void;
+  onAddCustomDevice: (def: CustomDeviceDef) => void;
 }
 
 export const BottomDrawer: React.FC<BottomDrawerProps> = ({
+  customDevices,
+  onSaveCustomDevice,
+  onDeleteCustomDevice,
+  onAddCustomDevice,
   onAddDeviceByType,
   onAddRailByLength,
   onAddTerminalBar,
@@ -47,6 +74,8 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [activeCategory, setActiveCategory] = useState<DrawerCategory>('appareils');
+  // null = fermé ; 'new' = création ; sinon l'appareil en cours de modification
+  const [customEditor, setCustomEditor] = useState<CustomDeviceDef | 'new' | null>(null);
 
   // Configurable states for interactive cards
   const [comb1PLength, setComb1PLength] = useState(2);
@@ -133,6 +162,48 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
              ======================================================== */}
           {activeCategory === 'appareils' && (
             <div className="space-y-4 pt-1">
+              {/* SECTION: Appareils personnalisés */}
+              <div>
+                <h3 className="text-xs font-bold text-slate-900 mb-1.5">Appareils personnalisés</h3>
+                <div className="flex items-center gap-2.5 overflow-x-auto pb-1">
+                  <div
+                    onClick={() => setCustomEditor('new')}
+                    className="relative w-24 h-28 rounded-xl border-2 border-dashed border-[#007aff]/60 bg-blue-50/60 hover:bg-blue-100/60 transition-all cursor-pointer flex flex-col items-center justify-center p-2 shrink-0"
+                  >
+                    <Plus className="w-5 h-5 text-[#007aff]" />
+                    <span className="text-[10px] text-[#007aff] font-semibold mt-1 text-center">Créer</span>
+                  </div>
+                  {customDevices.map((d) => (
+                    <div
+                      key={d.id}
+                      onClick={() => onAddCustomDevice(d)}
+                      className="group relative w-28 h-28 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
+                    >
+                      <div className="absolute right-1 top-1 flex gap-1" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => setCustomEditor(d)}
+                          className="rounded-md bg-slate-700/80 p-1 text-white hover:bg-slate-600"
+                          aria-label="Modifier"
+                        >
+                          <Pencil className="h-3 w-3" />
+                        </button>
+                        <button
+                          onClick={() => onDeleteCustomDevice(d.id)}
+                          className="rounded-md bg-slate-700/80 p-1 text-white hover:bg-red-600"
+                          aria-label="Supprimer"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                      <div className="flex-1 flex items-center justify-center pt-3">
+                        <DeviceThumbSvg type={thumbTypeForCustom(d)} className="h-14 w-auto max-w-full" />
+                      </div>
+                      <span className="text-[10px] text-white font-medium text-center truncate w-full">{d.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* SECTION: Disjoncteurs */}
               <div>
                 <h3 className="text-xs font-bold text-slate-900 mb-1.5">Disjoncteurs</h3>
@@ -851,6 +922,20 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
           )}
         </div>
       )}
+
+      {/* Portail : le flou d'arrière-plan du tiroir piégerait sinon le panneau « fixed » dans le tiroir */}
+      {customEditor &&
+        createPortal(
+          <CustomDeviceModal
+            initial={customEditor === 'new' ? null : customEditor}
+            onCancel={() => setCustomEditor(null)}
+            onSave={(def) => {
+              onSaveCustomDevice(def);
+              setCustomEditor(null);
+            }}
+          />,
+          document.body
+        )}
     </aside>
   );
 };

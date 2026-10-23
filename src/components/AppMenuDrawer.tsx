@@ -16,6 +16,8 @@ import {
   Download,
   Info,
   FileText,
+  Image as ImageIcon,
+  Link2,
 } from 'lucide-react';
 
 interface AppMenuDrawerProps {
@@ -26,6 +28,9 @@ interface AppMenuDrawerProps {
   onSaveJSON: () => void;
   onImportJSON: (file: File) => void;
   onPrint: () => void;
+  onExportPNG: () => void;
+  onCopyLink: () => void;
+  onImportLink: () => void;
   onOpenBOM: () => void;
   canUndo: boolean;
   canRedo: boolean;
@@ -45,6 +50,9 @@ export const AppMenuDrawer: React.FC<AppMenuDrawerProps> = ({
   onSaveJSON,
   onImportJSON,
   onPrint,
+  onExportPNG,
+  onCopyLink,
+  onImportLink,
   onOpenBOM,
   canUndo,
   canRedo,
@@ -182,6 +190,39 @@ export const AppMenuDrawer: React.FC<AppMenuDrawerProps> = ({
               >
                 <Printer className="w-4 h-4 text-emerald-600" />
                 <span>Imprimer / Exporter en PDF</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  onExportPNG();
+                  onClose();
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-700 font-medium transition-colors cursor-pointer"
+              >
+                <ImageIcon className="w-4 h-4 text-violet-600" />
+                <span>Exporter le schéma en PNG</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  onCopyLink();
+                  onClose();
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-700 font-medium transition-colors cursor-pointer"
+              >
+                <Link2 className="w-4 h-4 text-sky-600" />
+                <span>Copier le lien du projet</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  onImportLink();
+                  onClose();
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-700 font-medium transition-colors cursor-pointer"
+              >
+                <Link2 className="w-4 h-4 text-slate-500" />
+                <span>Ouvrir depuis un lien</span>
               </button>
             </div>
           </div>
