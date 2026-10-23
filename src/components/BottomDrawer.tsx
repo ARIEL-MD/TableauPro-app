@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PictogramKey } from '../types/panel';
 import { DeviceThumbSvg } from './DeviceThumbSvg';
+import { DistributionBlockThumb, DISTRIBUTION_THUMB_HEIGHT } from './DistributionBlockThumb';
 import { PictogramCards } from './PictogramCards';
 import { TextCards } from './TextCards';
 import { Plus, Minus } from 'lucide-react';
@@ -64,6 +65,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
     sd: 'red',
   });
 
+  const [activeDistribution, setActiveDistribution] = useState<string>('2x7');
   const [indicatorCount, setIndicatorCount] = useState(1);
   const [indicatorColor, setIndicatorColor] = useState<'red' | 'teal' | 'yellow' | 'blue' | 'white'>('red');
 
@@ -555,8 +557,9 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
              ======================================================== */}
           {activeCategory === 'repartiteurs' && (
             <div>
-              <h3 className="text-xs font-bold text-slate-900 mb-2.5">Blocs de distribution</h3>
-              <div className="flex items-center gap-3 overflow-x-auto pb-2">
+              <h3 className="text-[22px] leading-7 font-bold text-[#202020] mb-2">Blocs de distribution</h3>
+              {/* Cartes identiques à la capture de référence (sans badge PRO) : 146 px de haut, fond gris, libellé 20 px. */}
+              <div className="flex flex-wrap items-start gap-3 pb-1">
                 {[
                   { config: '2x7' as const, label: '2×7 contacts' },
                   { config: '2x11' as const, label: '2×11 contacts' },
@@ -567,13 +570,25 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                 ].map((b) => (
                   <div
                     key={b.config}
-                    onClick={() => onAddDistributionBlock(b.config)}
-                    className="group relative w-28 h-24 rounded-xl bg-[#525862] hover:bg-[#454a54] transition-all cursor-pointer flex flex-col items-center justify-between p-2 shadow-sm shrink-0"
+                    onClick={() => {
+                      setActiveDistribution(b.config);
+                      onAddDistributionBlock(b.config);
+                    }}
+                    className="relative flex shrink-0 cursor-pointer flex-col items-center transition-colors"
+                    style={{
+                      height: 146,
+                      borderRadius: 16,
+                      backgroundColor: activeDistribution === b.config ? '#4e4e4e' : '#6f6f6f',
+                      padding: '18px 18px 0',
+                    }}
                   >
-                    <div className="flex-1 flex items-center justify-center">
-                      <DeviceThumbSvg type="DistributionBlock" variant={b.config} className="h-14 w-auto max-w-[96px]" />
+                    <div className="flex items-center justify-center" style={{ height: 72 }}>
+                      <DistributionBlockThumb
+                        variant={b.config}
+                        style={{ height: DISTRIBUTION_THUMB_HEIGHT[b.config], width: 'auto' }}
+                      />
                     </div>
-                    <span className="text-[11px] text-white font-medium text-center">
+                    <span className="mt-auto whitespace-nowrap text-[20px] leading-6 text-white" style={{ marginBottom: 20 }}>
                       {b.label}
                     </span>
                   </div>

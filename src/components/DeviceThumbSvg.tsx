@@ -2,6 +2,7 @@ import React from 'react';
 import { Meter1PSvg, Meter3PSvg } from './MeterSvg';
 import { TerminalBarGraphic } from './TerminalBarGraphic';
 import { ChangeoverDevice, GuardmotorDevice, IndicatorLightDevice } from './RefDevices';
+import { DistributionBlockThumb } from './DistributionBlockThumb';
 
 interface DeviceThumbSvgProps {
   type: string;
@@ -1195,29 +1196,8 @@ export const DeviceThumbSvg: React.FC<DeviceThumbSvgProps> = ({
     }
 
     /* ---------- Distribution blocks (rows x cols) ---------- */
-    case 'DistributionBlock': {
-      const [r, c] = (variant || '2x7').split('x').map(Number);
-      const rowH = 13;
-      const cw = 6.4;
-      const W = 18 + c * cw;
-      const Hh = 10 + r * rowH;
-      return (
-        <svg viewBox={`0 0 ${W + 4} ${Hh + 4}`} className={className} fill="none" preserveAspectRatio="xMidYMid meet">
-          <Defs />
-          <rect x={2} y={2} width={W} height={Hh} rx={2} fill="#6e8aa3" stroke="#475569" strokeWidth={0.8} />
-          <rect x={2} y={2} width={7} height={Hh} rx={2} fill="url(#dt-body)" stroke="#9ca3af" strokeWidth={0.6} />
-          <rect x={W - 5} y={2} width={7} height={Hh} rx={2} fill="url(#dt-body)" stroke="#9ca3af" strokeWidth={0.6} />
-          {Array.from({ length: r }).map((_, ri) => (
-            <g key={ri}>
-              <rect x={11} y={7 + ri * rowH} width={W - 22} height={5} rx={1} fill="url(#dt-brass)" stroke="#8a7020" strokeWidth={0.4} />
-              {Array.from({ length: c }).map((_, ci) => (
-                <circle key={ci} cx={11 + (ci + 0.5) * ((W - 22) / c)} cy={9.5 + ri * rowH} r={1.3} fill="#5b4a12" />
-              ))}
-            </g>
-          ))}
-        </svg>
-      );
-    }
+    case 'DistributionBlock':
+      return <DistributionBlockThumb variant={variant || '2x7'} className={className} />;
 
     /* ---------- Busbar combs ---------- */
     case 'Comb': {
