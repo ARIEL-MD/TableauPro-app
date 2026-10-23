@@ -29,6 +29,20 @@ export const METER_GEOMETRY: Record<string, MeterGeometry> = {
     topY: 0.735,
     bottomY: 0.775,
   },
+  // Guardmotor (dessin RefDevices, 72 × 118) : 3 bornes en haut et 3 en bas
+  Guardmotor: {
+    aspect: 72 / 118,
+    terminalX: [0.2382, 0.4983, 0.7561],
+    topY: 0.0743,
+    bottomY: 0.9129,
+  },
+  // Interrupteur-sectionneur inverseur (dessin RefDevices, 164 × 146) : 3 bornes par source, en haut et en bas
+  'SD Changeover': {
+    aspect: 164 / 146,
+    terminalX: [0.1176, 0.2571, 0.3917, 0.6015, 0.7332, 0.8649],
+    topY: 0.1421,
+    bottomY: 0.8579,
+  },
 };
 
 /** Largeur sur le plan, en modules DIN (1 module = 36 px). */
