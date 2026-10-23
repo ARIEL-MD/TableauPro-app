@@ -81,31 +81,35 @@ export const IndicatorLightDevice: React.FC<{
             <rect x={x0} y={0.6} width={1.4} height={116.8} fill="#474749" />
             <rect x={x0 + 12.6} y={0.6} width={1.4} height={116.8} fill="#474749" />
 
-            {/* Repères imprimés du haut + flèche vers le bas */}
-            <rect x={cx - 2.2} y={5.5} width={4.4} height={1} rx={0.4} fill="#7d8186" />
-            <rect x={cx - 1.2} y={8.2} width={2.4} height={0.9} rx={0.4} fill="#9a9ea3" />
-            <path d={`M${cx - 3} 15.2 L${cx + 3} 15.2 L${cx} 21.4 Z`} fill="#565a60" />
+            {/* Repères imprimés du haut : petits points, trait, cuvette pleine */}
+            <rect x={cx - 3.2} y={10.6} width={1.6} height={0.6} fill="#c3c8ca" />
+            <rect x={cx + 1.6} y={10.6} width={1.6} height={0.6} fill="#c3c8ca" />
+            <line x1={cx + 1.3} y1={12.2} x2={cx + 0.4} y2={14.9} stroke="#4d5559" strokeWidth={0.8} strokeLinecap="round" />
+            <path
+              d={`M${cx - 3} 17.6 Q${cx - 3.3} 22.4 ${cx} 23.4 Q${cx + 3.3} 22.4 ${cx + 3} 17.6 Q${cx} 16.2 ${cx - 3} 17.6 Z`}
+              fill="#4d5559"
+            />
+            <rect x={cx - 3.4} y={24.6} width={6.8} height={0.6} fill="#b4bcbc" />
 
             {/* Première bande de couleur */}
-            <rect x={x0 + 1.4} y={28} width={11.2} height={8.2} fill={lens} stroke={bandStroke} strokeWidth={0.4} />
+            <rect x={x0 + 1.4} y={28.6} width={11.2} height={6.3} fill={lens} stroke={bandStroke} strokeWidth={0.4} />
 
             {/* Petits repères entre les bandes */}
-            <circle cx={cx - 1.4} cy={42} r={0.55} fill="#8d9195" />
-            <circle cx={cx + 1.4} cy={45.5} r={0.45} fill="#9a9ea2" />
+            <circle cx={cx - 1.4} cy={38} r={0.5} fill="#c7a3a5" />
+            <circle cx={cx + 1.4} cy={38} r={0.5} fill="#c7a3a5" />
+            <path d={`M${cx - 1.4} 41.2 L${cx + 1.4} 41.2 L${cx} 45 Z`} fill="#a4a9ac" />
 
             {/* Seconde bande de couleur, un peu plus sombre */}
-            <rect x={x0 + 1.4} y={70.5} width={11.2} height={8.4} fill={darken(lens, 0.16)} stroke={bandStroke} strokeWidth={0.4} />
+            <rect x={x0 + 1.4} y={72.2} width={11.2} height={6.3} fill={darken(lens, 0.16)} stroke={bandStroke} strokeWidth={0.4} />
 
-            {/* Bas : filet, repère « lampe » et point */}
-            <rect x={cx - 3.6} y={87.2} width={7.2} height={0.7} fill="#b3b7bb" />
+            {/* Bas : filet, dôme plein (type ampoule) et point */}
+            <rect x={cx - 3.6} y={90.2} width={7.2} height={0.7} fill="#b4bcbc" />
             <path
-              d={`M${cx - 3.3} 103 L${cx} 94.2 L${cx + 3.3} 103`}
-              stroke="#5a5e63"
-              strokeWidth={1.1}
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              d={`M${cx - 2.8} 101.8 L${cx - 2.8} 98.4 Q${cx - 2.8} 94.8 ${cx} 94.8 Q${cx + 2.8} 94.8 ${cx + 2.8} 98.4 L${cx + 2.8} 101.8 Z`}
+              fill="#4f555a"
             />
-            <circle cx={cx} cy={108} r={0.95} fill="#5a5e63" />
+            <rect x={cx - 1.7} y={101.8} width={3.4} height={1.6} fill="#4f555a" />
+            <circle cx={cx} cy={105.8} r={0.95} fill="#4f555a" />
           </g>
         );
       })}
