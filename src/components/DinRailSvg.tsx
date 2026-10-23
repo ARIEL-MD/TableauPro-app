@@ -120,7 +120,7 @@ export const DinRailSvg: React.FC<DinRailSvgProps> = ({
           boxShadow: isRailSelected ? '0 0 0 3px #007aff' : 'none',
         }}
       >
-        <RailDrawing length={drawLength} width={width} />
+        <RailDrawing length={drawLength} width={width} seeThrough />
       </div>
 
       {/* Appareils d'un modèle encore montés sur ce rail */}

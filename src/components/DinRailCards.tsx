@@ -90,36 +90,75 @@ export const railDrawingHeight = (length: number, width: number): number =>
   (width * (RAILS[length] ?? RAILS[200]).rows.length) / ICON_W;
 
 /** Dessin d'un rail DIN — viewBox 84 × h, comme sur la capture. */
-export const RailDrawing: React.FC<{ length: number; width: number }> = ({ length, width }) => {
+export const RailDrawing: React.FC<{ length: number; width: number; seeThrough?: boolean }> = ({
+  length,
+  width,
+  seeThrough = false,
+}) => {
   const spec = RAILS[length] ?? RAILS[200];
   const h = spec.rows.length;
+  const maskId = React.useId();
+
+  // Fentes : positions en px de la capture (celles coupées au bord sont prolongées)
+  const slots = spec.runs.map(([s, e]) => {
+    const w = e - s + 1;
+    let x = s;
+    let rw = w;
+    if (s === 0 && w < spec.slotLen) {
+      rw = spec.slotLen;
+      x = e + 1 - spec.slotLen;
+    } else if (e === ICON_W - 1 && w < spec.slotLen) {
+      rw = spec.slotLen;
+    }
+    return { x, rw };
+  });
+
+  const rows = spec.rows.map((v, i) => <rect key={i} x="0" y={i} width={ICON_W} height="1.02" fill={g(v)} />);
+
   return (
     <svg width={width} height={(width * h) / ICON_W} viewBox={`0 0 ${ICON_W} ${h}`} aria-hidden>
-      {spec.rows.map((v, i) => (
-        <rect key={i} x="0" y={i} width={ICON_W} height="1.02" fill={g(v)} />
-      ))}
-      {spec.runs.map(([s, e], i) => {
-        const w = e - s + 1;
-        let x = s;
-        let rw = w;
-        if (s === 0 && w < spec.slotLen) {
-          rw = spec.slotLen;
-          x = e + 1 - spec.slotLen;
-        } else if (e === ICON_W - 1 && w < spec.slotLen) {
-          rw = spec.slotLen;
-        }
-        return (
-          <rect
-            key={i}
-            x={x}
-            y={spec.slotY}
-            width={rw}
-            height={spec.slotH}
-            rx={spec.slotH / 2}
-            fill={spec.slotFill}
-          />
-        );
-      })}
+      {seeThrough ? (
+        <>
+          {/* Sur le plan, les fentes sont ouvertes : on voit le fond à travers, avec un fin contour */}
+          <defs>
+            <mask id={maskId}>
+              <rect x="0" y="0" width={ICON_W} height={h} fill="white" />
+              {slots.map((sl, i) => (
+                <rect key={i} x={sl.x} y={spec.slotY} width={sl.rw} height={spec.slotH} rx={spec.slotH / 2} fill="black" />
+              ))}
+            </mask>
+          </defs>
+          <g mask={`url(#${maskId})`}>{rows}</g>
+          {slots.map((sl, i) => (
+            <rect
+              key={i}
+              x={sl.x}
+              y={spec.slotY}
+              width={sl.rw}
+              height={spec.slotH}
+              rx={spec.slotH / 2}
+              fill="none"
+              stroke="#5f5f5f"
+              strokeWidth={(2.2 * ICON_W) / width}
+            />
+          ))}
+        </>
+      ) : (
+        <>
+          {rows}
+          {slots.map((sl, i) => (
+            <rect
+              key={i}
+              x={sl.x}
+              y={spec.slotY}
+              width={sl.rw}
+              height={spec.slotH}
+              rx={spec.slotH / 2}
+              fill={spec.slotFill}
+            />
+          ))}
+        </>
+      )}
     </svg>
   );
 };
