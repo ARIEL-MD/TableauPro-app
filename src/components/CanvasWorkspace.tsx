@@ -17,6 +17,7 @@ import { TerminalBarSvg } from './TerminalBarSvg';
 import { DistributionBlockSvg } from './DistributionBlockSvg';
 import { AnnotationObject } from './AnnotationObject';
 import { AnnotationTopBar } from './AnnotationTopBar';
+import { RailTopBar } from './RailTopBar';
 import { TextEditorModal } from './TextEditorModal';
 import { Menu, Plus, Minus, Maximize2, Zap } from 'lucide-react';
 
@@ -47,6 +48,7 @@ interface CanvasWorkspaceProps {
   onDeleteDistributionBlock: (id: string) => void;
   onAddDeviceToRailQuick: (railId: string) => void;
   onMoveFreeDevice?: (id: string, x: number, y: number) => void;
+  onMoveRail?: (id: string, x: number, y: number) => void;
   selectedWireId?: string | null;
   onSelectWire?: (id: string | null) => void;
   onMoveWire?: (wireId: string, pts: { x: number; y: number }[]) => void;
@@ -83,6 +85,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
   onDeleteDistributionBlock,
   onAddDeviceToRailQuick,
   onMoveFreeDevice,
+  onMoveRail,
   selectedWireId,
   onSelectWire,
   onMoveWire,
@@ -98,6 +101,9 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
   const [startPan, setStartPan] = useState({ x: 0, y: 0 });
   const [selectedAnnotationId, setSelectedAnnotationId] = useState<string | null>(null);
   const [editingTextId, setEditingTextId] = useState<string | null>(null);
+  // Rail touché directement sur le plan (affiche sa barre du haut avec la corbeille)
+  const [activeRailId, setActiveRailId] = useState<string | null>(null);
+  const activeRail = project.rails.find((r) => r.id === activeRailId) ?? null;
   const selectedAnnotation = (project.annotations ?? []).find((a) => a.id === selectedAnnotationId) ?? null;
   const editingAnnotation = (project.annotations ?? []).find((a) => a.id === editingTextId) ?? null;
   const annotationCount = (project.annotations ?? []).length;
@@ -121,6 +127,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
       onSelectDevice(null);
       onSelectRail(null);
       setSelectedAnnotationId(null);
+      setActiveRailId(null);
     }
   };
 
@@ -146,6 +153,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
     onSelectDevice(null);
     onSelectRail(null);
     setSelectedAnnotationId(null);
+    setActiveRailId(null);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -233,6 +241,17 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
         />
       )}
 
+      {/* Barre du haut d'un rail sélectionné */}
+      {activeRail && !selectedAnnotation && (
+        <RailTopBar
+          rail={activeRail}
+          onDelete={() => {
+            setActiveRailId(null);
+            onDeleteRail(activeRail.id);
+          }}
+        />
+      )}
+
       {/* Panneau d'édition du texte */}
       {editingAnnotation && editingAnnotation.kind === 'text' && (
         <TextEditorModal
@@ -284,7 +303,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
       {/* ========================================================
           TOP PROJECT NAME CARD — style mobile des captures
          ======================================================== */}
-      {!selectedAnnotation && (
+      {!selectedAnnotation && !activeRail && (
       <div className="absolute top-3 left-3 right-[76px] z-30 no-print">
         <div className="h-12 px-4 bg-white/95 backdrop-blur-md rounded-xl border border-slate-200/90 shadow-md flex items-center">
           <input
@@ -399,37 +418,33 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
               </span>
             </div>
           )}
-
-          {/* DIN Rails Stack */}
-          <div className="space-y-4">
-            {[...project.rails]
-              .sort((a, b) => a.order - b.order)
-              .map((rail) => {
-                const railDevices = project.devices.filter((d) => d.railId === rail.id && !d.free);
-                return (
-                  <DinRailSvg
-                    key={rail.id}
-                    rail={rail}
-                    devices={railDevices}
-                    busbars={project.busbars}
-                    selectedDeviceId={selectedDeviceId}
-                    isRailSelected={selectedRailId === rail.id}
-                    onSelectRail={onSelectRail}
-                    onSelectDevice={(device, e) => {
-                      e.stopPropagation();
-                      onSelectDevice(device);
-                    }}
-                    onToggleDeviceSwitch={onToggleDeviceSwitch}
-                    onDeleteRail={onDeleteRail}
-                    onAddDeviceToRail={onAddDeviceToRailQuick}
-                    onDropDeviceOnRail={(railId, targetSlot) => {
-                      // Handled via drag & drop
-                    }}
-                  />
-                );
-              })}
-          </div>
         </div>
+
+        {/* Rails DIN posés sur le plan : dessin seul, déplaçables */}
+        {project.rails.map((rail) => (
+          <DinRailSvg
+            key={rail.id}
+            rail={rail}
+            devices={project.devices.filter((d) => d.railId === rail.id && !d.free)}
+            busbars={project.busbars}
+            zoom={zoom}
+            selectedDeviceId={selectedDeviceId}
+            isRailSelected={activeRailId === rail.id}
+            onSelectRail={(id) => {
+              setActiveRailId(id);
+              setSelectedAnnotationId(null);
+              onSelectDevice(null);
+              onSelectRail(id);
+            }}
+            onSelectDevice={(device, e) => {
+              e.stopPropagation();
+              setActiveRailId(null);
+              onSelectDevice(device);
+            }}
+            onToggleDeviceSwitch={onToggleDeviceSwitch}
+            onMoveRail={onMoveRail}
+          />
+        ))}
 
         {/* Appareils libres posés sur le plan (déplaçables un par un) */}
         {project.devices
@@ -440,7 +455,10 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
               device={d}
               zoom={zoom}
               isSelected={selectedDeviceId === d.id}
-              onSelect={() => onSelectDevice(d)}
+              onSelect={() => {
+                setActiveRailId(null);
+                onSelectDevice(d);
+              }}
               onMove={(x, y) => onMoveFreeDevice?.(d.id, x, y)}
             />
           ))}
@@ -454,6 +472,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
             isSelected={selectedAnnotationId === a.id}
             onSelect={(id) => {
               setSelectedAnnotationId(id);
+              setActiveRailId(null);
               onSelectDevice(null);
             }}
             onUpdate={onUpdateAnnotation}

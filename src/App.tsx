@@ -204,7 +204,7 @@ export default function App() {
         capacityModules,
         lengthMm,
         x: 60,
-        y: 120 + (newOrder - 1) * 150,
+        y: 120 + (newOrder - 1) * 200,
       };
       showToast(`Rail DIN ${lengthMm} mm (${capacityModules}M) ajouté`);
       return {
@@ -222,22 +222,6 @@ export default function App() {
   // Add Device by generic type from BottomDrawer
   const handleAddDeviceByType = (deviceType: string, options?: any) => {
     updateProjectWithHistory((prev) => {
-      let rails = [...prev.rails];
-
-      // Auto-create initial rail if none exists
-      if (rails.length === 0) {
-        const initialRail: DinRail = {
-          id: `rail-${Date.now()}`,
-          order: 1,
-          label: 'Rangée 1',
-          capacityModules: 18,
-          lengthMm: 300,
-          x: 60,
-          y: 120,
-        };
-        rails.push(initialRail);
-      }
-
       // Determine width & characteristics
       // Determine width & authentic characteristics based on real devices
       let moduleWidth = 1;
@@ -544,70 +528,13 @@ export default function App() {
         }
       }
 
-      // Target selected rail or find first with available space
-      let targetRail = rails.find((r) => r.id === selectedRailId);
-      if (!targetRail) {
-        targetRail = rails[0];
-      }
-
-      let railDevices = prev.devices.filter((d) => d.railId === targetRail!.id);
-      let slot = 0;
-      let foundSlot = false;
-
-      while (slot + moduleWidth <= targetRail.capacityModules) {
-        const isCollision = railDevices.some((d) => {
-          return !(slot + moduleWidth <= d.slotIndex || slot >= d.slotIndex + d.moduleWidth);
-        });
-        if (!isCollision) {
-          foundSlot = true;
-          break;
-        }
-        slot++;
-      }
-
-      // If full on current rail, try other rails
-      if (!foundSlot) {
-        for (const otherRail of rails) {
-          const otherDevices = prev.devices.filter((d) => d.railId === otherRail.id);
-          let candidateSlot = 0;
-          while (candidateSlot + moduleWidth <= otherRail.capacityModules) {
-            const isCollision = otherDevices.some((d) => {
-              return !(candidateSlot + moduleWidth <= d.slotIndex || candidateSlot >= d.slotIndex + d.moduleWidth);
-            });
-            if (!isCollision) {
-              targetRail = otherRail;
-              railDevices = otherDevices;
-              slot = candidateSlot;
-              foundSlot = true;
-              break;
-            }
-            candidateSlot++;
-          }
-          if (foundSlot) break;
-        }
-      }
-
-      // If all existing rails full, create a new rail automatically
-      if (!foundSlot) {
-        const newOrder = rails.length + 1;
-        const newAutoRail: DinRail = {
-          id: `rail-${Date.now()}`,
-          order: newOrder,
-          label: `Rangée ${newOrder}`,
-          capacityModules: 18,
-          lengthMm: 300,
-          x: 60,
-          y: 120 + (newOrder - 1) * 150,
-        };
-        rails.push(newAutoRail);
-        targetRail = newAutoRail;
-        slot = 0;
-      }
+      // Appareil libre posé sur le plan : aucun rail n'est créé automatiquement.
+      const parentRailId = prev.rails.find((r) => r.id === selectedRailId)?.id ?? prev.rails[0]?.id ?? '';
 
       const newDevice: ElectricalDevice = {
         id: `dev-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-        railId: targetRail.id,
-        slotIndex: slot,
+        railId: parentRailId,
+        slotIndex: 0,
         moduleWidth,
         category,
         name,
@@ -643,6 +570,14 @@ export default function App() {
         devices: [...prev.devices, newDevice],
       };
     });
+  };
+
+  // Déplacer un rail sur le plan
+  const handleMoveRail = (id: string, x: number, y: number) => {
+    updateProjectWithHistory((prev) => ({
+      ...prev,
+      rails: prev.rails.map((r) => (r.id === id ? { ...r, x, y } : r)),
+    }));
   };
 
   // Déplacer un appareil libre sur le plan
@@ -942,6 +877,20 @@ export default function App() {
   // Duplicate device
   const handleDuplicateDevice = (source: ElectricalDevice) => {
     updateProjectWithHistory((prev) => {
+      // Appareil libre : la copie est posée un peu à côté
+      if (source.free) {
+        const copy: ElectricalDevice = {
+          ...source,
+          id: `dev-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+          x: (source.x ?? 0) + 40,
+          y: (source.y ?? 0) + 40,
+          circuitLabel: `${source.circuitLabel || source.name} (Copie)`,
+        };
+        setSelectedDeviceId(copy.id);
+        showToast('Appareil dupliqué');
+        return { ...prev, devices: [...prev.devices, copy] };
+      }
+
       const rail = prev.rails.find((r) => r.id === source.railId);
       if (!rail) return prev;
 
@@ -1163,6 +1112,7 @@ export default function App() {
         <CanvasWorkspace
           project={project}
           onMoveFreeDevice={handleMoveFreeDevice}
+          onMoveRail={handleMoveRail}
           selectedWireId={selectedWireId}
           onSelectWire={setSelectedWireId}
           onMoveWire={handleMoveWire}

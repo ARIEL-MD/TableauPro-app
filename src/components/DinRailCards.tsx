@@ -81,6 +81,14 @@ const RAILS: Record<number, RailSpec> = {
 
 export const RAIL_LENGTHS = [100, 200, 250, 300, 400, 500, 600] as const;
 
+/** Longueur standard dont le dessin est le plus proche d'une longueur quelconque (mm). */
+export const nearestRailLength = (mm: number): number =>
+  RAIL_LENGTHS.reduce((best, l) => (Math.abs(l - mm) < Math.abs(best - mm) ? l : best), 200 as number);
+
+/** Hauteur (px) du dessin d'un rail affiché sur `width` px de large. */
+export const railDrawingHeight = (length: number, width: number): number =>
+  (width * (RAILS[length] ?? RAILS[200]).rows.length) / ICON_W;
+
 /** Dessin d'un rail DIN — viewBox 84 × h, comme sur la capture. */
 export const RailDrawing: React.FC<{ length: number; width: number }> = ({ length, width }) => {
   const spec = RAILS[length] ?? RAILS[200];
