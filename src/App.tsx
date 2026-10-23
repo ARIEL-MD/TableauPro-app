@@ -20,6 +20,8 @@ import { DeviceToolbar } from './components/DeviceToolbar';
 import { BOMModal } from './components/BOMModal';
 import { ProjectManagerModal } from './components/ProjectManagerModal';
 import { FileText } from 'lucide-react';
+import { App as CapacitorApp } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 import { CustomDeviceDef, loadCustomDevices, saveCustomDevices } from './utils/customDevices';
 import { decodeProjectLink, encodeProjectLink, hasProjectInHash } from './utils/projectLink';
 import { exportPlanToPng } from './utils/exportPng';
@@ -668,17 +670,36 @@ export default function App() {
   };
 
   // Lien reçu : ouvre le projet contenu dans l'adresse (#p=...)
+  // - version web : l'adresse de la page
+  // - APK : lien touché hors de l'appli (Android propose « Ouvrir avec TableauPro »)
   useEffect(() => {
-    if (!hasProjectInHash()) return;
-    decodeProjectLink(window.location.hash).then((imported) => {
-      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    const openFromLink = async (link: string) => {
+      const imported = await decodeProjectLink(link);
       if (!imported) {
         showToast('Lien de projet invalide');
         return;
       }
       setProject({ ...imported, id: `proj-${Date.now()}-link`, annotations: imported.annotations ?? [] });
       showToast(`Projet « ${imported.title} » ouvert depuis un lien`);
+    };
+
+    if (hasProjectInHash()) {
+      const link = window.location.hash;
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      void openFromLink(link);
+    }
+
+    if (!Capacitor.isNativePlatform()) return;
+    // Appli fermée : lien qui l'a lancée ; appli ouverte : lien reçu ensuite
+    CapacitorApp.getLaunchUrl().then((res) => {
+      if (res?.url && res.url.includes('#p=')) void openFromLink(res.url);
     });
+    const handle = CapacitorApp.addListener('appUrlOpen', (event) => {
+      if (event.url.includes('#p=')) void openFromLink(event.url);
+    });
+    return () => {
+      void handle.then((h) => h.remove());
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

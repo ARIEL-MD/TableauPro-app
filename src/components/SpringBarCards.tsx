@@ -66,7 +66,7 @@ export const SpringBarCards: React.FC<Props> = ({ onAddTerminalBar }) => {
         >
           {/* Miniature : pixels de la capture */}
           <img
-            src={`/assets/barres/${b.image}.png`}
+            src={`${import.meta.env.BASE_URL}assets/barres/${b.image}.png`}
             alt=""
             draggable={false}
             style={{

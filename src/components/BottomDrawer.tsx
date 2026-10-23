@@ -579,7 +579,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
                       aria-label={`Barre à vis ${count} contacts`}
                     >
                       <img
-                        src={`/assets/vis/${count}.png`}
+                        src={`${import.meta.env.BASE_URL}assets/vis/${count}.png`}
                         alt=""
                         aria-hidden="true"
                         draggable={false}

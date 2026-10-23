@@ -5,6 +5,8 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    // Sous-dossier d'hébergement (GitHub Pages) : VITE_BASE=/TableauPro-app/ ; l'APK garde « / »
+    base: process.env.VITE_BASE ?? '/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {

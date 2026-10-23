@@ -1,4 +1,8 @@
+import { Capacitor } from '@capacitor/core';
 import type { ElectricalPanelProject } from '../types/panel';
+
+/** Adresse publique de la version web (GitHub Pages) : c'est elle que l'APK met dans les liens. */
+export const PUBLIC_APP_URL = 'https://ariel-md.github.io/TableauPro-app/';
 
 /**
  * Lien de projet : le projet entier est compressé (gzip) puis encodé en base64url
@@ -28,7 +32,8 @@ const pipe = async (data: Uint8Array, stream: CompressionStream | DecompressionS
 export const encodeProjectLink = async (project: ElectricalPanelProject): Promise<string> => {
   const json = new TextEncoder().encode(JSON.stringify(project));
   const packed = await pipe(json, new CompressionStream('gzip'));
-  const base = `${window.location.origin}${window.location.pathname}`;
+  // Dans l'APK, l'adresse interne (https://localhost) est inutilisable ailleurs : on met l'adresse publique.
+  const base = Capacitor.isNativePlatform() ? PUBLIC_APP_URL : `${window.location.origin}${window.location.pathname}`;
   return `${base}#${HASH_KEY}${toBase64Url(packed)}`;
 };
 
